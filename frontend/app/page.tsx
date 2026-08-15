@@ -1,0 +1,1 @@
+export default function Home() { return <main><h1>AI-Assisted PC Configuration System</h1><p>v0.1 project skeleton is ready.</p><p>Catalog, compatibility analysis, recommendations, and AI interactions will be added in their approved phases.</p></main>; }
