@@ -1,7 +1,38 @@
+# Project-local documentation and agent scratch space
+/docs/
+/outputs/
+/work/
+
+# Python
 .venv/
+venv/
 __pycache__/
+*.py[cod]
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Environment and secrets
 .env
-.next/
+.env.*
+!.env.example
+
+# Node / Next.js
 node_modules/
-*.pyc
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
