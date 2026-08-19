@@ -2,18 +2,25 @@
 /docs/
 /outputs/
 /work/
+/AGENTS.md
+
 
 # Python
 .venv/
 venv/
 __pycache__/
 *.py[cod]
+*.egg-info/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .coverage
 coverage.xml
 htmlcov/
+
+# Windows reserved / accidental empty files
+nul
+NUL
 
 # Environment and secrets
 .env
