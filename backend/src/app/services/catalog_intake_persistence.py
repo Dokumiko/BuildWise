@@ -34,6 +34,7 @@ from app.db.models import (
     DataSource,
     SourceType,
 )
+from app.services.benchmark_normalization import NormalizedBenchmark, normalize_intake_benchmarks
 from app.services.catalog_intake import (
     IntakeCanonicalizationResult,
     canonicalize_intake,
@@ -156,7 +157,11 @@ def _source_from_raw(
     )
 
 
-def _benchmark_context(intake: CatalogEvaluationIntake, record) -> dict:
+def _benchmark_context(
+    intake: CatalogEvaluationIntake,
+    record,
+    normalized: NormalizedBenchmark,
+) -> dict:
     context: dict = {
         "intake_schema_version": intake.intake_schema_version,
         "dataset_version": record.dataset_version,
@@ -165,6 +170,10 @@ def _benchmark_context(intake: CatalogEvaluationIntake, record) -> dict:
         "match_scope": record.match_scope,
         "intake_source_type": record.source_type.value,
         "source_test_context": record.test_context,
+        "normalized_score": normalized.normalized_score,
+        "normalization_method": normalized.normalization_method.value,
+        "normalization_min": normalized.normalization_min,
+        "normalization_max": normalized.normalization_max,
     }
     if isinstance(record.test_context, dict):
         for key in ("system_info_version", "exact_board_sku_verified", "limitation"):
@@ -214,6 +223,9 @@ def persist_catalog_evaluation_intake(
     price_count = 0
     benchmark_count = 0
     skipped: list[str] = []
+    normalized_by_source_url = {
+        item.source_url: item for item in normalize_intake_benchmarks(intake)
+    }
 
     for entry in result.components:
         component = _get_or_create_component(session, entry.component)
@@ -384,7 +396,12 @@ def persist_catalog_evaluation_intake(
         )
         source_count += int(created)
         metric_value = Decimal(str(record.raw_metric_value))
-        context = _benchmark_context(intake, record)
+        normalized = normalized_by_source_url.get(record.direct_source_url)
+        if normalized is None:
+            raise ValueError(
+                f"missing normalized benchmark evidence for {record.direct_source_url}"
+            )
+        context = _benchmark_context(intake, record, normalized)
         existing = session.scalar(
             select(DbBenchmarkRecord).where(
                 DbBenchmarkRecord.component_id == component.id,

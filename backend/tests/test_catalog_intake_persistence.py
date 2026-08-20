@@ -106,6 +106,10 @@ def test_persist_intake_uses_only_canonical_components_and_preserves_evidence(db
     assert cpu_benchmark.test_context["benchmark_version"] == "PerformanceTest V10"
     assert cpu_benchmark.test_context["match_scope"] == "CPU_MODEL"
     assert cpu_benchmark.test_context["source_test_context"] == "PassMark aggregate CPU Mark result."
+    assert cpu_benchmark.test_context["normalization_method"] == "MIN_MAX"
+    assert cpu_benchmark.test_context["normalization_min"] == 28279.0
+    assert cpu_benchmark.test_context["normalization_max"] == 62148.0
+    assert cpu_benchmark.test_context["normalized_score"] == 0.0
 
     sources = db_session.scalars(select(DataSource)).all()
     source_types = {source.source_type.value for source in sources}
