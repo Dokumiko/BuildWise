@@ -13,7 +13,12 @@ def db_session() -> Iterator[Session]:
     engine = create_engine(settings.database_url, pool_pre_ping=True)
     connection = engine.connect()
     transaction = connection.begin()
-    SessionLocal = sessionmaker(bind=connection, autoflush=False, autocommit=False)
+    SessionLocal = sessionmaker(
+        bind=connection,
+        autoflush=False,
+        autocommit=False,
+        join_transaction_mode="create_savepoint",
+    )
     session = SessionLocal()
     try:
         yield session
