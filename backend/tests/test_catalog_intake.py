@@ -149,10 +149,12 @@ def test_canonicalization_validates_complete_components_and_excludes_unresolved_
         for entry in result.components
     }
 
-    # Eight main records plus three additional CPUs, except the incomplete GPU
-    # PCIe contract and conditional CASE radiator data.
-    assert len(canonical) == 9
-    assert {exclusion.component_type for exclusion in result.exclusions} == {"GPU", "CASE"}
+    # Eight eligible records: the cooler conflicts with the frozen seed and is
+    # retained as raw evidence rather than promoted over the canonical value.
+    assert len(canonical) == 8
+    assert {exclusion.component_type for exclusion in result.exclusions} == {
+        "GPU", "CASE", "COOLER"
+    }
 
     motherboard = canonical[("MOTHERBOARD", "PRIME B650M-A WIFI II")]
     assert motherboard.component.specifications["form_factor"] == "MICRO_ATX"

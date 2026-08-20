@@ -8,7 +8,7 @@ contracts instead of filling in missing hardware facts.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -16,6 +16,7 @@ from typing import Any
 from pydantic import ValidationError
 
 from app.contracts.components import (
+    CatalogSeed,
     ComponentRecord,
     MotherboardFormFactor,
     PsuFormFactor,
@@ -42,9 +43,12 @@ class CanonicalizedIntakeComponent:
     """A canonical component plus the provenance needed by a later importer."""
 
     component: ComponentRecord
+    sku: str | None
     source_url: str
+    raw_source_type: RawSourceType
     source_type: PersistedSourceType
     verified_at: datetime
+    additional_sources: tuple[RawSourceEvidence, ...] = field(default_factory=tuple)
 
 
 @dataclass(frozen=True)
@@ -83,8 +87,10 @@ def _canonical_component(
     component_type: str,
     manufacturer: str,
     exact_model: str,
+    sku: str | None,
     specifications: dict[str, Any],
     source: RawSourceEvidence,
+    additional_sources: tuple[RawSourceEvidence, ...] = (),
 ) -> CanonicalizedIntakeComponent:
     record = validate_component(
         {
@@ -98,9 +104,12 @@ def _canonical_component(
     )
     return CanonicalizedIntakeComponent(
         component=record,
+        sku=sku,
         source_url=source.url,
+        raw_source_type=source.source_type,
         source_type=canonicalize_source_type(source.source_type),
         verified_at=source.verified_at,
+        additional_sources=additional_sources,
     )
 
 
@@ -218,8 +227,20 @@ def _exclusion_reason(component: IntakeComponent) -> str:
     return "raw record does not satisfy a current canonical component contract"
 
 
-def canonicalize_intake(intake: CatalogEvaluationIntake) -> IntakeCanonicalizationResult:
-    """Canonicalize only complete records; retain exclusions for transparent review."""
+def canonicalize_intake(
+    intake: CatalogEvaluationIntake,
+    *,
+    canonical_reference: CatalogSeed | None = None,
+) -> IntakeCanonicalizationResult:
+    """Canonicalize complete records against the approved frozen seed baseline."""
+    if canonical_reference is None:
+        from app.services.catalog_import import load_validated_seed
+
+        canonical_reference = load_validated_seed()
+    reference_by_identity = {
+        (record.manufacturer, record.model, record.component_type.value): record
+        for record in canonical_reference.components
+    }
     components: list[CanonicalizedIntakeComponent] = []
     exclusions: list[CanonicalizationExclusion] = []
 
@@ -243,6 +264,18 @@ def canonicalize_intake(intake: CatalogEvaluationIntake) -> IntakeCanonicalizati
     for raw_component in raw_components:
         try:
             canonical_specs = _canonical_specifications(raw_component)
+            reference = reference_by_identity.get(
+                (
+                    raw_component.manufacturer,
+                    raw_component.exact_model,
+                    raw_component.component_type.value,
+                )
+            )
+            if reference is not None and reference.specifications != canonical_specs:
+                raise ValueError(
+                    "raw specifications conflict with frozen canonical reference; "
+                    f"raw={canonical_specs}, frozen={reference.specifications}"
+                )
             if canonical_specs is None:
                 raise ValueError(_exclusion_reason(raw_component))
             components.append(
@@ -250,8 +283,14 @@ def canonicalize_intake(intake: CatalogEvaluationIntake) -> IntakeCanonicalizati
                     component_type=raw_component.component_type.value,
                     manufacturer=raw_component.manufacturer,
                     exact_model=raw_component.exact_model,
+                    sku=raw_component.sku,
                     specifications=canonical_specs,
                     source=raw_component.technical_source,
+                    additional_sources=(
+                        (raw_component.manual_source,)
+                        if raw_component.manual_source is not None
+                        else ()
+                    ),
                 )
             )
         except (KeyError, TypeError, ValueError, ValidationError) as exc:
