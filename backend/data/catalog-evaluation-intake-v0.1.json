@@ -120,8 +120,7 @@
           "PCIE_8PIN": 2
         },
         "pcie_generation": "4.0",
-        "pcie_lanes_reported": 16,
-        "pcie_lane_mapping_requires_contract_validation": true
+        "pcie_lanes_reported": 16
       },
       "technical_source": {
         "url": "https://www.sapphiretech.com/en/consumer/pure-radeon-rx-7800-xt-16g-gddr6",

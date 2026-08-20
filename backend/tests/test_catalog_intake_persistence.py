@@ -19,7 +19,7 @@ def test_option_one_excludes_conflicting_cooler_without_overwriting_frozen_value
     intake = load_validated_intake()
     canonicalized = canonicalize_intake(intake)
 
-    assert len(canonicalized.components) == 8
+    assert len(canonicalized.components) == 9
     cooler_exclusion = next(
         exclusion
         for exclusion in canonicalized.exclusions
@@ -37,11 +37,11 @@ def test_option_one_excludes_conflicting_cooler_without_overwriting_frozen_value
 
     result = persist_catalog_evaluation_intake(db_session, intake)
 
-    assert result.component_count == 8
-    assert result.excluded_component_count == 3
-    # The retail observation can attach to the approved seed cooler, while its
-    # conflicting raw technical specifications remain unpromoted.
-    assert result.price_count == 6
+    assert result.component_count == 9
+    assert result.excluded_component_count == 2
+    # The GPU price can attach to the newly canonicalized GPU; the cooler price
+    # can attach to the approved seed cooler without promoting its raw conflict.
+    assert result.price_count == 7
     assert result.benchmark_count == 4
     assert db_session.scalar(
         select(Component.specifications["fan_max_input_power_w"])
@@ -63,20 +63,20 @@ def test_persist_intake_uses_only_canonical_components_and_preserves_evidence(db
 
     result = persist_catalog_evaluation_intake(db_session, load_validated_intake())
 
-    assert result.component_count == 8
-    assert result.excluded_component_count == 3
-    assert result.component_source_count == 9
-    assert result.price_count == 5
+    assert result.component_count == 9
+    assert result.excluded_component_count == 2
+    assert result.component_source_count == 10
+    assert result.price_count == 6
     assert result.benchmark_count == 4
-    assert result.skipped_price_count == 3
+    assert result.skipped_price_count == 2
     assert result.skipped_benchmark_count == 2
-    assert db_session.scalar(select(func.count()).select_from(Component)) == 8
-    assert db_session.scalar(select(func.count()).select_from(ComponentSource)) == 9
-    assert db_session.scalar(select(func.count()).select_from(ComponentPrice)) == 5
+    assert db_session.scalar(select(func.count()).select_from(Component)) == 9
+    assert db_session.scalar(select(func.count()).select_from(ComponentSource)) == 10
+    assert db_session.scalar(select(func.count()).select_from(ComponentPrice)) == 6
     assert db_session.scalar(select(func.count()).select_from(BenchmarkRecord)) == 4
 
     models = set(db_session.scalars(select(Component.model)).all())
-    assert "PURE RX 7800 XT GAMING OC 16GB" not in models
+    assert "PURE RX 7800 XT GAMING OC 16GB" in models
     assert "H5 Flow (2024)" not in models
     assert "NH-U12S redux" not in models
 
@@ -96,6 +96,8 @@ def test_persist_intake_uses_only_canonical_components_and_preserves_evidence(db
     gpu_benchmarks = db_session.scalars(
         select(BenchmarkRecord).where(BenchmarkRecord.benchmark_name == "3DMark Time Spy")
     ).all()
+    # Model-level records do not match the exact SAPPHIRE board SKU, so they
+    # remain in raw intake rather than being attached to the canonical board.
     assert gpu_benchmarks == []
 
     cpu_benchmark = db_session.scalar(
@@ -131,9 +133,8 @@ def test_persist_intake_preserves_null_and_unknown_availability(db_session) -> N
         price.availability is not None and price.availability.value == "UNKNOWN"
         for price in prices
     )
-    # PREORDER belongs to the excluded GPU and is retained only in raw intake.
-    assert all(
-        price.availability is None or price.availability.value != "PREORDER"
+    assert any(
+        price.availability is not None and price.availability.value == "PREORDER"
         for price in prices
     )
     assert any(
@@ -149,13 +150,13 @@ def test_persist_intake_is_idempotent_for_existing_evidence(db_session) -> None:
     first = persist_catalog_evaluation_intake(db_session, intake)
     second = persist_catalog_evaluation_intake(db_session, intake)
 
-    assert first.price_count == 5
+    assert first.price_count == 6
     assert first.benchmark_count == 4
     assert second.price_count == 0
     assert second.benchmark_count == 0
-    assert db_session.scalar(select(func.count()).select_from(Component)) == 8
+    assert db_session.scalar(select(func.count()).select_from(Component)) == 9
     assert db_session.scalar(select(func.count()).select_from(DataSource)) == first.source_count
-    assert db_session.scalar(select(func.count()).select_from(ComponentPrice)) == 5
+    assert db_session.scalar(select(func.count()).select_from(ComponentPrice)) == 6
     assert db_session.scalar(select(func.count()).select_from(BenchmarkRecord)) == 4
 
 

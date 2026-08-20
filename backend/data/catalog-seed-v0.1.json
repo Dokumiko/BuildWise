@@ -105,8 +105,7 @@
         },
         "pcie_interface": {
           "generation": "4.0",
-          "physical_lanes": 16,
-          "electrical_lanes": 8
+          "reported_lanes": 8
         }
       },
       "source_key": "asus_dual_rtx4060"

@@ -164,15 +164,15 @@ class RamSpec(Contract):
 
 
 class Pcie(Contract):
-    generation: str
-    physical_lanes: PositiveInt
-    electrical_lanes: PositiveInt
+    """PCIe facts explicitly reported by the exact component source.
 
-    @model_validator(mode="after")
-    def valid_lanes(self) -> Pcie:
-        if self.electrical_lanes > self.physical_lanes:
-            raise ValueError("electrical_lanes cannot exceed physical_lanes")
-        return self
+    ``reported_lanes`` is a source-reported lane width. It does not infer or
+    split physical slot lanes from electrical/resource-sharing lanes; v0.1
+    does not implement PCIe lane compatibility rules.
+    """
+
+    generation: str
+    reported_lanes: PositiveInt
 
 
 class GpuSpec(Contract):

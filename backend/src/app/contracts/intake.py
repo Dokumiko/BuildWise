@@ -288,8 +288,8 @@ class CatalogEvaluationIntake(IntakeContract):
                 "spd_speed_mt_s", "spd_voltage_v", "tested_speed_mt_s",
                 "tested_voltage_v", "profile",
             },
-            # The raw GPU intentionally does not claim the physical/electrical
-            # lane pair required by the canonical contract.
+            # The raw GPU preserves only the PCIe lane width explicitly
+            # reported by the exact-board source.
             ComponentType.GPU: {
                 "length_mm", "slot_width", "vram_gb", "total_graphics_power_w",
                 "power_connectors_raw", "power_connectors_canonical_candidate",

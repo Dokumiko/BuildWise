@@ -105,34 +105,48 @@ def assess_catalog_readiness(
         for record in intake.benchmark_records
         if record.component_type is ComponentType.GPU
     ]
-    if gpu_benchmarks and not canonical_gpu_available:
-        findings.append(
-            ReadinessFinding(
-                finding_id="GPU_BENCHMARK_WITHOUT_CANONICAL_GPU",
-                severity=ReadinessSeverity.BLOCKER,
-                message=(
-                    "GPU benchmark records cannot support the workload indicator "
-                    "because no canonical GPU is available."
-                ),
-                evidence={
-                    "record_count": len(gpu_benchmarks),
-                    "match_scopes": sorted(
-                        {
-                            record.test_context.get("match_scope")
-                            for record in gpu_benchmarks
-                            if isinstance(record.test_context, dict)
-                        }
+    if gpu_benchmarks:
+        gpu_evidence = {
+            "record_count": len(gpu_benchmarks),
+            "match_scopes": sorted(
+                {
+                    record.test_context.get("match_scope")
+                    for record in gpu_benchmarks
+                    if isinstance(record.test_context, dict)
+                }
+            ),
+            "exact_board_sku_verified": sorted(
+                {
+                    record.test_context.get("exact_board_sku_verified")
+                    for record in gpu_benchmarks
+                    if isinstance(record.test_context, dict)
+                }
+            ),
+        }
+        if not canonical_gpu_available:
+            findings.append(
+                ReadinessFinding(
+                    finding_id="GPU_BENCHMARK_WITHOUT_CANONICAL_GPU",
+                    severity=ReadinessSeverity.BLOCKER,
+                    message=(
+                        "GPU benchmark records cannot support the workload indicator "
+                        "because no canonical GPU is available."
                     ),
-                    "exact_board_sku_verified": sorted(
-                        {
-                            record.test_context.get("exact_board_sku_verified")
-                            for record in gpu_benchmarks
-                            if isinstance(record.test_context, dict)
-                        }
-                    ),
-                },
+                    evidence=gpu_evidence,
+                )
             )
-        )
+        elif any(value is False for value in gpu_evidence["exact_board_sku_verified"]):
+            findings.append(
+                ReadinessFinding(
+                    finding_id="GPU_BENCHMARK_MODEL_SCOPE_LIMITATION",
+                    severity=ReadinessSeverity.INFO,
+                    message=(
+                        "GPU benchmark records are model-level relative indicators, "
+                        "not exact retail-board/SKU measurements."
+                    ),
+                    evidence=gpu_evidence,
+                )
+            )
 
     single_candidate_types = [
         component_type

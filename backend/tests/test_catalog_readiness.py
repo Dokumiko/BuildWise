@@ -17,7 +17,7 @@ def test_current_intake_is_explicitly_not_ready_for_scoring_or_search() -> None:
         "CPU": 4,
         "MOTHERBOARD": 1,
         "RAM": 1,
-        "GPU": 0,
+        "GPU": 1,
         "STORAGE": 1,
         "PSU": 1,
         "CASE": 0,
@@ -30,32 +30,30 @@ def test_readiness_reports_raw_only_records_and_missing_component_types() -> Non
 
     raw_only = finding_by_id(report, "RAW_COMPONENT_NOT_CANONICAL")
     assert {finding.evidence["component_type"] for finding in raw_only} == {
-        "GPU",
         "CASE",
         "COOLER",
     }
-    assert any("physical_lanes" in finding.evidence["reason"] for finding in raw_only)
     assert any("conditional" in finding.evidence["reason"] for finding in raw_only)
     assert any("frozen canonical reference" in finding.evidence["reason"] for finding in raw_only)
 
     missing = finding_by_id(report, "CANONICAL_COMPONENT_TYPE_MISSING")
     assert {finding.evidence["component_type"] for finding in missing} == {
-        "GPU",
         "CASE",
         "COOLER",
     }
 
 
-def test_gpu_model_benchmarks_do_not_make_a_missing_canonical_gpu_scoreable() -> None:
+def test_gpu_model_benchmarks_remain_limited_to_model_scope() -> None:
     report = assess_catalog_readiness(load_validated_intake())
 
-    [finding] = finding_by_id(report, "GPU_BENCHMARK_WITHOUT_CANONICAL_GPU")
+    [finding] = finding_by_id(report, "GPU_BENCHMARK_MODEL_SCOPE_LIMITATION")
     assert finding.evidence == {
         "record_count": 2,
         "match_scopes": ["GPU_MODEL"],
         "exact_board_sku_verified": [False],
     }
-    assert "no canonical GPU" in finding.message
+    assert "model-level" in finding.message
+    assert report.canonical_component_counts["GPU"] == 1
 
 
 def test_current_intake_pool_is_insufficient_for_meaningful_search() -> None:
@@ -65,7 +63,7 @@ def test_current_intake_pool_is_insufficient_for_meaningful_search() -> None:
     assert finding.evidence["counts"] == {
         "MOTHERBOARD": 1,
         "RAM": 1,
-        "GPU": 0,
+        "GPU": 1,
         "STORAGE": 1,
         "PSU": 1,
         "CASE": 0,

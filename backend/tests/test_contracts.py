@@ -186,11 +186,11 @@ def test_v11() -> None:
     pcie = item("GPU")["specifications"]["pcie_interface"]
     assert pcie == {
         "generation": "4.0",
-        "physical_lanes": 16,
-        "electrical_lanes": 8,
+        "reported_lanes": 8,
     }
-    bad("GPU", lambda s: s["pcie_interface"].__setitem__("electrical_lanes", 32))
-    for field in ("generation", "physical_lanes", "electrical_lanes"):
+    bad("GPU", lambda s: s["pcie_interface"].__setitem__("reported_lanes", 0))
+    bad("GPU", lambda s: s["pcie_interface"].__setitem__("physical_lanes", 16))
+    for field in ("generation", "reported_lanes"):
         bad("GPU", lambda s, f=field: s["pcie_interface"].pop(f))
 
 

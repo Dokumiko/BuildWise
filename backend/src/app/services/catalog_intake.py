@@ -180,6 +180,18 @@ def _canonical_specifications(component: IntakeComponent) -> dict[str, Any] | No
             "average_write_power_w": specs["average_write_power_w"],
             "idle_power_w": specs["idle_power_w"],
         }
+    if component_type == "GPU":
+        return {
+            "length_mm": specs["length_mm"],
+            "slot_width": specs["slot_width"],
+            "vram_gb": specs["vram_gb"],
+            "total_graphics_power_w": specs["total_graphics_power_w"],
+            "power_connectors": specs["power_connectors_canonical_candidate"],
+            "pcie_interface": {
+                "generation": canonicalize_pcie_version(specs["pcie_generation"]),
+                "reported_lanes": specs["pcie_lanes_reported"],
+            },
+        }
     if component_type == "PSU":
         return {
             "form_factor": canonicalize_form_factor(
@@ -198,8 +210,8 @@ def _canonical_specifications(component: IntakeComponent) -> dict[str, Any] | No
             "ram_clearance_mm": specs["ram_clearance_mm"],
             "fan_max_input_power_w": specs["fan_max_input_power_w"],
         }
-    # GPU lacks an explicit physical/electrical PCIe lane pair. CASE radiator
-    # support is conditional and cannot become an unconditional contract fact.
+    # CASE radiator support is conditional and cannot become an unconditional
+    # contract fact.
     return None
 
 
@@ -214,11 +226,6 @@ def _canonical_motherboard_connectors(specs: dict[str, Any]) -> dict[str, int]:
 
 
 def _exclusion_reason(component: IntakeComponent) -> str:
-    if component.component_type.value == "GPU":
-        return (
-            "raw intake does not provide the explicit physical_lanes and "
-            "electrical_lanes required by the canonical GPU PCIe contract"
-        )
     if component.component_type.value == "CASE":
         return (
             "raw radiator support remains conditional and cannot be promoted "

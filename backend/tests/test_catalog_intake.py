@@ -149,11 +149,17 @@ def test_canonicalization_validates_complete_components_and_excludes_unresolved_
         for entry in result.components
     }
 
-    # Eight eligible records: the cooler conflicts with the frozen seed and is
-    # retained as raw evidence rather than promoted over the canonical value.
-    assert len(canonical) == 8
+    # Nine eligible records: the exact-board GPU now has source-reported PCIe
+    # lane width, while case and cooler remain unresolved.
+    assert len(canonical) == 9
     assert {exclusion.component_type for exclusion in result.exclusions} == {
-        "GPU", "CASE", "COOLER"
+        "CASE", "COOLER"
+    }
+
+    gpu = canonical[("GPU", "PURE RX 7800 XT GAMING OC 16GB")]
+    assert gpu.component.specifications["pcie_interface"] == {
+        "generation": "4.0",
+        "reported_lanes": 16,
     }
 
     motherboard = canonical[("MOTHERBOARD", "PRIME B650M-A WIFI II")]
