@@ -1,0 +1,654 @@
+{
+  "intake_schema_version": "0.1",
+  "dataset_version": "vn-pc-am5-ddr5-v0.1",
+  "collected_at": "2026-08-20T16:59:00+07:00",
+  "scope": {
+    "market": "VN",
+    "currency": "VND",
+    "platform": "AMD AM5 / DDR5",
+    "benchmark_policy": "CPU and GPU benchmark domains are normalized independently.",
+    "gpu_benchmark_match_scope": "GPU_MODEL"
+  },
+  "components": [
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7600X",
+      "sku": "100-100000593WOF",
+      "specifications": {
+        "socket": "AM5",
+        "canonical_cpu_family": "RYZEN_7000",
+        "cores": 6,
+        "threads": 12,
+        "default_tdp_w": 105,
+        "memory_type": "DDR5",
+        "integrated_graphics": true,
+        "pcie_version": "5.0"
+      },
+      "technical_source": {
+        "url": "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-5-7600x.html",
+        "source_type": "MANUFACTURER_OFFICIAL",
+        "verified_at": "2026-08-20T16:44:00+07:00"
+      }
+    },
+    {
+      "component_type": "MOTHERBOARD",
+      "manufacturer": "ASUS",
+      "exact_model": "PRIME B650M-A WIFI II",
+      "sku": null,
+      "specifications": {
+        "socket": "AM5",
+        "supported_cpu_families": ["RYZEN_7000", "RYZEN_8000", "RYZEN_9000"],
+        "form_factor": "MICRO_ATX",
+        "memory": {
+          "type": "DDR5",
+          "max_capacity_gb": 192,
+          "slot_count": 4,
+          "max_supported_speed_mt_s": 7600
+        },
+        "m2_slots_ryzen_7000_9000": [
+          {
+            "slot_id": "M2_1",
+            "interfaces": ["M2_NVME"],
+            "sizes": ["2242", "2260", "2280"],
+            "pcie_generation": "5.0",
+            "lane_count": 4
+          },
+          {
+            "slot_id": "M2_2",
+            "interfaces": ["M2_NVME"],
+            "sizes": ["2242", "2260", "2280"],
+            "pcie_generation": "4.0",
+            "lane_count": 4
+          }
+        ],
+        "sata_ports": 4,
+        "power_connectors_raw": ["24-pin ATX", "8-pin +12V", "4-pin +12V"],
+        "power_connectors_canonical_candidate": {
+          "ATX_24PIN": 1,
+          "EPS_8PIN": 1
+        },
+        "optional_connector_note": "The official manual states that the 8-pin may be used alone or together with the supplementary 4-pin connector. The 4-pin is not treated as a second required EPS_8PIN."
+      },
+      "technical_source": {
+        "url": "https://www.asus.com/vn/motherboards-components/motherboards/prime/prime-b650m-a-wifi-ii/techspec/",
+        "source_type": "MANUFACTURER_OFFICIAL",
+        "verified_at": "2026-08-20T16:59:00+07:00"
+      },
+      "manual_source": {
+        "url": "https://dlcdnets.asus.com/pub/ASUS/mb/SocketAM5/PRIME_B650M-A_WIFI_II/E21432_PRIME_B650M-A_WIFI_II_UM_WEB.pdf?model=PRIME+B650M-A+WIFI+II",
+        "source_type": "MANUFACTURER_OFFICIAL",
+        "verified_at": "2026-08-20T16:59:00+07:00"
+      }
+    },
+    {
+      "component_type": "RAM",
+      "manufacturer": "Corsair",
+      "exact_model": "Vengeance 32GB (2x16GB) DDR5 DRAM 5200MHz C40",
+      "sku": "CMK32GX5M2B5200C40",
+      "specifications": {
+        "memory_type": "DDR5",
+        "capacity_gb": 32,
+        "module_count": 2,
+        "capacity_per_module_gb": 16,
+        "spd_speed_mt_s": 4800,
+        "spd_voltage_v": 1.1,
+        "tested_speed_mt_s": 5200,
+        "tested_voltage_v": 1.25,
+        "profile": "XMP",
+        "tested_timings": "40-40-40-77",
+        "spd_timings": "40-40-40-77"
+      },
+      "technical_source": {
+        "url": "https://www.corsair.com/us/en/p/memory/cmk32gx5m2b5200c40/vengeancea-32gb-2x16gb-ddr5-dram-5200mhz-c40-memory-kit-a-black-cmk32gx5m2b5200c40",
+        "source_type": "MANUFACTURER_OFFICIAL",
+        "verified_at": "2026-08-20T16:59:00+07:00"
+      }
+    },
+    {
+      "component_type": "GPU",
+      "manufacturer": "SAPPHIRE",
+      "exact_model": "PURE RX 7800 XT GAMING OC 16GB",
+      "sku": "11330-03-20G",
+      "specifications": {
+        "length_mm": 320,
+        "slot_width": 2.5,
+        "vram_gb": 16,
+        "total_graphics_power_w": 270,
+        "power_connectors_raw": ["2 x 8-pin"],
+        "power_connectors_canonical_candidate": {
+          "PCIE_8PIN": 2
+        },
+        "pcie_generation": "4.0",
+        "pcie_lanes_reported": 16,
+        "pcie_lane_mapping_requires_contract_validation": true
+      },
+      "technical_source": {
+        "url": "https://www.sapphiretech.com/en/consumer/pure-radeon-rx-7800-xt-16g-gddr6",
+        "source_type": "MANUFACTURER_OFFICIAL",
+        "verified_at": "2026-08-20T16:59:00+07:00"
+      }
+    },
+    {
+      "component_type": "STORAGE",
+      "manufacturer": "Samsung",
+      "exact_model": "9100 PRO 1TB",
+      "sku": "MZ-VAP1T0BW",
+      "specifications": {
+        "interface": "M2_NVME",
+        "form_factor": "2280",
+        "capacity_gb": 1000,
+        "pcie_generation": "5.0",
+        "pcie_lanes": 4,
+        "average_read_power_w": 7.6,
+        "average_write_power_w": 7.2,
+        "idle_power_w": 0.004,
+        "power_source_text": {
+          "average_read": "Average Power Consumption (system level): Average Read 7.6 W",
+          "average_write": "Average Power Consumption (system level): Average Write 7.2 W",
+          "idle": "Power consumption (Idle): Typical 4 mW"
+        }
+      },
+      "technical_source": {
+        "url": "https://www.samsung.com/uk/memory-storage/nvme-ssd/9100-pro-1tb-nvme-pcie-gen-5-mz-vap1t0bw/",
+        "source_type": "MANUFACTURER_OFFICIAL",
+        "verified_at": "2026-08-20T16:59:00+07:00"
+      }
+    },
+    {
+      "component_type": "PSU",
+      "manufacturer": "Corsair",
+      "exact_model": "RM750x SHIFT",
+      "sku": "CP-9020251-NA",
+      "specifications": {
+        "form_factor": "ATX",
+        "capacity_w": 750,
+        "connectors": {
+          "ATX_24PIN": 1,
+          "EPS_8PIN": 2,
+          "PCIE_8PIN": 3,
+          "12V_2X6": 1,
+          "SATA_POWER": 12
+        },
+        "connectors_raw_extra": {
+          "PATA": 4
+        },
+        "atx_version": "3.1",
+        "pcie_version": "5.1"
+      },
+      "technical_source": {
+        "url": "https://www.corsair.com/us/en/p/psu/cp-9020251-na/rm750x-shift-80-plus-gold-fully-modular-atx-power-supply-cp-9020251-na",
+        "source_type": "MANUFACTURER_OFFICIAL",
+        "verified_at": "2026-08-20T16:59:00+07:00"
+      }
+    },
+    {
+      "component_type": "CASE",
+      "manufacturer": "NZXT",
+      "exact_model": "H5 Flow (2024)",
+      "sku": "CC-H52FB-01",
+      "specifications": {
+        "form_factor": "MID_TOWER",
+        "supported_motherboard_form_factors": ["E_ATX", "ATX", "MICRO_ATX", "MINI_ITX"],
+        "supported_psu_form_factors": ["ATX"],
+        "max_gpu_length": {
+          "value_mm": 410,
+          "context": "UNKNOWN"
+        },
+        "max_cpu_cooler_height_mm": 170,
+        "max_psu_length_mm": 200,
+        "max_gpu_slot_width": null,
+        "radiator_support_raw": {
+          "top": [
+            "up to 240 mm with 120 mm base",
+            "up to 280 mm with 240 mm base and low-profile memory only"
+          ],
+          "front": [
+            "up to 360 mm with 120 mm base",
+            "up to 280 mm with 140 mm base"
+          ]
+        },
+        "radiator_support_canonical_candidate": {
+          "top_mm": [240],
+          "front_mm": [280]
+        },
+        "radiator_condition_note": "Some radiator sizes depend on fan/base configuration and low-profile memory; the raw conditions must not be presented as unconditional fit guarantees."
+      },
+      "technical_source": {
+        "url": "https://support.nzxt.com/hc/en-us/articles/40225168535451-H5-Flow-2024-Specs",
+        "source_type": "MANUFACTURER_OFFICIAL",
+        "verified_at": "2026-08-20T16:59:00+07:00"
+      }
+    },
+    {
+      "component_type": "COOLER",
+      "manufacturer": "Noctua",
+      "exact_model": "NH-U12S redux",
+      "sku": null,
+      "specifications": {
+        "supported_sockets": ["AM5", "AM4", "LGA2066", "LGA2011-0", "LGA2011-3", "LGA1700", "LGA1200", "LGA1156", "LGA1155", "LGA1151", "LGA1150"],
+        "cooler_type": "AIR",
+        "height_mm": 158,
+        "ram_clearance_mm": null,
+        "fan_max_input_power_w": 0.95
+      },
+      "technical_source": {
+        "url": "https://www.noctua.at/en/products/nh-u12s-redux/specifications",
+        "source_type": "MANUFACTURER_OFFICIAL",
+        "verified_at": "2026-08-20T16:59:00+07:00"
+      }
+    }
+  ],
+  "additional_cpu_components": [
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 7700",
+      "manufacturer_opns": ["100-100000592SBX*", "100-100000592WOZ*"],
+      "specifications": {
+        "socket": "AM5",
+        "canonical_cpu_family": "RYZEN_7000",
+        "cores": 8,
+        "threads": 16,
+        "default_tdp_w": 65,
+        "memory_type": "DDR5",
+        "integrated_graphics": true,
+        "pcie_version": "5.0"
+      },
+      "technical_source_url": "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-7-7700.html",
+      "technical_source_type": "MANUFACTURER_OFFICIAL",
+      "verified_at": "2026-08-20T16:59:00+07:00"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 7800X3D",
+      "manufacturer_opns": ["100-100000910WOF"],
+      "specifications": {
+        "socket": "AM5",
+        "canonical_cpu_family": "RYZEN_7000",
+        "cores": 8,
+        "threads": 16,
+        "default_tdp_w": 120,
+        "memory_type": "DDR5",
+        "integrated_graphics": true,
+        "pcie_version": "5.0"
+      },
+      "technical_source_url": "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-7-7800x3d.html",
+      "technical_source_type": "MANUFACTURER_OFFICIAL",
+      "verified_at": "2026-08-20T16:59:00+07:00"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 9 7950X",
+      "manufacturer_opns": ["100-100000514WOF"],
+      "specifications": {
+        "socket": "AM5",
+        "canonical_cpu_family": "RYZEN_7000",
+        "cores": 16,
+        "threads": 32,
+        "default_tdp_w": 170,
+        "memory_type": "DDR5",
+        "integrated_graphics": true,
+        "pcie_version": "5.0"
+      },
+      "technical_source_url": "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-9-7950x.html",
+      "technical_source_type": "MANUFACTURER_OFFICIAL",
+      "verified_at": "2026-08-20T16:59:00+07:00"
+    }
+  ],
+  "technical_sources": [
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7600X",
+      "url": "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-5-7600x.html",
+      "source_type": "MANUFACTURER_OFFICIAL",
+      "verified_at": "2026-08-20T16:44:00+07:00"
+    },
+    {
+      "component_type": "MOTHERBOARD",
+      "manufacturer": "ASUS",
+      "exact_model": "PRIME B650M-A WIFI II",
+      "url": "https://www.asus.com/vn/motherboards-components/motherboards/prime/prime-b650m-a-wifi-ii/techspec/",
+      "source_type": "MANUFACTURER_OFFICIAL",
+      "verified_at": "2026-08-20T16:59:00+07:00"
+    },
+    {
+      "component_type": "RAM",
+      "manufacturer": "Corsair",
+      "exact_model": "CMK32GX5M2B5200C40",
+      "url": "https://www.corsair.com/us/en/p/memory/cmk32gx5m2b5200c40/vengeancea-32gb-2x16gb-ddr5-dram-5200mhz-c40-memory-kit-a-black-cmk32gx5m2b5200c40",
+      "source_type": "MANUFACTURER_OFFICIAL",
+      "verified_at": "2026-08-20T16:59:00+07:00"
+    },
+    {
+      "component_type": "GPU",
+      "manufacturer": "SAPPHIRE",
+      "exact_model": "11330-03-20G",
+      "url": "https://www.sapphiretech.com/en/consumer/pure-radeon-rx-7800-xt-16g-gddr6",
+      "source_type": "MANUFACTURER_OFFICIAL",
+      "verified_at": "2026-08-20T16:59:00+07:00"
+    },
+    {
+      "component_type": "STORAGE",
+      "manufacturer": "Samsung",
+      "exact_model": "MZ-VAP1T0BW",
+      "url": "https://www.samsung.com/uk/memory-storage/nvme-ssd/9100-pro-1tb-nvme-pcie-gen-5-mz-vap1t0bw/",
+      "source_type": "MANUFACTURER_OFFICIAL",
+      "verified_at": "2026-08-20T16:59:00+07:00"
+    },
+    {
+      "component_type": "PSU",
+      "manufacturer": "Corsair",
+      "exact_model": "CP-9020251-NA",
+      "url": "https://www.corsair.com/us/en/p/psu/cp-9020251-na/rm750x-shift-80-plus-gold-fully-modular-atx-power-supply-cp-9020251-na",
+      "source_type": "MANUFACTURER_OFFICIAL",
+      "verified_at": "2026-08-20T16:59:00+07:00"
+    },
+    {
+      "component_type": "CASE",
+      "manufacturer": "NZXT",
+      "exact_model": "CC-H52FB-01",
+      "url": "https://support.nzxt.com/hc/en-us/articles/40225168535451-H5-Flow-2024-Specs",
+      "source_type": "MANUFACTURER_OFFICIAL",
+      "verified_at": "2026-08-20T16:59:00+07:00"
+    },
+    {
+      "component_type": "COOLER",
+      "manufacturer": "Noctua",
+      "exact_model": "NH-U12S redux",
+      "url": "https://www.noctua.at/en/products/nh-u12s-redux/specifications",
+      "source_type": "MANUFACTURER_OFFICIAL",
+      "verified_at": "2026-08-20T16:59:00+07:00"
+    }
+  ],
+  "price_snapshots": [
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7600X",
+      "sku": "100-100000593WOF",
+      "retailer_name": "HACOM",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-7600x-4.7-ghz-upto-5.3ghz-38mb-6-cores-12-threads-105w-socket-am5",
+      "price_vnd": 5699000,
+      "availability": "IN_STOCK",
+      "price_type": "SALE",
+      "vat_included": true,
+      "verified_at": "2026-08-20T16:44:00+07:00",
+      "notes": "Retailer displays listed, promotional, and online prices; this snapshot records the promotional price 5699000 VND."
+    },
+    {
+      "component_type": "MOTHERBOARD",
+      "manufacturer": "ASUS",
+      "exact_model": "PRIME B650M-A WIFI II",
+      "sku": null,
+      "retailer_name": "HACOM",
+      "listing_url": "https://hacom.vn/mainboard-amd-b650",
+      "price_vnd": 3999000,
+      "availability": "UNKNOWN",
+      "price_type": "LISTED",
+      "vat_included": null,
+      "verified_at": "2026-08-20T16:44:00+07:00",
+      "notes": "Exact model is identified on the retailer listing; manufacturer SKU is not exposed."
+    },
+    {
+      "component_type": "RAM",
+      "manufacturer": "Corsair",
+      "exact_model": "CMK32GX5M2B5200C40",
+      "sku": "CMK32GX5M2B5200C40",
+      "retailer_name": "MemoryZone",
+      "listing_url": "https://memoryzone.com.vn/ram-pc-corsair-vengeance-32gb-5200mhz-ddr5-2x16gb-cmk32gx5m2b5200c40",
+      "price_vnd": 2500000,
+      "availability": "OUT_OF_STOCK",
+      "price_type": "SALE",
+      "vat_included": null,
+      "verified_at": "2026-08-20T16:59:00+07:00",
+      "notes": "Exact SKU identified; page states Hết hàng."
+    },
+    {
+      "component_type": "GPU",
+      "manufacturer": "SAPPHIRE",
+      "exact_model": "PURE RX 7800 XT GAMING OC 16GB",
+      "sku": "11330-03-20G",
+      "retailer_name": "HACOM",
+      "listing_url": "https://hacom.vn/card-man-hinh-sapphire-pure-rx-7800-xt-gaming-oc-16gb",
+      "price_vnd": 15699000,
+      "availability": "PREORDER",
+      "price_type": "LISTED",
+      "vat_included": true,
+      "verified_at": "2026-08-20T16:44:00+07:00",
+      "notes": "Exact product and retailer product code VGSP0059 are identified."
+    },
+    {
+      "component_type": "STORAGE",
+      "manufacturer": "Samsung",
+      "exact_model": "9100 PRO 1TB",
+      "sku": "MZ-VAP1T0BW",
+      "retailer_name": "MemoryZone",
+      "listing_url": "https://memoryzone.com.vn/ssd-samsung-9100-pro-1tb-pcie-gen5-x4-nvme-mz-vap1t0bw",
+      "price_vnd": 7450000,
+      "availability": "UNKNOWN",
+      "price_type": "SALE",
+      "vat_included": null,
+      "verified_at": "2026-08-20T16:59:00+07:00",
+      "notes": "Exact SKU identified; displayed price is 7450000 VND from 8590000 VND."
+    },
+    {
+      "component_type": "PSU",
+      "manufacturer": "Corsair",
+      "exact_model": "RM750x SHIFT",
+      "sku": "CP-9020251-NA",
+      "retailer_name": "CellphoneS",
+      "listing_url": "https://cellphones.com.vn/nguon-may-tinh-corsair-rm750x-shift.html",
+      "price_vnd": 2590000,
+      "availability": "OUT_OF_STOCK",
+      "price_type": "SALE",
+      "vat_included": null,
+      "verified_at": "2026-08-20T16:59:00+07:00",
+      "notes": "Retailer identifies RM750x SHIFT 750W but does not independently print manufacturer SKU."
+    },
+    {
+      "component_type": "CASE",
+      "manufacturer": "NZXT",
+      "exact_model": "H5 Flow (2024)",
+      "sku": "CC-H52FB-01",
+      "retailer_name": "An Phat PC",
+      "listing_url": "https://www.anphatpc.com.vn/vo-case-nzxt-h5-flow-2024-all-black-cc-h52fb-01.html",
+      "price_vnd": 1989000,
+      "availability": "UNKNOWN",
+      "price_type": "SALE",
+      "vat_included": true,
+      "verified_at": "2026-08-20T16:59:00+07:00",
+      "notes": "Exact H5 Flow 2024 revision and CC-H52FB-01 are identified."
+    },
+    {
+      "component_type": "COOLER",
+      "manufacturer": "Noctua",
+      "exact_model": "NH-U12S redux",
+      "sku": null,
+      "retailer_name": "GEARVN",
+      "listing_url": "https://gearvn.com/products/tan-nhiet-noctua-nh-u12s-redux/",
+      "price_vnd": 1290000,
+      "availability": "OUT_OF_STOCK",
+      "price_type": "SALE",
+      "vat_included": null,
+      "verified_at": "2026-08-20T16:59:00+07:00",
+      "notes": "Direct retailer page identifies exact Noctua NH-U12S redux model."
+    }
+  ],
+  "benchmark_records": [
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7600X",
+      "sku": "100-100000593WOF",
+      "benchmark_name": "PassMark CPU Mark",
+      "metric_name": "CPU Mark",
+      "raw_metric_value": 28279,
+      "metric_unit": "points",
+      "direct_source_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+5+7600X",
+      "benchmark_version": "PerformanceTest V10",
+      "test_context": "PassMark aggregate CPU Mark result.",
+      "match_scope": "CPU_MODEL",
+      "collected_at": "2026-08-20T16:59:00+07:00",
+      "dataset_version": "vn-pc-am5-ddr5-v0.1",
+      "source_type": "PASSMARK_DIRECT"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 7700",
+      "sku": null,
+      "benchmark_name": "PassMark CPU Mark",
+      "metric_name": "CPU Mark",
+      "raw_metric_value": 34336,
+      "metric_unit": "points",
+      "direct_source_url": "https://www.cpubenchmark.net/cpu.php?id=5169",
+      "benchmark_version": "PerformanceTest V10",
+      "test_context": "PassMark aggregate CPU Mark result.",
+      "match_scope": "CPU_MODEL",
+      "collected_at": "2026-08-20T16:59:00+07:00",
+      "dataset_version": "vn-pc-am5-ddr5-v0.1",
+      "source_type": "PASSMARK_DIRECT"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 7800X3D",
+      "sku": "100-100000910WOF",
+      "benchmark_name": "PassMark CPU Mark",
+      "metric_name": "CPU Mark",
+      "raw_metric_value": 34277,
+      "metric_unit": "points",
+      "direct_source_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+7+7800X3D",
+      "benchmark_version": "PerformanceTest V10",
+      "test_context": "PassMark aggregate CPU Mark result.",
+      "match_scope": "CPU_MODEL",
+      "collected_at": "2026-08-20T16:59:00+07:00",
+      "dataset_version": "vn-pc-am5-ddr5-v0.1",
+      "source_type": "PASSMARK_DIRECT"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 9 7950X",
+      "sku": "100-100000514WOF",
+      "benchmark_name": "PassMark CPU Mark",
+      "metric_name": "CPU Mark",
+      "raw_metric_value": 62148,
+      "metric_unit": "points",
+      "direct_source_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+9+7950X&id=5031",
+      "benchmark_version": "PerformanceTest V10",
+      "test_context": "PassMark aggregate CPU Mark result.",
+      "match_scope": "CPU_MODEL",
+      "collected_at": "2026-08-20T16:59:00+07:00",
+      "dataset_version": "vn-pc-am5-ddr5-v0.1",
+      "source_type": "PASSMARK_DIRECT"
+    },
+    {
+      "component_type": "GPU",
+      "manufacturer": "AMD",
+      "exact_model": "Radeon RX 7600",
+      "sku": null,
+      "benchmark_name": "3DMark Time Spy",
+      "metric_name": "Graphics Score",
+      "raw_metric_value": 10884,
+      "metric_unit": "points",
+      "direct_source_url": "https://www.3dmark.com/spy/57353409",
+      "benchmark_version": "Test Version 1.2",
+      "test_context": {
+        "system_info_version": "5.84",
+        "match_scope": "GPU_MODEL",
+        "exact_board_sku_verified": false,
+        "limitation": "The result verifies the Radeon RX 7600 GPU model only, not an exact retail board SKU."
+      },
+      "collected_at": "2026-08-20T16:59:00+07:00",
+      "dataset_version": "vn-pc-am5-ddr5-v0.1",
+      "source_type": "3DMARK_DIRECT_RESULT"
+    },
+    {
+      "component_type": "GPU",
+      "manufacturer": "AMD",
+      "exact_model": "Radeon RX 7800 XT",
+      "sku": null,
+      "benchmark_name": "3DMark Time Spy",
+      "metric_name": "Graphics Score",
+      "raw_metric_value": 19740,
+      "metric_unit": "points",
+      "direct_source_url": "https://www.3dmark.com/spy/46434161",
+      "benchmark_version": "Test Version 1.2",
+      "test_context": {
+        "system_info_version": "5.70",
+        "match_scope": "GPU_MODEL",
+        "exact_board_sku_verified": false,
+        "limitation": "The result verifies the Radeon RX 7800 XT GPU model only, not an exact retail board SKU."
+      },
+      "collected_at": "2026-08-20T16:59:00+07:00",
+      "dataset_version": "vn-pc-am5-ddr5-v0.1",
+      "source_type": "3DMARK_DIRECT_RESULT"
+    }
+  ],
+  "dataset_bounds": {
+    "cpu": {
+      "benchmark_name": "PassMark CPU Mark",
+      "metric_name": "CPU Mark",
+      "min": 28279,
+      "max": 62148,
+      "models_used": ["AMD Ryzen 5 7600X", "AMD Ryzen 7 7700", "AMD Ryzen 7 7800X3D", "AMD Ryzen 9 7950X"]
+    },
+    "gpu": {
+      "benchmark_name": "3DMark Time Spy",
+      "metric_name": "Graphics Score",
+      "min": 10884,
+      "max": 19740,
+      "models_used": ["AMD Radeon RX 7600", "AMD Radeon RX 7800 XT"],
+      "match_scope": "GPU_MODEL"
+    }
+  },
+  "missing_or_unresolved_items": [
+    {
+      "item": "ASUS DUAL-RX7600-O8G-EVO total_graphics_power_w and PCIe lane fields",
+      "status": "missing",
+      "reason": "Official ASUS exact-model page does not publish the required numeric TGP or explicit physical/electrical lane counts."
+    },
+    {
+      "item": "Samsung 990 PRO 1TB exact average read/write power fields",
+      "status": "missing",
+      "reason": "The 9100 PRO replacement is used because the 990 PRO source did not provide separate average read/write fields."
+    },
+    {
+      "item": "Corsair RM750e CP-9020248-NA PCIe version",
+      "status": "missing",
+      "reason": "Exact SKU source did not explicitly publish a PCIe generation/version."
+    },
+    {
+      "item": "Thermalright Peerless Assassin 120 SE fan_max_input_power_w",
+      "status": "missing",
+      "reason": "Manufacturer publishes fan current but not input power in watts; no calculation was performed."
+    },
+    {
+      "item": "GPU exact-board Time Spy evidence",
+      "status": "model_level_only",
+      "reason": "The GPU benchmark records are intentionally GPU_MODEL scope and must not be presented as exact retail-board measurements."
+    },
+    {
+      "item": "Conditional NZXT H5 Flow radiator support",
+      "status": "conditional",
+      "reason": "Some radiator configurations depend on fan/base arrangement and low-profile memory; raw conditions are retained."
+    }
+  ],
+  "normalization_notes": {
+    "source_type_mapping_for_persistence": {
+      "MANUFACTURER_OFFICIAL": "MANUFACTURER",
+      "VN_RETAILER_DIRECT": "RETAILER",
+      "PASSMARK_DIRECT": "TRUSTED_SECONDARY",
+      "3DMARK_DIRECT_RESULT": "TRUSTED_SECONDARY"
+    },
+    "url_format": "All URLs in this intake file are raw URL strings, not Markdown links.",
+    "sku_handling": "SKU is retained in intake metadata. The current approved component contract does not yet define a dedicated SKU field.",
+    "benchmark_rule": "CPU and GPU raw values are never combined. CPU and GPU are normalized independently within this dataset version.",
+    "price_rule": "Price snapshots preserve retailer observation state; PREORDER, OUT_OF_STOCK, and UNKNOWN are not converted to IN_STOCK."
+  }
+}
