@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from enum import Enum
 
+from app.contracts.components import ComponentType
 from app.contracts.intake import PriceSnapshot
 
 
@@ -28,6 +29,38 @@ def price_is_eligible_for_evaluation(snapshot: PriceSnapshot) -> bool:
     policy; it remains a dated observation for display and explanation.
     """
     return snapshot.price_vnd is not None
+
+
+def select_price_snapshot(
+    snapshots: list[PriceSnapshot] | tuple[PriceSnapshot, ...],
+    *,
+    manufacturer: str,
+    model: str,
+    component_type: ComponentType,
+) -> PriceSnapshot | None:
+    """Select one deterministic dated price observation for a component.
+
+    Priority is newest ``verified_at``; ties use lower VND price; remaining
+    ties use listing URL ascending. Availability never participates in the
+    selection or eligibility decision.
+    """
+    matches = [
+        snapshot
+        for snapshot in snapshots
+        if snapshot.manufacturer == manufacturer
+        and snapshot.exact_model == model
+        and snapshot.component_type is component_type
+        and price_is_eligible_for_evaluation(snapshot)
+    ]
+    if not matches:
+        return None
+    newest = max(snapshot.verified_at for snapshot in matches)
+    newest_matches = [snapshot for snapshot in matches if snapshot.verified_at == newest]
+    lowest_price = min(snapshot.price_vnd for snapshot in newest_matches)
+    lowest_price_matches = [
+        snapshot for snapshot in newest_matches if snapshot.price_vnd == lowest_price
+    ]
+    return min(lowest_price_matches, key=lambda snapshot: snapshot.listing_url)
 
 
 def price_availability_disclaimer(snapshot: PriceSnapshot) -> str:
