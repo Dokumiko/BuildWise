@@ -20,6 +20,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.contracts.recommendation import WorkloadProfile
 from app.contracts.components import (
+    AvailabilityStatus,
     ComponentRecord,
     ComponentType,
     CpuMotherboardSupportRecord,
@@ -31,7 +32,11 @@ from app.services.catalog_intake import (
     IntakeCanonicalizationResult,
     canonicalize_intake,
 )
-from app.services.catalog_policies import select_price_snapshot
+from app.services.catalog_policies import (
+    PRICE_USE_POLICY,
+    price_availability_disclaimer,
+    select_price_snapshot,
+)
 from app.services.analysis import DeterministicAnalysis, analyze_deterministic_build
 
 
@@ -147,11 +152,29 @@ class BuildIndicators(BaseModel):
     overall_weights: OverallWeights
 
 
+class SelectedPriceEvidence(BaseModel):
+    """The dated listing snapshot selected for one component's scored price."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    component_type: ComponentType
+    manufacturer: str
+    model: str
+    retailer_name: str
+    listing_url: str
+    price_vnd: int = Field(ge=0)
+    availability: AvailabilityStatus | None
+    verified_at: datetime
+    price_use_policy: str
+    availability_disclaimer: str
+
+
 class ScoredBuild(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     component_identity: list[dict[str, str]]
     total_price_vnd: int | None
+    selected_price_evidence: list[SelectedPriceEvidence]
     analysis_status: str
     feasible: bool
     analysis: DeterministicAnalysis
@@ -388,8 +411,17 @@ def _normalize_values(values: list[Decimal]) -> list[Decimal]:
     ]
 
 
-def _total_price(records: Iterable[ComponentRecord], catalog: ScoringCatalog) -> int | None:
-    total = 0
+def _selected_price_evidence(
+    records: Iterable[ComponentRecord],
+    catalog: ScoringCatalog,
+) -> list[SelectedPriceEvidence]:
+    """Return the deterministically selected dated price evidence per component.
+
+    A missing eligible price produces no evidence for that component. The caller
+    must still treat the whole build as unpriced when any selected component has
+    no eligible snapshot.
+    """
+    evidence: list[SelectedPriceEvidence] = []
     for record in records:
         snapshot = select_price_snapshot(
             catalog.prices,
@@ -398,9 +430,35 @@ def _total_price(records: Iterable[ComponentRecord], catalog: ScoringCatalog) ->
             component_type=record.component_type,
         )
         if snapshot is None or snapshot.price_vnd is None:
-            return None
-        total += snapshot.price_vnd
-    return total
+            continue
+        evidence.append(
+            SelectedPriceEvidence(
+                component_type=record.component_type,
+                manufacturer=record.manufacturer,
+                model=record.model,
+                retailer_name=snapshot.retailer_name,
+                listing_url=snapshot.listing_url,
+                price_vnd=snapshot.price_vnd,
+                availability=snapshot.availability,
+                verified_at=snapshot.verified_at,
+                price_use_policy=PRICE_USE_POLICY.value,
+                availability_disclaimer=price_availability_disclaimer(snapshot),
+            )
+        )
+    return evidence
+
+
+def _total_price(
+    records: Iterable[ComponentRecord],
+    catalog: ScoringCatalog,
+    *,
+    selected_price_evidence: list[SelectedPriceEvidence] | None = None,
+) -> int | None:
+    records = tuple(records)
+    evidence = selected_price_evidence or _selected_price_evidence(records, catalog)
+    if len(evidence) != len(records):
+        return None
+    return sum(item.price_vnd for item in evidence)
 
 
 def _build_indicators(
@@ -458,14 +516,21 @@ def score_builds(
     """Analyze and score an explicit candidate set without selecting parts."""
     support_rows = tuple(cpu_motherboard_support)
     prepared: list[tuple[tuple[ComponentRecord, ...], DeterministicAnalysis, int | None]] = []
+    price_evidence_by_build: list[list[SelectedPriceEvidence]] = []
     for build in builds:
         records = tuple(build)
         analysis = analyze_deterministic_build(
             records,
             cpu_motherboard_support=support_rows,
         )
-        total_price = _total_price(records, catalog)
+        selected_price_evidence = _selected_price_evidence(records, catalog)
+        total_price = _total_price(
+            records,
+            catalog,
+            selected_price_evidence=selected_price_evidence,
+        )
         prepared.append((records, analysis, total_price))
+        price_evidence_by_build.append(selected_price_evidence)
 
     performance_values: list[Decimal | None] = []
     raw_values: list[Decimal | None] = []
@@ -522,6 +587,7 @@ def score_builds(
                     for record in records
                 ],
                 total_price_vnd=total_price,
+                selected_price_evidence=price_evidence_by_build[index],
                 analysis_status=analysis.status.value,
                 feasible=analysis.feasible,
                 analysis=analysis,

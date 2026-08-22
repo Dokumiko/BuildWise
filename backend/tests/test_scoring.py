@@ -72,6 +72,16 @@ def test_scoring_uses_independent_cpu_gpu_domains_and_retains_gpu_proxy_limit() 
     assert run.config_version == DEFAULT_SCORING_CONFIG.version
     assert run.value_population_size == 2
     low_result, high_result = run.candidates
+    assert len(high_result.selected_price_evidence) == 8
+    gpu_price = next(
+        item
+        for item in high_result.selected_price_evidence
+        if item.component_type is ComponentType.GPU
+    )
+    assert gpu_price.price_use_policy == "LISTED_PRICE_EVIDENCE"
+    assert gpu_price.listing_url.startswith("https://")
+    assert gpu_price.verified_at.isoformat()
+    assert "not a current inventory guarantee" in gpu_price.availability_disclaimer
     assert low_result.feasible is True
     assert high_result.feasible is True
     assert low_result.indicators is not None
@@ -213,3 +223,4 @@ def test_infeasible_build_is_excluded_from_value_population_and_has_no_score() -
     assert invalid_result.feasible is False
     assert invalid_result.indicators is None
     assert invalid_result.analysis_status == "INCOMPATIBLE"
+    assert len(invalid_result.selected_price_evidence) == 8

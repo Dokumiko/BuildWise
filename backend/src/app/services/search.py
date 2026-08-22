@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal
+from enum import Enum
 from typing import Iterable
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -19,7 +20,7 @@ from app.contracts.components import (
     CpuMotherboardSupportRecord,
     SPEC,
 )
-from app.contracts.recommendation import BudgetMode, RecommendationRequirements, WorkloadProfile
+from app.contracts.recommendation import BudgetMode, RecommendationRequirements
 from app.services.catalog_policies import select_price_snapshot
 from app.services.compatibility import (
     CompatibilityBuild,
@@ -62,6 +63,25 @@ class SearchConfig(BaseModel):
 DEFAULT_SEARCH_CONFIG = SearchConfig()
 
 
+class ComponentLocalBaselineStatus(str, Enum):
+    AVAILABLE = "AVAILABLE"
+    AVAILABLE_OVER_BUDGET = "AVAILABLE_OVER_BUDGET"
+    NO_CANDIDATES = "NO_CANDIDATES"
+    INFEASIBLE = "INFEASIBLE"
+    STRICT_BUDGET_EXCEEDED = "STRICT_BUDGET_EXCEEDED"
+    UNSCORABLE = "UNSCORABLE"
+
+
+class ComponentLocalBaselineResult(BaseModel):
+    """Transparent outcome of the independently selected local baseline."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    status: ComponentLocalBaselineStatus
+    selected_build: ScoredBuild | None
+    reason: str
+
+
 class CandidatePoolMetric(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -93,7 +113,7 @@ class SearchResult(BaseModel):
     requirements: RecommendationRequirements
     ranked_builds: list[ScoredBuild]
     cheapest_feasible_baseline: ScoredBuild | None
-    component_local_baseline: ScoredBuild | None
+    component_local_baseline: ComponentLocalBaselineResult
     metrics: SearchMetrics
     scoring_run: ScoringRun
 
@@ -352,6 +372,79 @@ def _component_local_baseline_build(
     return tuple(selected)
 
 
+def _component_local_baseline_result(
+    pools: dict[ComponentType, tuple[ComponentRecord, ...]],
+    catalog: ScoringCatalog,
+    requirements: RecommendationRequirements,
+    support_rows: tuple[CpuMotherboardSupportRecord, ...],
+    scoring_config: ScoringConfig,
+) -> ComponentLocalBaselineResult:
+    baseline_build = _component_local_baseline_build(pools, catalog)
+    if baseline_build is None:
+        return ComponentLocalBaselineResult(
+            status=ComponentLocalBaselineStatus.NO_CANDIDATES,
+            selected_build=None,
+            reason="No candidate component exists in at least one required category after requirement filtering.",
+        )
+
+    baseline_candidate = score_builds(
+        (baseline_build,),
+        catalog,
+        workload=requirements.primary_workload,
+        cpu_motherboard_support=support_rows,
+        config=scoring_config,
+    ).candidates[0]
+    if not baseline_candidate.feasible:
+        return ComponentLocalBaselineResult(
+            status=ComponentLocalBaselineStatus.INFEASIBLE,
+            selected_build=baseline_candidate,
+            reason=(
+                "The independently selected component-local baseline is infeasible "
+                f"under deterministic compatibility/power analysis ({baseline_candidate.analysis_status})."
+            ),
+        )
+    if baseline_candidate.indicators is None or baseline_candidate.indicators.overall_score is None:
+        return ComponentLocalBaselineResult(
+            status=ComponentLocalBaselineStatus.UNSCORABLE,
+            selected_build=baseline_candidate,
+            reason="The component-local baseline is feasible but lacks the required supported indicators for an overall score.",
+        )
+    if baseline_candidate.total_price_vnd is None:
+        return ComponentLocalBaselineResult(
+            status=ComponentLocalBaselineStatus.UNSCORABLE,
+            selected_build=baseline_candidate,
+            reason="The component-local baseline cannot be evaluated because one or more selected components lacks eligible price evidence.",
+        )
+    if (
+        requirements.budget_mode is BudgetMode.STRICT
+        and baseline_candidate.total_price_vnd > requirements.budget_vnd
+    ):
+        return ComponentLocalBaselineResult(
+            status=ComponentLocalBaselineStatus.STRICT_BUDGET_EXCEEDED,
+            selected_build=baseline_candidate,
+            reason=(
+                "The independently selected component-local baseline costs "
+                f"{baseline_candidate.total_price_vnd:,} VND, exceeding the strict "
+                f"{requirements.budget_vnd:,} VND budget."
+            ),
+        )
+    if baseline_candidate.total_price_vnd > requirements.budget_vnd:
+        return ComponentLocalBaselineResult(
+            status=ComponentLocalBaselineStatus.AVAILABLE_OVER_BUDGET,
+            selected_build=baseline_candidate,
+            reason=(
+                "The component-local baseline is feasible and scored, but its "
+                f"price of {baseline_candidate.total_price_vnd:,} VND exceeds the "
+                f"approximate {requirements.budget_vnd:,} VND target."
+            ),
+        )
+    return ComponentLocalBaselineResult(
+        status=ComponentLocalBaselineStatus.AVAILABLE,
+        selected_build=baseline_candidate,
+        reason="The component-local baseline is feasible, scored, and within the applicable budget policy.",
+    )
+
+
 def _rank_builds(
     builds: Iterable[ScoredBuild],
     *,
@@ -434,29 +527,13 @@ def recommend_builds(
         key=lambda candidate: (candidate.total_price_vnd, _identity_key(candidate)),
         default=None,
     )
-    baseline_build = _component_local_baseline_build(
-        _filtered_pools(catalog, requirements), catalog
+    component_local_baseline = _component_local_baseline_result(
+        _filtered_pools(catalog, requirements),
+        catalog,
+        requirements,
+        support_rows,
+        scoring_config,
     )
-    component_local_baseline = None
-    if baseline_build is not None:
-        baseline_candidate = score_builds(
-            (baseline_build,),
-            catalog,
-            workload=requirements.primary_workload,
-            cpu_motherboard_support=support_rows,
-            config=scoring_config,
-        ).candidates[0]
-        if (
-            baseline_candidate.feasible
-            and (
-                requirements.budget_mode is not BudgetMode.STRICT
-                or (
-                    baseline_candidate.total_price_vnd is not None
-                    and baseline_candidate.total_price_vnd <= requirements.budget_vnd
-                )
-            )
-        ):
-            component_local_baseline = baseline_candidate
     metrics = SearchMetrics(
         candidate_pools=list(pool_state.metrics),
         partial_builds_evaluated=partial_count,
