@@ -41,6 +41,14 @@ from app.services.catalog_intake import (
     IntakeCanonicalizationResult,
     canonicalize_intake,
 )
+from app.services.catalog_dataset_metadata import (
+    CANONICAL_COMPONENT_ROLE,
+    RAW_ONLY_COMPONENT_ROLE,
+    append_component_metadata,
+    append_dataset_marker,
+    merge_component_metadata,
+    merge_dataset_markers,
+)
 from app.services.catalog_policies import price_is_eligible_for_evaluation
 
 
@@ -76,6 +84,7 @@ def _get_or_create_source(
             raise ValueError(
                 f"source URL is already registered with a different source type: {evidence.url}"
             )
+        source.description = merge_dataset_markers(source.description, description)
         return source, False
 
     source = DataSource(
@@ -132,7 +141,7 @@ def _ensure_component_source(
     existing = session.get(ComponentSource, (component.id, source.id))
     if existing is not None:
         existing.verified_at = verified_at
-        existing.notes = notes
+        existing.notes = merge_component_metadata(existing.notes, notes)
         return False
     session.add(
         ComponentSource(
@@ -170,6 +179,11 @@ def _benchmark_context(
     context: dict = {
         "intake_schema_version": intake.intake_schema_version,
         "dataset_version": record.dataset_version,
+        "benchmark_component_identity": {
+            "manufacturer": record.manufacturer,
+            "model": record.exact_model,
+            "component_type": record.component_type.value,
+        },
         "benchmark_version": record.benchmark_version,
         "collected_at": record.collected_at.isoformat(),
         "match_scope": record.match_scope,
@@ -193,6 +207,11 @@ def _benchmark_context(
                     "manufacturer": component.manufacturer,
                     "model": component.model,
                     "component_type": component.component_type.value,
+                },
+                "gpu_model_association_identity": {
+                    "manufacturer": association.manufacturer,
+                    "model": association.model,
+                    "component_type": "GPU",
                 },
                 "association_evidence_url": association.evidence_url,
                 "association_note": (
@@ -289,9 +308,13 @@ def persist_catalog_evaluation_intake(
                     component=component,
                     source=source,
                     verified_at=evidence.verified_at,
-                    notes=(
-                        f"Catalog evaluation intake {'technical' if index == 0 else 'additional'} "
-                        f"provenance from dataset {intake.dataset_version}."
+                    notes=append_component_metadata(
+                        (
+                            f"Catalog evaluation intake {'technical' if index == 0 else 'additional'} "
+                            f"provenance from dataset {intake.dataset_version}."
+                        ),
+                        dataset_version=intake.dataset_version,
+                        role=CANONICAL_COMPONENT_ROLE,
                     ),
                 )
             )
@@ -330,9 +353,13 @@ def persist_catalog_evaluation_intake(
                 component=canonical_component,
                 source=source,
                 verified_at=raw_component.technical_source.verified_at,
-                notes=(
-                    f"NOT CANONICALIZED: {exclusion.reason}. Frozen canonical "
-                    "specification retained; raw intake remains the evidence record."
+                notes=append_component_metadata(
+                    (
+                        f"NOT CANONICALIZED: {exclusion.reason}. Frozen canonical "
+                        "specification retained; raw intake remains the evidence record."
+                    ),
+                    dataset_version=intake.dataset_version,
+                    role=RAW_ONLY_COMPONENT_ROLE,
                 ),
             )
         )
@@ -366,7 +393,10 @@ def persist_catalog_evaluation_intake(
                 raw_source_type=RawSourceType.VN_RETAILER_DIRECT,
                 verified_at=snapshot.verified_at,
             ),
-            description=f"Retailer price evidence from intake dataset {intake.dataset_version}.",
+            description=append_dataset_marker(
+                f"Retailer price evidence from intake dataset {intake.dataset_version}.",
+                intake.dataset_version,
+            ),
         )
         source_count += int(created)
         availability = (

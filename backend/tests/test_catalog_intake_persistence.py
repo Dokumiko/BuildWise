@@ -158,6 +158,41 @@ def test_persist_v02_intake_persists_verified_candidates_and_gpu_model_proxy_evi
         benchmark.test_context["association_scope"] == "GPU_MODEL_PROXY"
         for benchmark in gpu_benchmarks
     )
+    assert {
+        (
+            benchmark.test_context["benchmark_component_identity"]["manufacturer"],
+            benchmark.test_context["benchmark_component_identity"]["model"],
+        )
+        for benchmark in gpu_benchmarks
+    } == {
+        ("NVIDIA", "GeForce RTX 4060"),
+        ("AMD", "Radeon RX 7800 XT"),
+    }
+    assert {
+        (
+            benchmark.test_context["gpu_model_association_identity"]["manufacturer"],
+            benchmark.test_context["gpu_model_association_identity"]["model"],
+            benchmark.test_context["gpu_model_association_identity"]["component_type"],
+        )
+        for benchmark in gpu_benchmarks
+    } == {
+        ("NVIDIA", "GeForce RTX 4060", "GPU"),
+        ("AMD", "Radeon RX 7800 XT", "GPU"),
+    }
+    canonical_notes = db_session.scalars(select(ComponentSource.notes)).all()
+    assert all(
+        "[buildwise_catalog_dataset=vn-pc-am5-ddr5-v0.2]" in note
+        and "[buildwise_catalog_component_role=CANONICAL;dataset=vn-pc-am5-ddr5-v0.2]" in note
+        for note in canonical_notes
+    )
+    price_source_descriptions = db_session.scalars(
+        select(DataSource.description)
+        .join(ComponentPrice, ComponentPrice.source_id == DataSource.id)
+    ).all()
+    assert all(
+        "[buildwise_catalog_dataset=vn-pc-am5-ddr5-v0.2]" in description
+        for description in price_source_descriptions
+    )
 
     models = set(db_session.scalars(select(Component.model)).all())
     assert "AIR 903 BASE" in models
