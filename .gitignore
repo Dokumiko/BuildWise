@@ -4,6 +4,12 @@
 /work/
 /AGENTS.md
 
+# Local research artifacts; validated versioned catalog intake files remain tracked.
+/backend/data/test-data.txt
+/backend/data/report/
+/backend/data/media_source/
+/backend/data/*-targeted-verification-report.json
+
 
 # Python
 .venv/

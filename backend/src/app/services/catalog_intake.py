@@ -210,9 +210,25 @@ def _canonical_specifications(component: IntakeComponent) -> dict[str, Any] | No
             "ram_clearance_mm": specs["ram_clearance_mm"],
             "fan_max_input_power_w": specs["fan_max_input_power_w"],
         }
-    # CASE radiator support is conditional and cannot become an unconditional
-    # contract fact.
-    return None
+    if component_type == "CASE":
+        return {
+            "form_factor": specs["form_factor"],
+            "supported_motherboard_form_factors": specs[
+                "supported_motherboard_form_factors"
+            ],
+            "supported_psu_form_factors": specs["supported_psu_form_factors"],
+            "max_gpu_length": specs["max_gpu_length"],
+            "max_cpu_cooler_height_mm": specs["max_cpu_cooler_height_mm"],
+            "max_psu_length_mm": specs["max_psu_length_mm"],
+            "max_gpu_slot_width": specs["max_gpu_slot_width"],
+            # A case enters the canonical catalog only if every radiator fact is
+            # already unconditional and losslessly represented by the candidate.
+            "radiator_support": _canonical_case_radiator_support(specs),
+            # v0.1 has no verified front-radiator GPU-clearance observation for
+            # the reviewed cases. Never derive one from general GPU clearance.
+            "front_radiator_gpu_clearance_mm": None,
+        }
+    raise ValueError(f"unsupported component type: {component_type}")
 
 
 def _canonical_motherboard_connectors(specs: dict[str, Any]) -> dict[str, int]:
@@ -220,9 +236,24 @@ def _canonical_motherboard_connectors(specs: dict[str, Any]) -> dict[str, int]:
     canonical = specs["power_connectors_canonical_candidate"]
     if canonical != {"ATX_24PIN": 1, "EPS_8PIN": 1}:
         raise ValueError("motherboard canonical connector candidate is not approved")
-    if raw != ["24-pin ATX", "8-pin +12V", "4-pin +12V"]:
-        raise ValueError("motherboard raw power connectors do not match the reviewed evidence")
+    # The exact reviewed boards document either the required main 24-pin plus
+    # 8-pin CPU connector, or that same pair with an optional supplementary
+    # 4-pin. The latter is not a second EPS_8PIN requirement.
+    if raw[:2] != ["24-pin ATX", "8-pin +12V"] or raw[2:] not in ([], ["4-pin +12V"]):
+        raise ValueError("motherboard raw power connectors do not match reviewed evidence")
     return {"ATX_24PIN": 1, "EPS_8PIN": 1}
+
+
+def _canonical_case_radiator_support(specs: dict[str, Any]) -> dict[str, list[int]]:
+    """Promote only lossless, unconditional case radiator-support facts."""
+    raw = specs["radiator_support_raw"]
+    candidate = specs["radiator_support_canonical_candidate"]
+    if raw != candidate:
+        raise ValueError(
+            "case radiator support is conditional or cannot be represented "
+            "as unconditional canonical fit data"
+        )
+    return candidate
 
 
 def _exclusion_reason(component: IntakeComponent) -> str:

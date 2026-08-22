@@ -1,5 +1,12 @@
+from pathlib import Path
+
 from app.services.catalog_intake import canonicalize_intake, load_validated_intake
 from app.services.catalog_readiness import assess_catalog_readiness
+
+
+V02_INTAKE = (
+    Path(__file__).parents[1] / "data" / "vn-pc-am5-ddr5-v0.2-catalog-evaluation-intake.json"
+)
 
 
 def finding_by_id(report, finding_id: str):
@@ -78,6 +85,32 @@ def test_current_intake_pool_is_insufficient_for_meaningful_search() -> None:
         "CASE",
         "COOLER",
     ]
+
+
+def test_v02_intake_has_two_canonical_candidates_per_category_for_search() -> None:
+    intake = load_validated_intake(V02_INTAKE)
+    report = assess_catalog_readiness(intake)
+
+    assert report.intake_dataset_version == "vn-pc-am5-ddr5-v0.2"
+    assert report.canonical_component_counts == {
+        "CPU": 2,
+        "MOTHERBOARD": 2,
+        "RAM": 2,
+        "GPU": 2,
+        "STORAGE": 2,
+        "PSU": 2,
+        "CASE": 2,
+        "COOLER": 2,
+    }
+    assert report.scoring_ready is True
+    assert report.constrained_search_ready is True
+
+    raw_only = finding_by_id(report, "RAW_COMPONENT_NOT_CANONICAL")
+    assert [
+        (finding.evidence["component_type"], finding.evidence["model"])
+        for finding in raw_only
+    ] == [("CASE", "H5 Flow (2024)")]
+    assert finding_by_id(report, "CONSTRAINED_SEARCH_POOL_INSUFFICIENT") == []
 
 
 def test_readiness_is_deterministic_for_a_fixed_canonicalization() -> None:

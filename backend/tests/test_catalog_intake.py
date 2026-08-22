@@ -21,10 +21,17 @@ from app.services.catalog_intake import (
 )
 
 INTAKE = Path(__file__).parents[1] / "data" / "catalog-evaluation-intake-v0.1.json"
+V02_INTAKE = (
+    Path(__file__).parents[1] / "data" / "vn-pc-am5-ddr5-v0.2-catalog-evaluation-intake.json"
+)
 
 
 def intake_payload() -> dict:
     return json.loads(INTAKE.read_text(encoding="utf-8"))
+
+
+def v02_intake_payload() -> dict:
+    return json.loads(V02_INTAKE.read_text(encoding="utf-8"))
 
 
 def test_load_validated_intake_preserves_raw_research_envelope() -> None:
@@ -176,6 +183,39 @@ def test_canonicalization_validates_complete_components_and_excludes_unresolved_
     psu = canonical[("PSU", "RM750x SHIFT")]
     assert psu.component.specifications["pcie_version"] == "5.1"
     assert psu.component.specifications["connectors"]["12V_2X6"] == 1
+
+
+def test_v02_intake_canonicalizes_reviewed_candidates_without_promoting_conditional_case_data() -> None:
+    intake = validate_intake_payload(v02_intake_payload())
+    result = canonicalize_intake(intake)
+    canonical = {
+        (entry.component.component_type.value, entry.component.model): entry
+        for entry in result.components
+    }
+
+    assert len(canonical) == 16
+    assert {(exclusion.component_type, exclusion.exact_model) for exclusion in result.exclusions} == {
+        ("CASE", "H5 Flow (2024)")
+    }
+
+    # PRIME B650-PLUS has only the documented 24-pin and 8-pin connectors;
+    # the B650M board additionally documents an optional 4-pin. Both map to
+    # the same required canonical main/EPS connector facts.
+    for model in ("PRIME B650-PLUS", "PRIME B650M-A WIFI II"):
+        assert canonical[("MOTHERBOARD", model)].component.specifications[
+            "power_connectors"
+        ] == {"ATX_24PIN": 1, "EPS_8PIN": 1}
+
+    fractal = canonical[("CASE", "Pop Air Black Solid")].component.specifications
+    montech = canonical[("CASE", "AIR 903 BASE")].component.specifications
+    assert fractal["max_gpu_length"] == {"value_mm": 405.0, "context": "UNKNOWN"}
+    assert fractal["front_radiator_gpu_clearance_mm"] is None
+    assert montech["max_gpu_length"] == {"value_mm": 400.0, "context": "UNKNOWN"}
+    assert montech["front_radiator_gpu_clearance_mm"] is None
+
+    cooler = canonical[("COOLER", "NH-U12S chromax.black")].component.specifications
+    assert cooler["supported_sockets"][:2] == ["AM4", "AM5"]
+    assert cooler["fan_max_input_power_w"] == 0.6
 
 
 def test_invalid_json_is_rejected_before_intake_validation(tmp_path: Path) -> None:

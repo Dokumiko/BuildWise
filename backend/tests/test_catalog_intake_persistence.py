@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from sqlalchemy import func, select
 
@@ -12,6 +14,11 @@ from app.services.catalog_import import import_catalog_seed
 from app.services.catalog_intake import canonicalize_intake, load_validated_intake
 from app.services.catalog_intake_persistence import persist_catalog_evaluation_intake
 from tests.conftest import clear_catalog_tables
+
+
+V02_INTAKE = (
+    Path(__file__).parents[1] / "data" / "vn-pc-am5-ddr5-v0.2-catalog-evaluation-intake.json"
+)
 
 
 def test_option_one_excludes_conflicting_cooler_without_overwriting_frozen_value(db_session) -> None:
@@ -116,6 +123,54 @@ def test_persist_intake_uses_only_canonical_components_and_preserves_evidence(db
     sources = db_session.scalars(select(DataSource)).all()
     source_types = {source.source_type.value for source in sources}
     assert source_types == {"MANUFACTURER", "RETAILER", "TRUSTED_SECONDARY"}
+
+
+def test_persist_v02_intake_persists_verified_candidates_and_skips_unsupported_evidence(
+    db_session,
+) -> None:
+    clear_catalog_tables(db_session)
+    result = persist_catalog_evaluation_intake(
+        db_session,
+        load_validated_intake(V02_INTAKE),
+    )
+
+    assert result.component_count == 16
+    assert result.excluded_component_count == 1
+    assert result.price_count == 15
+    assert result.skipped_price_count == 1
+    assert result.benchmark_count == 2
+    assert result.skipped_benchmark_count == 2
+
+    models = set(db_session.scalars(select(Component.model)).all())
+    assert "AIR 903 BASE" in models
+    assert "Pop Air Black Solid" in models
+    assert "NH-U12S chromax.black" in models
+    assert "Hyper H410R" not in models
+    assert "H5 Flow (2024)" not in models
+
+    chromax = db_session.scalar(
+        select(Component).where(Component.model == "NH-U12S chromax.black")
+    )
+    assert chromax is not None
+    assert chromax.specifications["fan_max_input_power_w"] == 0.6
+
+    b650m_price = db_session.scalar(
+        select(ComponentPrice)
+        .join(Component)
+        .where(Component.model == "PRIME B650M-A WIFI II")
+    )
+    assert b650m_price is not None
+    assert b650m_price.price_vnd == 3999000
+    assert b650m_price.availability is None
+
+    montech_price = db_session.scalar(
+        select(ComponentPrice)
+        .join(Component)
+        .where(Component.model == "AIR 903 BASE")
+    )
+    assert montech_price is not None
+    assert montech_price.price_vnd == 1690000
+    assert montech_price.availability is None
 
 
 def test_persist_intake_preserves_null_and_unknown_availability(db_session) -> None:
