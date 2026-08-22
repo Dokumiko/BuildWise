@@ -136,7 +136,8 @@ def test_persist_v02_intake_persists_verified_candidates_and_skips_unsupported_e
 
     assert result.component_count == 16
     assert result.excluded_component_count == 1
-    assert result.price_count == 15
+    assert result.price_count == 16
+    # NZXT H5 Flow remains raw-only because its radiator support is conditional.
     assert result.skipped_price_count == 1
     assert result.benchmark_count == 2
     assert result.skipped_benchmark_count == 2

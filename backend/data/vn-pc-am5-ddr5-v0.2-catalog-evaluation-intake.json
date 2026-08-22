@@ -950,6 +950,20 @@
       "vat_included": true,
       "verified_at": "2026-08-21T18:06:00+07:00",
       "notes": "Direct HACOM product page identifies NH-U12S chromax.black, lists 2,459,000 VND including VAT, and states Order trước – giao sau."
+    },
+    {
+      "component_type": "CASE",
+      "manufacturer": "Fractal Design",
+      "exact_model": "Pop Air Black Solid",
+      "sku": "FD-C-POA1A-01",
+      "retailer_name": "Fado (Amazon US import)",
+      "listing_url": "https://fado.vn/us/amazon/fractal-design-pop-air-black-solid-B08SRBTYGK.html?fdv2=B08SRBTYGK",
+      "price_vnd": 3063542,
+      "availability": null,
+      "price_type": "IMPORTED_LISTED",
+      "vat_included": false,
+      "verified_at": "2026-08-22T13:04:00+07:00",
+      "notes": "Fado Vietnam page identifies the exact Black Solid Amazon listing by ASIN B08SRBTYGK and displays 3,063,542 VND. This is a cross-border import listing, not domestic Vietnamese inventory; the page does not expose an explicit stock badge, so availability remains null. Embedded pricing also shows a separate VAT-included total of 3,496,584 VND; the stored observation follows the displayed non-VAT price."
     }
   ],
   "benchmark_records": [
@@ -1080,14 +1094,9 @@
       "reason": "The verified legacy manufacturer material labels 2.28 W as fan power consumption, not maximum input power; it is not promoted to the fan_max_input_power_w canonical contract."
     },
     {
-      "item": "Fractal Design Pop Air Black Solid current direct Vietnamese retailer price",
-      "status": "PRICE_NOT_FOUND",
-      "reason": "The exact FD-C-POA1A-01 technical identity is verified, but no direct Vietnamese retailer price snapshot was verified. Amazon/USD and Fado conversion are not used as VND price evidence."
-    },
-    {
-      "item": "Catalog price coverage",
-      "status": "INSUFFICIENT_EVIDENCE",
-      "reason": "Fractal Design Pop Air Black Solid is canonical technical evidence only; a second canonical CASE price snapshot remains required before price-based search can use two case candidates."
+      "item": "Fractal Design Pop Air Black Solid Fado cross-border price source",
+      "status": "ACCEPTED_WITH_LIMITATION",
+      "reason": "No domestic Vietnamese retailer listing was found. The verified Fado Vietnam page is retained as a VND cross-border import price observation for the current dataset state; it must not be interpreted as domestic Vietnamese stock or domestic retailer availability."
     }
   ],
   "normalization_notes": {
