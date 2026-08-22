@@ -18,6 +18,7 @@ from typing import Iterable
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from app.contracts.recommendation import WorkloadProfile
 from app.contracts.components import (
     ComponentRecord,
     ComponentType,
@@ -32,12 +33,6 @@ from app.services.catalog_intake import (
 )
 from app.services.catalog_policies import select_price_snapshot
 from app.services.analysis import DeterministicAnalysis, analyze_deterministic_build
-
-
-class WorkloadProfile(str, Enum):
-    GAMING = "GAMING"
-    PRODUCTIVITY = "PRODUCTIVITY"
-    MIXED = "MIXED"
 
 
 class IndicatorName(str, Enum):
