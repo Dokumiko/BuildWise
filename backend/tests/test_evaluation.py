@@ -12,10 +12,18 @@ from app.contracts.recommendation import (
 from app.services.catalog_intake import load_validated_intake
 from app.services.evaluation import (
     DEFAULT_SEARCH_EVALUATION_CONFIG,
+    EvaluationScenario,
     SearchEvaluationConfig,
+    evaluate_scoring_sensitivity,
     evaluate_search_scenario,
+    evaluate_search_scenarios,
 )
-from app.services.scoring import ScoringCatalog
+from app.services.scoring import (
+    DEFAULT_SCORING_CONFIG,
+    OverallWeights,
+    ScoringCatalog,
+    ScoringConfig,
+)
 
 
 V02_INTAKE = (
@@ -105,3 +113,101 @@ def test_evaluation_config_rejects_invalid_k_values() -> None:
         SearchEvaluationConfig(pruning_k_values=(3, 5), reference_pruning_k=4)
     with pytest.raises(ValidationError, match="must not be empty"):
         SearchEvaluationConfig(pruning_k_values=())
+
+
+def test_multi_scenario_evaluation_aggregates_mean_median_and_missing_results() -> None:
+    scenarios = (
+        EvaluationScenario(
+            scenario_id="gaming-feasible",
+            requirements=requirements(),
+        ),
+        EvaluationScenario(
+            scenario_id="gaming-no-feasible",
+            requirements=RecommendationRequirements(
+                budget_vnd=3_000_000,
+                budget_mode=BudgetMode.STRICT,
+                primary_workload=WorkloadProfile.GAMING,
+            ),
+        ),
+    )
+    result = evaluate_search_scenarios(
+        scenarios,
+        catalog(),
+        evaluation_config=SearchEvaluationConfig(
+            pruning_k_values=(1,),
+            reference_top_n=1,
+        ),
+    )
+
+    assert result.scenario_ids == ["gaming-feasible", "gaming-no-feasible"]
+    aggregate = result.pruning_aggregates[0]
+    assert aggregate.scenario_count == 2
+    assert aggregate.recommendation_available_rate == Decimal("0.5")
+    assert aggregate.budget_compliant_rate == Decimal("0.5")
+    assert aggregate.total_price_vnd.observation_count == 1
+    assert aggregate.total_price_vnd.mean == aggregate.total_price_vnd.median
+    assert aggregate.candidate_count.observation_count == 2
+    assert aggregate.candidate_count.mean == Decimal("0.5")
+    cheapest = next(
+        item for item in result.baseline_aggregates if item.baseline_name == "CHEAPEST_FEASIBLE"
+    )
+    assert cheapest.available_rate == Decimal("0.5")
+
+
+def test_multi_scenario_evaluation_rejects_empty_and_duplicate_ids() -> None:
+    with pytest.raises(ValueError, match="must not be empty"):
+        evaluate_search_scenarios((), catalog())
+    scenario = EvaluationScenario(scenario_id="duplicate", requirements=requirements())
+    with pytest.raises(ValueError, match="must be unique"):
+        evaluate_search_scenarios((scenario, scenario), catalog())
+
+
+def test_scoring_sensitivity_reports_reference_stability_and_missing_results() -> None:
+    scenarios = (
+        EvaluationScenario(scenario_id="feasible", requirements=requirements()),
+        EvaluationScenario(
+            scenario_id="no-feasible",
+            requirements=RecommendationRequirements(
+                budget_vnd=3_000_000,
+                budget_mode=BudgetMode.STRICT,
+                primary_workload=WorkloadProfile.GAMING,
+            ),
+        ),
+    )
+    variant = ScoringConfig(
+        version="scoring-sensitivity-performance-heavy",
+        gaming_overall_weights=OverallWeights(
+            performance=Decimal("0.80"),
+            value=Decimal("0.10"),
+            power=Decimal("0.10"),
+        ),
+    )
+    result = evaluate_scoring_sensitivity(
+        scenarios,
+        catalog(),
+        scoring_configs=(DEFAULT_SCORING_CONFIG, variant),
+    )
+
+    assert result.reference_scoring_config_version == DEFAULT_SCORING_CONFIG.version
+    assert result.scoring_config_versions == [
+        DEFAULT_SCORING_CONFIG.version,
+        variant.version,
+    ]
+    assert result.available_rate_by_config[variant.version] == Decimal("0.5")
+    assert result.comparable_scenario_count_by_config[variant.version] == 1
+    assert Decimal("0") <= result.stability_rate_vs_reference_by_config[variant.version] <= Decimal("1")
+    assert result.stability_rate_vs_reference_by_config[DEFAULT_SCORING_CONFIG.version] == Decimal("1")
+
+
+def test_scoring_sensitivity_rejects_empty_and_duplicate_inputs() -> None:
+    scenario = EvaluationScenario(scenario_id="one", requirements=requirements())
+    with pytest.raises(ValueError, match="scenarios must not be empty"):
+        evaluate_scoring_sensitivity((), catalog(), scoring_configs=(DEFAULT_SCORING_CONFIG,))
+    with pytest.raises(ValueError, match="must not be empty"):
+        evaluate_scoring_sensitivity((scenario,), catalog(), scoring_configs=())
+    with pytest.raises(ValueError, match="must be unique"):
+        evaluate_scoring_sensitivity(
+            (scenario,),
+            catalog(),
+            scoring_configs=(DEFAULT_SCORING_CONFIG, DEFAULT_SCORING_CONFIG),
+        )

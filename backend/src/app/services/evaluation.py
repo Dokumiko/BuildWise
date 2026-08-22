@@ -161,6 +161,109 @@ class SearchScenarioEvaluation(BaseModel):
     component_local_baseline: EvaluationBuildSummary
 
 
+class EvaluationScenario(BaseModel):
+    """Caller-supplied scenario identity and validated requirements."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    scenario_id: str = Field(min_length=1)
+    requirements: RecommendationRequirements
+
+
+class MetricAggregate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    observation_count: int = Field(ge=0)
+    mean: Decimal | None
+    median: Decimal | None
+
+
+class SearchMetricAggregate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    pruning_k: int = Field(ge=1)
+    scenario_count: int = Field(ge=0)
+    recommendation_available_rate: Decimal = Field(ge=0, le=1)
+    budget_compliant_rate: Decimal = Field(ge=0, le=1)
+    total_price_vnd: MetricAggregate
+    budget_deviation_vnd: MetricAggregate
+    workload_performance_score: MetricAggregate
+    overall_score: MetricAggregate
+    candidate_count: MetricAggregate
+    complete_builds_evaluated: MetricAggregate
+    feasible_build_rate: MetricAggregate
+    pruning_coverage: MetricAggregate
+    latency_ms: MetricAggregate
+
+
+class BaselineMetricAggregate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    baseline_name: str
+    scenario_count: int = Field(ge=0)
+    available_rate: Decimal = Field(ge=0, le=1)
+    budget_compliant_rate: Decimal = Field(ge=0, le=1)
+    total_price_vnd: MetricAggregate
+    budget_deviation_vnd: MetricAggregate
+    workload_performance_score: MetricAggregate
+    overall_score: MetricAggregate
+
+
+class SearchScenarioSetEvaluation(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    evaluation_config_version: str
+    catalog_dataset_version: str
+    scoring_config_version: str
+    search_config_version: str
+    scenario_ids: list[str]
+    scenario_evaluations: list[SearchScenarioEvaluation]
+    pruning_aggregates: list[SearchMetricAggregate]
+    baseline_aggregates: list[BaselineMetricAggregate]
+
+
+class SensitivityEvaluation(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    catalog_dataset_version: str
+    search_config_version: str
+    reference_scoring_config_version: str
+    scoring_config_versions: list[str]
+    scenario_ids: list[str]
+    top_recommendation_ids: dict[str, dict[str, str | None]]
+    available_rate_by_config: dict[str, Decimal]
+    comparable_scenario_count_by_config: dict[str, int]
+    stability_rate_vs_reference_by_config: dict[str, Decimal]
+
+
+def _metric_aggregate(values: Iterable[Decimal | int | float | None]) -> MetricAggregate:
+    observed = sorted(Decimal(str(value)) for value in values if value is not None)
+    if not observed:
+        return MetricAggregate(observation_count=0, mean=None, median=None)
+    middle = len(observed) // 2
+    median = (
+        observed[middle]
+        if len(observed) % 2
+        else (observed[middle - 1] + observed[middle]) / Decimal("2")
+    )
+    return MetricAggregate(
+        observation_count=len(observed),
+        mean=sum(observed, Decimal("0")) / Decimal(len(observed)),
+        median=median,
+    )
+
+
+def _rate(numerator: int, denominator: int) -> Decimal:
+    return Decimal(numerator) / Decimal(denominator) if denominator else Decimal("0")
+
+
+def _summary_metric(
+    summaries: Iterable[EvaluationBuildSummary],
+    attribute: str,
+) -> MetricAggregate:
+    return _metric_aggregate(getattr(summary, attribute) for summary in summaries)
+
+
 def _run_measured(
     requirements: RecommendationRequirements,
     catalog: ScoringCatalog,
@@ -291,4 +394,213 @@ def evaluate_search_scenario(
         component_local_baseline=_summary(
             reference.component_local_baseline.selected_build, requirements
         ),
+    )
+
+
+def evaluate_search_scenarios(
+    scenarios: Iterable[EvaluationScenario],
+    catalog: ScoringCatalog,
+    *,
+    cpu_motherboard_support: Iterable[CpuMotherboardSupportRecord] = (),
+    evaluation_config: SearchEvaluationConfig = DEFAULT_SEARCH_EVALUATION_CONFIG,
+    scoring_config: ScoringConfig = DEFAULT_SCORING_CONFIG,
+) -> SearchScenarioSetEvaluation:
+    """Evaluate caller-supplied scenarios and aggregate each configured K.
+
+    The caller owns scenario selection and labeling. This function aggregates
+    only supplied validated requests; it does not manufacture a thesis scenario
+    dataset or infer representative workloads.
+    """
+    scenario_list = tuple(scenarios)
+    if not scenario_list:
+        raise ValueError("scenarios must not be empty")
+    scenario_ids = [scenario.scenario_id for scenario in scenario_list]
+    if len(set(scenario_ids)) != len(scenario_ids):
+        raise ValueError("scenario IDs must be unique")
+    support_rows = tuple(cpu_motherboard_support)
+    evaluations = [
+        evaluate_search_scenario(
+            scenario.requirements,
+            catalog,
+            cpu_motherboard_support=support_rows,
+            evaluation_config=evaluation_config,
+            scoring_config=scoring_config,
+        )
+        for scenario in scenario_list
+    ]
+
+    pruning_aggregates: list[SearchMetricAggregate] = []
+    for pruning_k in evaluation_config.pruning_k_values:
+        observations = [
+            next(
+                item
+                for item in scenario_evaluation.pruning_evaluations
+                if item.pruning_k == pruning_k
+            )
+            for scenario_evaluation in evaluations
+        ]
+        recommendations = [item.recommendation for item in observations]
+        pruning_aggregates.append(
+            SearchMetricAggregate(
+                pruning_k=pruning_k,
+                scenario_count=len(observations),
+                recommendation_available_rate=_rate(
+                    sum(summary.available for summary in recommendations),
+                    len(recommendations),
+                ),
+                budget_compliant_rate=_rate(
+                    sum(summary.budget_compliant is True for summary in recommendations),
+                    len(recommendations),
+                ),
+                total_price_vnd=_summary_metric(recommendations, "total_price_vnd"),
+                budget_deviation_vnd=_summary_metric(
+                    recommendations, "budget_deviation_vnd"
+                ),
+                workload_performance_score=_summary_metric(
+                    recommendations, "workload_performance_score"
+                ),
+                overall_score=_summary_metric(recommendations, "overall_score"),
+                candidate_count=_metric_aggregate(
+                    item.candidate_count for item in observations
+                ),
+                complete_builds_evaluated=_metric_aggregate(
+                    item.complete_builds_evaluated for item in observations
+                ),
+                feasible_build_rate=_metric_aggregate(
+                    item.feasible_build_rate for item in observations
+                ),
+                pruning_coverage=_metric_aggregate(
+                    item.pruning_coverage for item in observations
+                ),
+                latency_ms=_metric_aggregate(item.latency_ms for item in observations),
+            )
+        )
+
+    baseline_aggregates: list[BaselineMetricAggregate] = []
+    for baseline_name, summaries in (
+        (
+            "CHEAPEST_FEASIBLE",
+            [item.cheapest_feasible_baseline for item in evaluations],
+        ),
+        (
+            "COMPONENT_LOCAL",
+            [item.component_local_baseline for item in evaluations],
+        ),
+    ):
+        baseline_aggregates.append(
+            BaselineMetricAggregate(
+                baseline_name=baseline_name,
+                scenario_count=len(summaries),
+                available_rate=_rate(
+                    sum(summary.available for summary in summaries), len(summaries)
+                ),
+                budget_compliant_rate=_rate(
+                    sum(summary.budget_compliant is True for summary in summaries),
+                    len(summaries),
+                ),
+                total_price_vnd=_summary_metric(summaries, "total_price_vnd"),
+                budget_deviation_vnd=_summary_metric(
+                    summaries, "budget_deviation_vnd"
+                ),
+                workload_performance_score=_summary_metric(
+                    summaries, "workload_performance_score"
+                ),
+                overall_score=_summary_metric(summaries, "overall_score"),
+            )
+        )
+
+    return SearchScenarioSetEvaluation(
+        evaluation_config_version=evaluation_config.version,
+        catalog_dataset_version=catalog.dataset_version,
+        scoring_config_version=scoring_config.version,
+        search_config_version=DEFAULT_SEARCH_CONFIG.version,
+        scenario_ids=scenario_ids,
+        scenario_evaluations=evaluations,
+        pruning_aggregates=pruning_aggregates,
+        baseline_aggregates=baseline_aggregates,
+    )
+
+
+def evaluate_scoring_sensitivity(
+    scenarios: Iterable[EvaluationScenario],
+    catalog: ScoringCatalog,
+    *,
+    scoring_configs: Iterable[ScoringConfig],
+    cpu_motherboard_support: Iterable[CpuMotherboardSupportRecord] = (),
+    search_config: SearchConfig = DEFAULT_SEARCH_CONFIG,
+) -> SensitivityEvaluation:
+    """Measure top-recommendation stability across supplied scoring configs.
+
+    The first supplied scoring configuration is the reference. Stability is
+    calculated only where both the reference and comparison configuration have
+    a top recommendation. Missing recommendations remain visible through the
+    availability and comparable-scenario counts.
+    """
+    scenario_list = tuple(scenarios)
+    if not scenario_list:
+        raise ValueError("scenarios must not be empty")
+    scenario_ids = [scenario.scenario_id for scenario in scenario_list]
+    if len(set(scenario_ids)) != len(scenario_ids):
+        raise ValueError("scenario IDs must be unique")
+    config_list = tuple(scoring_configs)
+    if not config_list:
+        raise ValueError("scoring_configs must not be empty")
+    config_versions = [config.version for config in config_list]
+    if len(set(config_versions)) != len(config_versions):
+        raise ValueError("scoring configuration versions must be unique")
+
+    support_rows = tuple(cpu_motherboard_support)
+    top_recommendation_ids: dict[str, dict[str, str | None]] = {}
+    available_rate_by_config: dict[str, Decimal] = {}
+    reference_version = config_list[0].version
+
+    for config in config_list:
+        identities: dict[str, str | None] = {}
+        for scenario in scenario_list:
+            result = recommend_builds(
+                scenario.requirements,
+                catalog,
+                cpu_motherboard_support=support_rows,
+                config=search_config,
+                scoring_config=config,
+            )
+            top_build = result.ranked_builds[0] if result.ranked_builds else None
+            identities[scenario.scenario_id] = (
+                _identity_key(top_build) if top_build is not None else None
+            )
+        top_recommendation_ids[config.version] = identities
+        available_rate_by_config[config.version] = _rate(
+            sum(identity is not None for identity in identities.values()),
+            len(scenario_list),
+        )
+
+    reference_ids = top_recommendation_ids[reference_version]
+    comparable_scenario_count_by_config: dict[str, int] = {}
+    stability_rate_vs_reference_by_config: dict[str, Decimal] = {}
+    for version, identities in top_recommendation_ids.items():
+        comparable_ids = [
+            scenario_id
+            for scenario_id in scenario_ids
+            if reference_ids[scenario_id] is not None
+            and identities[scenario_id] is not None
+        ]
+        comparable_scenario_count_by_config[version] = len(comparable_ids)
+        stability_rate_vs_reference_by_config[version] = _rate(
+            sum(
+                identities[scenario_id] == reference_ids[scenario_id]
+                for scenario_id in comparable_ids
+            ),
+            len(comparable_ids),
+        )
+
+    return SensitivityEvaluation(
+        catalog_dataset_version=catalog.dataset_version,
+        search_config_version=search_config.version,
+        reference_scoring_config_version=reference_version,
+        scoring_config_versions=config_versions,
+        scenario_ids=scenario_ids,
+        top_recommendation_ids=top_recommendation_ids,
+        available_rate_by_config=available_rate_by_config,
+        comparable_scenario_count_by_config=comparable_scenario_count_by_config,
+        stability_rate_vs_reference_by_config=stability_rate_vs_reference_by_config,
     )
