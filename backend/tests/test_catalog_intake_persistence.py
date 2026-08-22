@@ -103,8 +103,8 @@ def test_persist_intake_uses_only_canonical_components_and_preserves_evidence(db
     gpu_benchmarks = db_session.scalars(
         select(BenchmarkRecord).where(BenchmarkRecord.benchmark_name == "3DMark Time Spy")
     ).all()
-    # Model-level records do not match the exact SAPPHIRE board SKU, so they
-    # remain in raw intake rather than being attached to the canonical board.
+    # The legacy v0.1 intake has no explicit GPU-model proxy associations, so
+    # its model-level GPU benchmarks remain skipped.
     assert gpu_benchmarks == []
 
     cpu_benchmark = db_session.scalar(
@@ -125,7 +125,7 @@ def test_persist_intake_uses_only_canonical_components_and_preserves_evidence(db
     assert source_types == {"MANUFACTURER", "RETAILER", "TRUSTED_SECONDARY"}
 
 
-def test_persist_v02_intake_persists_verified_candidates_and_skips_unsupported_evidence(
+def test_persist_v02_intake_persists_verified_candidates_and_gpu_model_proxy_evidence(
     db_session,
 ) -> None:
     clear_catalog_tables(db_session)
@@ -139,8 +139,25 @@ def test_persist_v02_intake_persists_verified_candidates_and_skips_unsupported_e
     assert result.price_count == 16
     # NZXT H5 Flow remains raw-only because its radiator support is conditional.
     assert result.skipped_price_count == 1
-    assert result.benchmark_count == 2
-    assert result.skipped_benchmark_count == 2
+    # CPU benchmarks match exact CPU models; GPU model benchmarks attach only
+    # through explicit, source-backed GPU_MODEL_PROXY associations.
+    assert result.benchmark_count == 4
+    assert result.skipped_benchmark_count == 0
+
+    gpu_benchmarks = db_session.scalars(
+        select(BenchmarkRecord).where(BenchmarkRecord.benchmark_name == "3DMark Time Spy")
+    ).all()
+    assert {
+        benchmark.test_context["associated_component_identity"]["model"]
+        for benchmark in gpu_benchmarks
+    } == {
+        "Dual GeForce RTX 4060 OC Edition 8GB (DUAL-RTX4060-O8G)",
+        "PURE RX 7800 XT GAMING OC 16GB",
+    }
+    assert all(
+        benchmark.test_context["association_scope"] == "GPU_MODEL_PROXY"
+        for benchmark in gpu_benchmarks
+    )
 
     models = set(db_session.scalars(select(Component.model)).all())
     assert "AIR 903 BASE" in models

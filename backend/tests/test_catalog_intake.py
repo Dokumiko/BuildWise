@@ -133,6 +133,31 @@ def test_gpu_benchmarks_require_model_scope_sku_limit_and_limitation() -> None:
         validate_intake_payload(payload)
 
 
+def test_gpu_model_proxy_requires_matching_board_source_and_model_benchmark() -> None:
+    intake = validate_intake_payload(v02_intake_payload())
+    gpu_associations = {
+        component.exact_model: component.gpu_model_association
+        for component in intake.components
+        if component.component_type.value == "GPU"
+    }
+    assert gpu_associations["Dual GeForce RTX 4060 OC Edition 8GB (DUAL-RTX4060-O8G)"] is not None
+    assert gpu_associations["Dual GeForce RTX 4060 OC Edition 8GB (DUAL-RTX4060-O8G)"].model == "GeForce RTX 4060"
+    assert gpu_associations["PURE RX 7800 XT GAMING OC 16GB"] is not None
+    assert gpu_associations["PURE RX 7800 XT GAMING OC 16GB"].manufacturer == "AMD"
+
+    payload = v02_intake_payload()
+    gpu = next(record for record in payload["components"] if record["component_type"] == "GPU")
+    gpu["gpu_model_association"]["evidence_url"] = "https://example.invalid/not-the-board-source"
+    with pytest.raises(ValidationError, match="must match the exact retail-board technical source"):
+        validate_intake_payload(payload)
+
+    payload = v02_intake_payload()
+    gpu = next(record for record in payload["components"] if record["component_type"] == "GPU")
+    gpu["gpu_model_association"]["model"] = "Unverified GPU Model"
+    with pytest.raises(ValidationError, match="exactly one model-level GPU benchmark"):
+        validate_intake_payload(payload)
+
+
 def test_scalar_and_connector_canonicalizers_normalize_only_known_forms() -> None:
     assert canonicalize_pcie_version("PCIe Gen 5.0") == "5.0"
     assert canonicalize_form_factor("Micro-ATX", allowed=MotherboardFormFactor) == "MICRO_ATX"

@@ -6,7 +6,7 @@
     "market": "VN",
     "currency": "VND",
     "platform": "AMD AM5 / DDR5",
-    "benchmark_policy": "CPU and GPU benchmark domains are normalized independently.",
+    "benchmark_policy": "CPU and GPU benchmark domains are normalized independently; GPU model-level results may be used only through explicit source-backed retail-board associations and remain labeled as model proxies.",
     "gpu_benchmark_match_scope": "GPU_MODEL"
   },
   "components": [
@@ -246,6 +246,11 @@
         "url": "https://www.asus.com/ch-en/motherboards-components/graphics-cards/dual/dual-rtx4060-o8g/techspec/",
         "source_type": "MANUFACTURER_OFFICIAL",
         "verified_at": "2026-08-20T16:59:00+07:00"
+      },
+      "gpu_model_association": {
+        "manufacturer": "NVIDIA",
+        "model": "GeForce RTX 4060",
+        "evidence_url": "https://www.asus.com/ch-en/motherboards-components/graphics-cards/dual/dual-rtx4060-o8g/techspec/"
       }
     },
     {
@@ -271,6 +276,11 @@
         "url": "https://www.sapphiretech.com/en/consumer/pure-radeon-rx-7800-xt-16g-gddr6",
         "source_type": "MANUFACTURER_OFFICIAL",
         "verified_at": "2026-08-20T16:59:00+07:00"
+      },
+      "gpu_model_association": {
+        "manufacturer": "AMD",
+        "model": "Radeon RX 7800 XT",
+        "evidence_url": "https://www.sapphiretech.com/en/consumer/pure-radeon-rx-7800-xt-16g-gddr6"
       }
     },
     {
@@ -1108,7 +1118,7 @@
     },
     "url_format": "All URLs are raw HTTP/HTTPS strings without Markdown wrappers, whitespace, citation fragments, or embedded JSON.",
     "sku_handling": "Exact manufacturer/model/SKU identity is preserved; similar products and colors/revisions are not merged. A retailer omission of the manufacturer SKU does not create a guessed SKU.",
-    "benchmark_rule": "CPU PassMark CPU Mark and GPU 3DMark Time Spy Graphics Score are normalized independently. GPU records remain model-level unless exact board SKU verification exists.",
-    "price_rule": "Prices are dated Vietnam/VND observations. Missing availability remains null; intentionally unknown availability is UNKNOWN. Deleted or removed listings are excluded rather than converted to UNKNOWN."
+    "benchmark_rule": "CPU PassMark CPU Mark and GPU 3DMark Time Spy Graphics Score are normalized independently. GPU model-level records may attach only through an explicit source-backed GPU_MODEL_PROXY association; they are never labeled as exact-board measurements.",
+    "price_rule": "Any dated listed VND price is eligible for evaluation when a real price is captured, regardless of IN_STOCK, OUT_OF_STOCK, PREORDER, UNKNOWN, or null availability. Availability remains evidence and is not a current inventory guarantee. Deleted or removed listings are excluded rather than converted to UNKNOWN."
   }
 }

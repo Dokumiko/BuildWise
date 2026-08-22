@@ -104,6 +104,7 @@ def test_v02_intake_has_two_canonical_candidates_per_category_for_search() -> No
     }
     assert report.scoring_ready is True
     assert report.constrained_search_ready is True
+    assert finding_by_id(report, "GPU_MODEL_BENCHMARK_ASSOCIATION_MISSING") == []
 
     raw_only = finding_by_id(report, "RAW_COMPONENT_NOT_CANONICAL")
     assert [
@@ -111,6 +112,29 @@ def test_v02_intake_has_two_canonical_candidates_per_category_for_search() -> No
         for finding in raw_only
     ] == [("CASE", "H5 Flow (2024)")]
     assert finding_by_id(report, "CONSTRAINED_SEARCH_POOL_INSUFFICIENT") == []
+
+
+def test_readiness_blocks_a_complete_catalog_without_gpu_proxy_association() -> None:
+    intake = load_validated_intake(V02_INTAKE)
+    gpu = next(component for component in intake.components if component.component_type.value == "GPU")
+    without_association = intake.model_copy(
+        update={
+            "components": [
+                component.model_copy(update={"gpu_model_association": None})
+                if component is gpu
+                else component
+                for component in intake.components
+            ]
+        }
+    )
+
+    report = assess_catalog_readiness(without_association)
+
+    assert report.scoring_ready is False
+    assert report.constrained_search_ready is False
+    [finding] = finding_by_id(report, "GPU_MODEL_BENCHMARK_ASSOCIATION_MISSING")
+    assert finding.evidence["associated_gpu_count"] == 1
+    assert finding.evidence["unassociated_models"] == [gpu.exact_model]
 
 
 def test_readiness_is_deterministic_for_a_fixed_canonicalization() -> None:

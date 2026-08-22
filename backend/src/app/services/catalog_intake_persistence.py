@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 from app.contracts.components import ComponentRecord
 from app.contracts.intake import (
     CatalogEvaluationIntake,
+    GpuModelAssociation,
     PersistedSourceType,
     PriceSnapshot,
     RawSourceEvidence,
@@ -36,9 +37,11 @@ from app.db.models import (
 )
 from app.services.benchmark_normalization import NormalizedBenchmark, normalize_intake_benchmarks
 from app.services.catalog_intake import (
+    CanonicalizedIntakeComponent,
     IntakeCanonicalizationResult,
     canonicalize_intake,
 )
+from app.services.catalog_policies import price_is_eligible_for_evaluation
 
 
 @dataclass(frozen=True)
@@ -161,6 +164,8 @@ def _benchmark_context(
     intake: CatalogEvaluationIntake,
     record,
     normalized: NormalizedBenchmark,
+    *,
+    gpu_association: tuple[Component, GpuModelAssociation] | None = None,
 ) -> dict:
     context: dict = {
         "intake_schema_version": intake.intake_schema_version,
@@ -179,6 +184,24 @@ def _benchmark_context(
         for key in ("system_info_version", "exact_board_sku_verified", "limitation"):
             if key in record.test_context:
                 context[key] = record.test_context[key]
+    if gpu_association is not None:
+        component, association = gpu_association
+        context.update(
+            {
+                "association_scope": "GPU_MODEL_PROXY",
+                "associated_component_identity": {
+                    "manufacturer": component.manufacturer,
+                    "model": component.model,
+                    "component_type": component.component_type.value,
+                },
+                "association_evidence_url": association.evidence_url,
+                "association_note": (
+                    "The benchmark remains a GPU-model indicator; the selected "
+                    "retail-board identity is linked only through explicit sourced "
+                    "GPU-model association evidence."
+                ),
+            }
+        )
     return context
 
 
@@ -226,6 +249,15 @@ def persist_catalog_evaluation_intake(
     normalized_by_source_url = {
         item.source_url: item for item in normalize_intake_benchmarks(intake)
     }
+    gpu_model_proxy_associations: dict[
+        tuple[str, str], list[tuple[CanonicalizedIntakeComponent, GpuModelAssociation]]
+    ] = {}
+    for entry in result.components:
+        association = entry.gpu_model_association
+        if association is not None:
+            gpu_model_proxy_associations.setdefault(
+                (association.manufacturer, association.model), []
+            ).append((entry, association))
 
     for entry in result.components:
         component = _get_or_create_component(session, entry.component)
@@ -321,7 +353,7 @@ def persist_catalog_evaluation_intake(
                 f"({snapshot.component_type.value}) has no canonical component"
             )
             continue
-        if snapshot.price_vnd is None:
+        if not price_is_eligible_for_evaluation(snapshot):
             skipped.append(
                 f"price skipped: {snapshot.manufacturer} {snapshot.exact_model} has no price"
             )
@@ -369,7 +401,7 @@ def persist_catalog_evaluation_intake(
             existing.availability = availability
 
     for record in intake.benchmark_records:
-        component = _find_component(
+        exact_component = _find_component(
             session,
             components_by_key,
             components_by_sku,
@@ -378,10 +410,24 @@ def persist_catalog_evaluation_intake(
             component_type=record.component_type.value,
             sku=record.sku,
         )
-        if component is None:
+        benchmark_targets: list[tuple[Component, GpuModelAssociation | None]] = []
+        if exact_component is not None:
+            benchmark_targets.append((exact_component, None))
+        elif record.component_type.value == "GPU":
+            for entry, association in gpu_model_proxy_associations.get(
+                (record.manufacturer, record.exact_model), []
+            ):
+                component = components_by_key.get(_component_key(entry.component))
+                if component is None:
+                    raise ValueError(
+                        "GPU model association targets a component that was not persisted"
+                    )
+                benchmark_targets.append((component, association))
+        if not benchmark_targets:
             skipped.append(
                 f"benchmark skipped: {record.manufacturer} {record.exact_model} "
-                f"({record.component_type.value}) has no exact canonical component"
+                f"({record.component_type.value}) has no exact canonical component "
+                "or explicit GPU model association"
             )
             continue
 
@@ -401,34 +447,40 @@ def persist_catalog_evaluation_intake(
             raise ValueError(
                 f"missing normalized benchmark evidence for {record.direct_source_url}"
             )
-        context = _benchmark_context(intake, record, normalized)
-        existing = session.scalar(
-            select(DbBenchmarkRecord).where(
-                DbBenchmarkRecord.component_id == component.id,
-                DbBenchmarkRecord.source_id == source.id,
-                DbBenchmarkRecord.benchmark_name == record.benchmark_name,
-                DbBenchmarkRecord.metric_name == record.metric_name,
-                DbBenchmarkRecord.metric_value == metric_value,
-                DbBenchmarkRecord.verified_at == record.collected_at,
+        for component, association in benchmark_targets:
+            context = _benchmark_context(
+                intake,
+                record,
+                normalized,
+                gpu_association=(component, association) if association is not None else None,
             )
-        )
-        if existing is None:
-            session.add(
-                DbBenchmarkRecord(
-                    component_id=component.id,
-                    source_id=source.id,
-                    benchmark_name=record.benchmark_name,
-                    metric_name=record.metric_name,
-                    metric_value=metric_value,
-                    metric_unit=record.metric_unit,
-                    test_context=context,
-                    verified_at=record.collected_at,
+            existing = session.scalar(
+                select(DbBenchmarkRecord).where(
+                    DbBenchmarkRecord.component_id == component.id,
+                    DbBenchmarkRecord.source_id == source.id,
+                    DbBenchmarkRecord.benchmark_name == record.benchmark_name,
+                    DbBenchmarkRecord.metric_name == record.metric_name,
+                    DbBenchmarkRecord.metric_value == metric_value,
+                    DbBenchmarkRecord.verified_at == record.collected_at,
                 )
             )
-            benchmark_count += 1
-        else:
-            existing.metric_unit = record.metric_unit
-            existing.test_context = context
+            if existing is None:
+                session.add(
+                    DbBenchmarkRecord(
+                        component_id=component.id,
+                        source_id=source.id,
+                        benchmark_name=record.benchmark_name,
+                        metric_name=record.metric_name,
+                        metric_value=metric_value,
+                        metric_unit=record.metric_unit,
+                        test_context=context,
+                        verified_at=record.collected_at,
+                    )
+                )
+                benchmark_count += 1
+            else:
+                existing.metric_unit = record.metric_unit
+                existing.test_context = context
 
     session.flush()
     return IntakePersistenceResult(

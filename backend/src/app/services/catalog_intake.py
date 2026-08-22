@@ -24,6 +24,7 @@ from app.contracts.components import (
 )
 from app.contracts.intake import (
     CatalogEvaluationIntake,
+    GpuModelAssociation,
     IntakeComponent,
     PersistedSourceType,
     RawSourceEvidence,
@@ -49,6 +50,7 @@ class CanonicalizedIntakeComponent:
     source_type: PersistedSourceType
     verified_at: datetime
     additional_sources: tuple[RawSourceEvidence, ...] = field(default_factory=tuple)
+    gpu_model_association: GpuModelAssociation | None = None
 
 
 @dataclass(frozen=True)
@@ -91,6 +93,7 @@ def _canonical_component(
     specifications: dict[str, Any],
     source: RawSourceEvidence,
     additional_sources: tuple[RawSourceEvidence, ...] = (),
+    gpu_model_association: GpuModelAssociation | None = None,
 ) -> CanonicalizedIntakeComponent:
     record = validate_component(
         {
@@ -110,6 +113,7 @@ def _canonical_component(
         source_type=canonicalize_source_type(source.source_type),
         verified_at=source.verified_at,
         additional_sources=additional_sources,
+        gpu_model_association=gpu_model_association,
     )
 
 
@@ -329,6 +333,7 @@ def canonicalize_intake(
                         if raw_component.manual_source is not None
                         else ()
                     ),
+                    gpu_model_association=raw_component.gpu_model_association,
                 )
             )
         except (KeyError, TypeError, ValueError, ValidationError) as exc:

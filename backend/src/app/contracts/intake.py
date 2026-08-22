@@ -96,6 +96,16 @@ class RawSourceEvidence(IntakeContract):
     _validate_url = field_validator("url")(validate_raw_http_url)
 
 
+class GpuModelAssociation(IntakeContract):
+    """Sourced retail-board to GPU-model link for a model-level benchmark proxy."""
+
+    manufacturer: str = Field(min_length=1)
+    model: str = Field(min_length=1)
+    evidence_url: str
+
+    _validate_evidence_url = field_validator("evidence_url")(validate_raw_http_url)
+
+
 class IntakeComponent(IntakeContract):
     component_type: ComponentType
     manufacturer: str = Field(min_length=1)
@@ -104,6 +114,18 @@ class IntakeComponent(IntakeContract):
     specifications: dict[str, Any]
     technical_source: RawSourceEvidence
     manual_source: RawSourceEvidence | None = None
+    gpu_model_association: GpuModelAssociation | None = None
+
+    @model_validator(mode="after")
+    def validate_gpu_model_association(self) -> IntakeComponent:
+        association = self.gpu_model_association
+        if self.component_type is not ComponentType.GPU and association is not None:
+            raise ValueError("gpu_model_association is supported only for GPU records")
+        if association is not None and association.evidence_url != self.technical_source.url:
+            raise ValueError(
+                "gpu_model_association evidence_url must match the exact retail-board technical source"
+            )
+        return self
 
 
 class AdditionalCpuComponent(IntakeContract):
@@ -265,12 +287,39 @@ class CatalogEvaluationIntake(IntakeContract):
             if record.dataset_version != self.dataset_version:
                 raise ValueError("every benchmark record must use the intake dataset_version")
 
+        self._validate_gpu_model_associations()
         self._validate_raw_component_shapes()
         self._validate_bounds(ComponentType.CPU, self.dataset_bounds.cpu)
         self._validate_bounds(ComponentType.GPU, self.dataset_bounds.gpu)
         if self.dataset_bounds.gpu.match_scope != "GPU_MODEL":
             raise ValueError("GPU bounds must retain match_scope=GPU_MODEL")
         return self
+
+    def _validate_gpu_model_associations(self) -> None:
+        """Ensure every declared retail-board proxy has matching model evidence.
+
+        The association is explicit intake evidence, not a relationship inferred
+        from a product name. Its source URL is constrained to the exact board's
+        technical source by ``IntakeComponent``.
+        """
+        for component in self.components:
+            association = component.gpu_model_association
+            if association is None:
+                continue
+            matches = [
+                record
+                for record in self.benchmark_records
+                if record.component_type is ComponentType.GPU
+                and record.manufacturer == association.manufacturer
+                and record.exact_model == association.model
+                and record.match_scope == "GPU_MODEL"
+                and isinstance(record.test_context, dict)
+                and record.test_context.get("exact_board_sku_verified") is False
+            ]
+            if len(matches) != 1:
+                raise ValueError(
+                    "gpu_model_association must match exactly one model-level GPU benchmark record"
+                )
 
     def _validate_raw_component_shapes(self) -> None:
         required: dict[ComponentType, set[str]] = {

@@ -99,7 +99,35 @@ def assess_catalog_readiness(
             )
         )
 
-    canonical_gpu_available = counts[ComponentType.GPU] > 0
+    canonical_gpu_entries = [
+        entry
+        for entry in result.components
+        if entry.component.component_type is ComponentType.GPU
+    ]
+    canonical_gpu_available = bool(canonical_gpu_entries)
+    associated_gpu_entries = [
+        entry for entry in canonical_gpu_entries if entry.gpu_model_association is not None
+    ]
+    if canonical_gpu_available and len(associated_gpu_entries) != len(canonical_gpu_entries):
+        findings.append(
+            ReadinessFinding(
+                finding_id="GPU_MODEL_BENCHMARK_ASSOCIATION_MISSING",
+                severity=ReadinessSeverity.BLOCKER,
+                message=(
+                    "One or more canonical GPU boards lacks explicit evidence "
+                    "linking it to a GPU-model benchmark indicator."
+                ),
+                evidence={
+                    "canonical_gpu_count": len(canonical_gpu_entries),
+                    "associated_gpu_count": len(associated_gpu_entries),
+                    "unassociated_models": [
+                        entry.component.model
+                        for entry in canonical_gpu_entries
+                        if entry.gpu_model_association is None
+                    ],
+                },
+            )
+        )
     gpu_benchmarks = [
         record
         for record in intake.benchmark_records
@@ -175,7 +203,11 @@ def assess_catalog_readiness(
             )
         )
 
-    scoring_ready = not missing_types and canonical_gpu_available
+    gpu_benchmark_ready = (
+        canonical_gpu_available
+        and len(associated_gpu_entries) == len(canonical_gpu_entries)
+    )
+    scoring_ready = not missing_types and gpu_benchmark_ready
     constrained_search_ready = scoring_ready and not single_candidate_types
     findings.append(
         ReadinessFinding(
