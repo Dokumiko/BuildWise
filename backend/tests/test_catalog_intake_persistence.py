@@ -108,7 +108,10 @@ def test_persist_intake_uses_only_canonical_components_and_preserves_evidence(db
     assert gpu_benchmarks == []
 
     cpu_benchmark = db_session.scalar(
-        select(BenchmarkRecord).where(BenchmarkRecord.benchmark_name == "PassMark CPU Mark")
+        select(BenchmarkRecord)
+        .join(Component)
+        .where(BenchmarkRecord.benchmark_name == "PassMark CPU Mark")
+        .where(Component.model == "Ryzen 5 7600X")
     )
     assert cpu_benchmark is not None
     assert cpu_benchmark.test_context["dataset_version"] == "vn-pc-am5-ddr5-v0.1"

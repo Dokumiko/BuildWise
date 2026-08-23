@@ -20,3 +20,13 @@ alembic stamp 0001_schema_v01
 ```
 
 For a future schema change only, create a reviewable revision with `alembic revision --autogenerate -m "description"`. Do not generate a revision merely for JSONB contract updates.
+
+## Import an evaluation catalog
+
+After the approved schema is available, validate and persist one explicit catalog-evaluation intake through the canonical ingestion path:
+
+```powershell
+python -m app.scripts.import_evaluation_intake --path data/vn-pc-am5-ddr5-v0.2-catalog-evaluation-intake.json
+```
+
+The command uses `DATABASE_URL` from `.env`, has no network behavior, and changes no schema. It commits only after the complete validation and persistence path succeeds; failures roll back. Its JSON output contains the input dataset version and persisted/skipped record counts. Re-running the same supported intake preserves the importer’s idempotent evidence behavior.
