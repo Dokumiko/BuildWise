@@ -12,6 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+from enum import Enum
 from typing import Any
 
 from sqlalchemy import select
@@ -44,13 +45,17 @@ from app.services.benchmark_normalization import (
     NormalizedBenchmark,
 )
 from app.services.catalog_dataset_metadata import (
+    CANONICAL_COMPONENT_ROLE,
+    component_role_memberships,
     dataset_versions,
     is_canonical_component_for_dataset,
 )
+from app.services.catalog_errors import classify_catalog_load_error
 from app.services.catalog_intake import (
     CanonicalizedIntakeComponent,
     IntakeCanonicalizationResult,
 )
+from app.services.catalog_policies import select_price_snapshot
 from app.services.scoring import ScoringCatalog
 
 
@@ -60,6 +65,22 @@ class PersistedScoringCatalog:
 
     catalog: ScoringCatalog
     cpu_motherboard_support: tuple[CpuMotherboardSupportRecord, ...]
+
+
+class PersistedCatalogDatasetStatus(str, Enum):
+    READY = "READY"
+    UNUSABLE = "UNUSABLE"
+
+
+@dataclass(frozen=True)
+class PersistedCatalogDatasetSummary:
+    """One explicitly marked dataset and whether strict reconstruction accepts it."""
+
+    dataset_version: str
+    status: PersistedCatalogDatasetStatus
+    component_counts: dict[str, int] | None
+    issue_code: str | None
+    issue_message: str | None
 
 
 def _require_nonempty_string(context: dict[str, Any], key: str) -> str:
@@ -181,6 +202,29 @@ def _price_snapshots(
                 verified_at=price.verified_at,
                 notes=None,
             )
+        )
+    missing_components = [
+        component
+        for component in components.values()
+        if select_price_snapshot(
+            snapshots,
+            manufacturer=component.manufacturer,
+            model=component.model,
+            component_type=ComponentType(component.component_type.value),
+        )
+        is None
+    ]
+    if missing_components:
+        identities = ", ".join(
+            f"{component.manufacturer} {component.model}"
+            for component in sorted(
+                missing_components,
+                key=lambda item: (item.component_type.value, item.manufacturer, item.model),
+            )
+        )
+        raise ValueError(
+            "persisted catalog is missing eligible price evidence for canonical components: "
+            + identities
         )
     return tuple(snapshots)
 
@@ -311,6 +355,36 @@ def _normalized_benchmarks(
             "persisted catalog is missing normalized benchmark evidence for: "
             + ", ".join(sorted(item.value for item in missing_benchmark_types))
         )
+    benchmark_identities = {
+        (benchmark.component_type, benchmark.manufacturer, benchmark.exact_model)
+        for benchmark in benchmarks
+    }
+    # GPU model-proxy coverage is verified below through the explicit board to
+    # model association. CPU benchmark evidence must match each canonical CPU
+    # identity directly.
+    missing_benchmark_components = [
+        component
+        for component in components.values()
+        if component.component_type.value == ComponentType.CPU.value
+        and (
+            ComponentType(component.component_type.value),
+            component.manufacturer,
+            component.model,
+        )
+        not in benchmark_identities
+    ]
+    if missing_benchmark_components:
+        identities = ", ".join(
+            f"{component.manufacturer} {component.model}"
+            for component in sorted(
+                missing_benchmark_components,
+                key=lambda item: (item.component_type.value, item.manufacturer, item.model),
+            )
+        )
+        raise ValueError(
+            "persisted catalog is missing normalized benchmark evidence for canonical components: "
+            + identities
+        )
     gpu_components = {
         component.id
         for component in components.values()
@@ -392,3 +466,62 @@ def load_persisted_scoring_catalog(
         ),
         cpu_motherboard_support=_support_records(session, components_by_id),
     )
+
+
+def list_persisted_scoring_catalog_datasets(
+    session: Session,
+) -> tuple[PersistedCatalogDatasetSummary, ...]:
+    """Discover marked datasets and verify each through strict reconstruction.
+
+    Dataset markers alone are not treated as proof that a recommendation catalog
+    is usable. Every discovered canonical role is loaded through the same
+    reconstruction boundary used by recommendation and evaluation callers.
+    """
+    notes = session.scalars(
+        select(ComponentSource.notes)
+        .join(Component, ComponentSource.component_id == Component.id)
+        .where(Component.active.is_(True))
+        .order_by(ComponentSource.component_id, ComponentSource.source_id)
+    ).all()
+    dataset_version_set = {
+        dataset_version
+        for value in notes
+        for dataset_version, role in component_role_memberships(value)
+        if role == CANONICAL_COMPONENT_ROLE
+    }
+    summaries: list[PersistedCatalogDatasetSummary] = []
+    for dataset_version in sorted(dataset_version_set):
+        try:
+            persisted = load_persisted_scoring_catalog(
+                session,
+                dataset_version=dataset_version,
+            )
+        except ValueError as error:
+            failure = classify_catalog_load_error(error)
+            summaries.append(
+                PersistedCatalogDatasetSummary(
+                    dataset_version=dataset_version,
+                    status=PersistedCatalogDatasetStatus.UNUSABLE,
+                    component_counts=None,
+                    issue_code=failure.code.value,
+                    issue_message=failure.message,
+                )
+            )
+            continue
+        component_counts = {
+            component_type.value: sum(
+                component.component_type is component_type
+                for component in persisted.catalog.components
+            )
+            for component_type in ComponentType
+        }
+        summaries.append(
+            PersistedCatalogDatasetSummary(
+                dataset_version=dataset_version,
+                status=PersistedCatalogDatasetStatus.READY,
+                component_counts=component_counts,
+                issue_code=None,
+                issue_message=None,
+            )
+        )
+    return tuple(summaries)

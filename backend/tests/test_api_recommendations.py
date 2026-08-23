@@ -2,10 +2,11 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import select
+from sqlalchemy import select, text
+from sqlalchemy.exc import OperationalError
 
 from app.api import recommendations as recommendations_api
-from app.db.models import ComponentPrice, DataSource
+from app.db.models import Component, ComponentPrice, DataSource
 from app.main import app
 from app.services.catalog_intake import load_validated_intake
 from app.services.catalog_intake_persistence import persist_catalog_evaluation_intake
@@ -121,6 +122,17 @@ def test_recommendations_api_rejects_invalid_request_and_component_facts(
         for error in response.json()["detail"]
     )
 
+    surrounding_whitespace = _request(dataset_version=f" {DATASET_VERSION}")
+    response = recommendation_client.post(
+        "/api/v1/recommendations", json=surrounding_whitespace
+    )
+    assert response.status_code == 422
+    assert any(
+        error["loc"] == ["body", "dataset_version"]
+        and "surrounding whitespace" in error["msg"]
+        for error in response.json()["detail"]
+    )
+
 
 def test_recommendations_api_reports_unknown_dataset_without_raw_adapter_error(
     db_session,
@@ -175,6 +187,66 @@ def test_recommendations_api_rejects_missing_or_ambiguous_persisted_price_eviden
     assert detail["code"] == expected_code
     assert detail["dataset_version"] == DATASET_VERSION
     assert "https://" not in detail["message"]
+
+
+def test_recommendations_api_rejects_missing_price_evidence_without_raw_details(
+    db_session,
+    recommendation_client,
+) -> None:
+    _persist_v02(db_session)
+    component = db_session.scalar(select(Component).where(Component.model == "9100 PRO 1TB"))
+    assert component is not None
+    db_session.execute(
+        text("DELETE FROM component_prices WHERE component_id = :component_id"),
+        {"component_id": component.id},
+    )
+    db_session.flush()
+
+    response = recommendation_client.post("/api/v1/recommendations", json=_request())
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == {
+        "code": "CATALOG_PRICE_EVIDENCE_MISSING",
+        "message": "The requested catalog dataset lacks eligible price evidence for a canonical component.",
+        "dataset_version": DATASET_VERSION,
+    }
+
+
+def test_recommendations_api_rejects_missing_benchmark_evidence_without_raw_details(
+    db_session,
+    recommendation_client,
+) -> None:
+    _persist_v02(db_session)
+    db_session.execute(text("DELETE FROM benchmark_records"))
+    db_session.flush()
+
+    response = recommendation_client.post("/api/v1/recommendations", json=_request())
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == {
+        "code": "CATALOG_BENCHMARK_EVIDENCE_MISSING",
+        "message": "The requested catalog dataset has incomplete benchmark evidence.",
+        "dataset_version": DATASET_VERSION,
+    }
+
+
+def test_recommendations_api_reports_database_unavailability_without_exception_text(
+    recommendation_client,
+    monkeypatch,
+) -> None:
+    def unavailable(*args, **kwargs):
+        raise OperationalError("SELECT", {}, RuntimeError("database detail"))
+
+    monkeypatch.setattr(recommendations_api, "load_persisted_scoring_catalog", unavailable)
+
+    response = recommendation_client.post("/api/v1/recommendations", json=_request())
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == {
+        "code": "CATALOG_DATABASE_UNAVAILABLE",
+        "message": "The catalog database is temporarily unavailable.",
+        "dataset_version": DATASET_VERSION,
+    }
 
 
 def test_recommendations_api_is_deterministic_for_repeated_requests(

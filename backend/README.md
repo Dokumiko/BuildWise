@@ -40,3 +40,35 @@ python -m app.scripts.import_evaluation_intake --path data/vn-pc-am5-ddr5-v0.2-c
 ```
 
 The command uses `DATABASE_URL` from `.env`, has no network behavior, and changes no schema. It commits only after the complete validation and persistence path succeeds; failures roll back. Its JSON output contains the input dataset version and persisted/skipped record counts. Re-running the same supported intake preserves the importer’s idempotent evidence behavior.
+
+## Discover and use recommendation datasets
+
+After import, discover the explicit persisted dataset versions before calling the recommendation endpoint:
+
+```powershell
+Invoke-RestMethod -Method Get -Uri "http://127.0.0.1:8000/api/v1/catalog-datasets"
+```
+
+Each result is `READY` only when strict persisted-catalog reconstruction succeeds. `UNUSABLE` results remain visible with a client-safe issue code/message; they must not be selected for recommendation. An empty list means no canonical dataset has been imported.
+
+Submit only a discovered `READY` dataset version and validated requirements to the deterministic recommendation API. Clients must not send component specifications, prices, benchmarks, or GPU associations:
+
+```powershell
+$body = @{
+  dataset_version = "vn-pc-am5-ddr5-v0.2"
+  requirements = @{
+    budget_vnd = 35000000
+    budget_mode = "strict"
+    primary_workload = "gaming"
+    minimum_ram_capacity_gb = 32
+    minimum_storage_capacity_gb = 1000
+  }
+} | ConvertTo-Json -Depth 3
+
+Invoke-RestMethod -Method Post `
+  -Uri "http://127.0.0.1:8000/api/v1/recommendations" `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+A missing dataset returns `404` with `CATALOG_DATASET_UNAVAILABLE`; a persisted-evidence problem returns `422` with a specific `CATALOG_*` code; a transient catalog database failure returns `503` with `CATALOG_DATABASE_UNAVAILABLE`. These responses deliberately omit raw database errors and source URLs.
