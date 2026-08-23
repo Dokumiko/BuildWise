@@ -21,9 +21,19 @@ alembic stamp 0001_schema_v01
 
 For a future schema change only, create a reviewable revision with `alembic revision --autogenerate -m "description"`. Do not generate a revision merely for JSONB contract updates.
 
+## Check catalog readiness
+
+Before importing an evaluation catalog, inspect its deterministic readiness report. This command does not access the database or network:
+
+```powershell
+python -m app.scripts.check_catalog_readiness --path data/vn-pc-am5-ddr5-v0.2-catalog-evaluation-intake.json
+```
+
+It exits `0` when the catalog is ready for constrained search, `2` when the intake is valid but not ready, and `1` when the input cannot be read or validated. The JSON output preserves the existing readiness findings and evidence.
+
 ## Import an evaluation catalog
 
-After the approved schema is available, validate and persist one explicit catalog-evaluation intake through the canonical ingestion path:
+After the approved schema is available and the readiness check passes, validate and persist one explicit catalog-evaluation intake through the canonical ingestion path:
 
 ```powershell
 python -m app.scripts.import_evaluation_intake --path data/vn-pc-am5-ddr5-v0.2-catalog-evaluation-intake.json
