@@ -72,3 +72,45 @@ Invoke-RestMethod -Method Post `
 ```
 
 A missing dataset returns `404` with `CATALOG_DATASET_UNAVAILABLE`; a persisted-evidence problem returns `422` with a specific `CATALOG_*` code; a transient catalog database failure returns `503` with `CATALOG_DATABASE_UNAVAILABLE`. These responses deliberately omit raw database errors and source URLs.
+
+## Run reproducible search evaluation
+
+Evaluation scenarios are caller-supplied and must not be fabricated by the command. Create a JSON array of validated `EvaluationScenario` objects, for example:
+
+```json
+[
+  {
+    "scenario_id": "gaming-strict-35m",
+    "requirements": {
+      "budget_vnd": 35000000,
+      "budget_mode": "strict",
+      "primary_workload": "gaming",
+      "minimum_ram_capacity_gb": 32,
+      "minimum_storage_capacity_gb": 1000
+    }
+  }
+]
+```
+
+Run the persisted-catalog pruning evaluation:
+
+```powershell
+python -m app.scripts.run_search_evaluation `
+  --dataset-version vn-pc-am5-ddr5-v0.2 `
+  --scenarios path/to/caller-supplied-scenarios.json `
+  --scenario-set-version operations-smoke-v0.1
+```
+
+The JSON report records its schema version, dataset version, caller-defined scenario-set version, SHA-256 of the exact scenario file, the complete primary scoring configuration, scoring/search/evaluation configuration versions, caller scenario IDs, K coverage/quality metrics, baselines, and observed latency. Latency is evaluation metadata only and never affects recommendation ranking. The default pruning experiment evaluates `K = 3, 5, 10, 20`; it does not select a final K automatically.
+
+Optionally provide a JSON array of `ScoringConfig` objects to calculate stability against the first configuration:
+
+```powershell
+python -m app.scripts.run_search_evaluation `
+  --dataset-version vn-pc-am5-ddr5-v0.2 `
+  --scenarios path/to/caller-supplied-scenarios.json `
+  --scenario-set-version operations-smoke-v0.1 `
+  --scoring-configs path/to/caller-supplied-scoring-configs.json
+```
+
+The current v0.2 catalog has only two candidates per component category. Its coverage and stability observations are smoke checks, not a thesis-scale scenario dataset, and the search does not claim global optimality.
