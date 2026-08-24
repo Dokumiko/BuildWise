@@ -1,1 +1,20 @@
-* { box-sizing: border-box; } body { margin: 0; font-family: Arial, sans-serif; background: #101418; color: #eef2f7; } main { max-width: 720px; margin: 12rem auto; padding: 2rem; } h1 { color: #8bd3ff; }
+:root {
+  --page: #10181d;
+  --panel: #17242a;
+  --input: #111d22;
+  --text: #f2f7f5;
+  --text-muted: #a8bab8;
+  --accent: #62e6bd;
+  --accent-hover: #8af1cf;
+  --accent-soft: rgb(98 230 189 / 0.1);
+  --border: #2b4147;
+  --border-strong: #436168;
+  --warning: #ffd26a;
+  --error: #ff8c7b;
+  --info: #83cbff;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--page); }
+body { min-width: 320px; margin: 0; color: var(--text); background: radial-gradient(circle at top right, #1e3d3a 0, transparent 30%), var(--page); font-family: Arial, Helvetica, sans-serif; }
+button, input, select { font: inherit; }
