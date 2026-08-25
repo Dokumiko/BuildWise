@@ -3,6 +3,7 @@
 /outputs/
 /work/
 /AGENTS.md
+/PRODUCT.md
 
 # Local research artifacts; validated versioned catalog intake files remain tracked.
 /backend/data/test-data.txt
@@ -49,3 +50,9 @@ pnpm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# AI Agent Skills
+.agents/
+.claude/
+skills-lock.json
+.codex/

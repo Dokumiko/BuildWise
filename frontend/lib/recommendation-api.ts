@@ -139,6 +139,48 @@ export interface RecommendationResponse {
   result: SearchResult;
 }
 
+export interface CatalogPickerComponent {
+  id: string;
+  component_type: string;
+  manufacturer: string;
+  model: string;
+  price_vnd: number;
+  availability: string | null;
+  listing_url: string;
+  verified_at: string;
+  availability_disclaimer: string;
+}
+
+export interface CatalogPickerListResponse {
+  dataset_version: string;
+  components: CatalogPickerComponent[];
+}
+
+export interface SourceEvidence {
+  source_name: string;
+  source_url: string;
+  verified_at: string;
+}
+
+export interface SelectedCatalogComponent {
+  id: string;
+  component_type: string;
+  manufacturer: string;
+  model: string;
+  sources: SourceEvidence[];
+}
+
+export interface ManualAnalysisResponse {
+  build_id: string;
+  analysis_result_id: string;
+  engine_version: string;
+  status: string;
+  summary: DeterministicAnalysis["summary"];
+  findings: AnalysisFinding[];
+  assumptions: string[];
+  selected_components: SelectedCatalogComponent[];
+}
+
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
@@ -185,5 +227,25 @@ export function requestRecommendation(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(request),
+  });
+}
+
+export function listCatalogPickerComponents(
+  datasetVersion: string,
+): Promise<CatalogPickerListResponse> {
+  return requestJson<CatalogPickerListResponse>(
+    `/api/v1/catalog-datasets/${encodeURIComponent(datasetVersion)}/components`,
+  );
+}
+
+export function analyzeManualBuild(
+  request: { name: string; component_ids: string[] },
+  signal?: AbortSignal,
+): Promise<ManualAnalysisResponse> {
+  return requestJson<ManualAnalysisResponse>("/api/v1/builds/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+    signal,
   });
 }

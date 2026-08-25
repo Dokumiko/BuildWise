@@ -3,7 +3,7 @@
   --panel: #17242a;
   --input: #111d22;
   --text: #f2f7f5;
-  --text-muted: #a8bab8;
+  --text-muted: #b7c7c4;
   --accent: #62e6bd;
   --accent-hover: #8af1cf;
   --accent-soft: rgb(98 230 189 / 0.1);
@@ -15,6 +15,13 @@
 }
 
 * { box-sizing: border-box; }
-html { background: var(--page); }
-body { min-width: 320px; margin: 0; color: var(--text); background: radial-gradient(circle at top right, #1e3d3a 0, transparent 30%), var(--page); font-family: Arial, Helvetica, sans-serif; }
+html { background: var(--page); scroll-behavior: smooth; }
+body {
+  min-width: 320px;
+  margin: 0;
+  color: var(--text);
+  background: radial-gradient(circle at top right, #1e3d3a 0, transparent 32%), var(--page);
+}
 button, input, select { font: inherit; }
+::selection { color: #09201d; background: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

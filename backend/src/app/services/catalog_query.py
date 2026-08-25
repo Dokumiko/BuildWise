@@ -55,7 +55,7 @@ from app.services.catalog_intake import (
     CanonicalizedIntakeComponent,
     IntakeCanonicalizationResult,
 )
-from app.services.catalog_policies import select_price_snapshot
+from app.services.catalog_policies import price_availability_disclaimer, select_price_snapshot
 from app.services.scoring import ScoringCatalog
 
 
@@ -525,3 +525,78 @@ def list_persisted_scoring_catalog_datasets(
             )
         )
     return tuple(summaries)
+
+PICKER_CATEGORY_ORDER: tuple[ComponentType, ...] = (
+    ComponentType.CPU,
+    ComponentType.COOLER,
+    ComponentType.MOTHERBOARD,
+    ComponentType.RAM,
+    ComponentType.STORAGE,
+    ComponentType.GPU,
+    ComponentType.CASE,
+    ComponentType.PSU,
+)
+
+
+@dataclass(frozen=True)
+class CatalogPickerComponent:
+    """Identity and dated price evidence for one catalog row in the manual picker."""
+
+    id: object
+    component_type: ComponentType
+    manufacturer: str
+    model: str
+    price_vnd: int
+    availability: AvailabilityStatus | None
+    listing_url: str
+    verified_at: datetime
+    availability_disclaimer: str
+
+
+def list_persisted_catalog_picker_components(
+    session: Session,
+    *,
+    dataset_version: str,
+) -> tuple[CatalogPickerComponent, ...]:
+    """Return canonical picker rows for one reconstructed READY dataset.
+
+    The listing reuses the same strict reconstruction boundary as recommendation.
+    Component specifications are omitted so the UI cannot calculate compatibility.
+    """
+    persisted = load_persisted_scoring_catalog(session, dataset_version=dataset_version)
+    selected = _selected_components(session, dataset_version)
+    order = {component_type: index for index, component_type in enumerate(PICKER_CATEGORY_ORDER)}
+    items: list[CatalogPickerComponent] = []
+    for component in sorted(
+        selected.values(),
+        key=lambda item: (
+            order[ComponentType(item.component_type.value)],
+            item.manufacturer,
+            item.model,
+        ),
+    ):
+        snapshot = select_price_snapshot(
+            persisted.catalog.prices,
+            manufacturer=component.manufacturer,
+            model=component.model,
+            component_type=ComponentType(component.component_type.value),
+        )
+        if snapshot is None or snapshot.price_vnd is None:
+            raise ValueError(
+                "persisted catalog is missing eligible price evidence for canonical components: "
+                f"{component.manufacturer} {component.model}"
+            )
+        items.append(
+            CatalogPickerComponent(
+                id=component.id,
+                component_type=ComponentType(component.component_type.value),
+                manufacturer=component.manufacturer,
+                model=component.model,
+                price_vnd=snapshot.price_vnd,
+                availability=snapshot.availability,
+                listing_url=snapshot.listing_url,
+                verified_at=snapshot.verified_at,
+                availability_disclaimer=price_availability_disclaimer(snapshot),
+            )
+        )
+    return tuple(items)
