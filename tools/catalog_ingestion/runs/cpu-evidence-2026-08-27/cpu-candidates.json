@@ -1,0 +1,1241 @@
+{
+  "technical": [],
+  "prices": [
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 5600X",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-5600x",
+        "retailer_name": "HACOM",
+        "price_text": "3.699.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 3 3200G",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amdryzen-3-3200g-3.6-ghz-4.0-ghz-with-boost-6mb-4-cores-4-threads-radeon-vega-8-/-65w",
+        "retailer_name": "HACOM",
+        "price_text": "1.799.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 3400G",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amdryzen-5-3400g-3.7-ghz-4.2-ghz-with-boost-6mb-4-cores-8-threads-radeon-vega-11-65w",
+        "retailer_name": "HACOM",
+        "price_text": "2.099.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 5600G",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-5600g-65w-socket-am4",
+        "retailer_name": "HACOM",
+        "price_text": "3.999.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Athlon 3000G",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-athlon-3300g",
+        "retailer_name": "HACOM",
+        "price_text": "1.299.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 5500",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-5500-3.6-ghz-upto-4.2ghz-19mb-6-cores-12-threads-65w-socket-am4",
+        "retailer_name": "HACOM",
+        "price_text": "1.899.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 5700G",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-5700g-65w-socket-am4",
+        "retailer_name": "HACOM",
+        "price_text": "5.799.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7600X",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-7600x-4.7-ghz-upto-5.3ghz-38mb-6-cores-12-threads-105w-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "5.299.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 7800X3D",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7800x3d-4.2ghz-up-to-5.0ghz-105mb-8-cores-16-threads-120w-socket-am5-tray-chinh-hang",
+        "retailer_name": "HACOM",
+        "price_text": "7.799.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 9 7900X",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-7900x-4.7-ghz-upto-5.6ghz-76mb-12-cores-24-threads-170w-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "8.599.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 5600GT",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-5600gt-4.6-ghz-upto-3.6-ghz-19mb-6-cores-12-threads-65w-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "4.099.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 9700X",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-9700x-3.8-ghz-upto-5.8ghz-40mb-8-cores-16-threads-65w-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "7.899.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "RYZEN 9 9950X3D",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9950x3d-4.3ghz-up-to-5.7ghz-128mb-16-cores-32-threads-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "17.499.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 5500GT",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-5500gt-4.4-ghz-upto-3.6-ghz-19mb-6-cores-12-threads-65w-socket-am4",
+        "retailer_name": "HACOM",
+        "price_text": "3.799.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7500F",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-7500f-cpua0313",
+        "retailer_name": "HACOM",
+        "price_text": "3.699.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7500X3D",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7500x3d-cpua0321",
+        "retailer_name": "HACOM",
+        "price_text": "5.599.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "RYZEN 9 9950X3D",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9950x3d-cpua0314",
+        "retailer_name": "HACOM",
+        "price_text": "16.599.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 9850X3D",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-9850x3d-cpua0319",
+        "retailer_name": "HACOM",
+        "price_text": "12.999.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 9850X3D",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-9850x3d-cpua0320",
+        "retailer_name": "HACOM",
+        "price_text": "12.599.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 5500GT",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-5500gt-cpua0322",
+        "retailer_name": "HACOM",
+        "price_text": "3.599.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7600",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-7600-3.8-ghz-upto-5.1ghz-38mb-6-cores-12-threads-65w-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "5.299.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 7800X3D",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7800x3d",
+        "retailer_name": "HACOM",
+        "price_text": "9.999.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 7700X",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7700x-4.5-ghz-upto-5.4ghz-40mb-8-cores-16-threads-105w-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "8.199.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 8500G",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-8500g-5.0-ghz-upto-3.5-ghz-22mb-6-cores-12-threads-65w-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "4.199.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 8600G",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-8600g-5.0-ghz-upto-4.3ghz-22mb-6-cores-12-threads-65w-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "5.799.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 9800X3D",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-9800x3d",
+        "retailer_name": "HACOM",
+        "price_text": "11.999.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 8700G",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-8700g-5.1-ghz-upto-4.2ghz-24mb-8-cores-16-threads-65w-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "8.199.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 9 9950X",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9950x-tray-chinh-hang",
+        "retailer_name": "HACOM",
+        "price_text": "12.499.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "RYZEN 9 9900X3D",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9900x3d-4.4ghz-up-to-5.5ghz-128mb-12-cores-24-threads-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "15.799.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 5700X",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-5700x",
+        "retailer_name": "HACOM",
+        "price_text": "5.899.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 4600G",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-4600g-3.7-ghz-turbo-upto-4.2ghz-11mb-6-cores-12-threads-65w-socket-am4",
+        "retailer_name": "HACOM",
+        "price_text": "2.399.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7500F",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-ryzen-5-7500f-3.7-ghz-upto-5.0ghz-38mb-6-cores-12-threads-65w-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "5.199.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 9 9950X",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9950x-4.3-ghz-upto-5.7ghz-80mb-16-cores-32-threads-170w-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "15.399.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 9 9900X",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9900x-4.4-ghz-upto-5.6ghz-78mb-12-cores-24-threads-120w-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "10.899.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 8400F",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-ryzen-5-8400f-4.2-ghz-upto-4.7ghz-22mb-6-cores-12-threads-65w-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "3.999.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 8700F",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-ryzen-5-8700f-4.1-ghz-upto-5.0ghz-35mb-8-cores-16-threads-65w-socket-am5",
+        "retailer_name": "HACOM",
+        "price_text": "7.099.000",
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd",
+        "final_url": "https://hacom.vn/cpu-amd",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+        "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+        "bytes": 1748805,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Athlon 3000G",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-athlon-3300g",
+        "retailer_name": "HACOM",
+        "price_text": "999.000",
+        "fetched_at": "2026-08-27T15:36:24.345190+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd-athlon-3300g",
+        "final_url": "https://hacom.vn/cpu-amd-athlon-3300g",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:24.345190+00:00",
+        "content_sha256": "e886499414c73e8daa2eea2d744e04eaccb49e27684f68c4bdaf25d7ffef5cba",
+        "bytes": 1141825,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 4600G",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-4600g-3.7-ghz-turbo-upto-4.2ghz-11mb-6-cores-12-threads-65w-socket-am4",
+        "retailer_name": "HACOM",
+        "price_text": "3.099.000",
+        "fetched_at": "2026-08-27T15:36:30.096604+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd-ryzen-5-4600g-3.7-ghz-turbo-upto-4.2ghz-11mb-6-cores-12-threads-65w-socket-am4",
+        "final_url": "https://hacom.vn/cpu-amd-ryzen-5-4600g-3.7-ghz-turbo-upto-4.2ghz-11mb-6-cores-12-threads-65w-socket-am4",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:30.096604+00:00",
+        "content_sha256": "0d7d6048d888a5307577e8f736ff58304695cba9c207e23e0c4e0057aa7f958a",
+        "bytes": 1068949,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 5500",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-5500-3.6-ghz-upto-4.2ghz-19mb-6-cores-12-threads-65w-socket-am4",
+        "retailer_name": "HACOM",
+        "price_text": "2.299.000",
+        "fetched_at": "2026-08-27T15:36:32.719929+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd-ryzen-5-5500-3.6-ghz-upto-4.2ghz-19mb-6-cores-12-threads-65w-socket-am4",
+        "final_url": "https://hacom.vn/cpu-amd-ryzen-5-5500-3.6-ghz-upto-4.2ghz-19mb-6-cores-12-threads-65w-socket-am4",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:32.719929+00:00",
+        "content_sha256": "c32be311517c845cf0c0eaaf3a84f46120730e5c97085e875fe25c5c72c1489e",
+        "bytes": 1112880,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 5500GT",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-5500gt-4.4-ghz-upto-3.6-ghz-19mb-6-cores-12-threads-65w-socket-am4",
+        "retailer_name": "HACOM",
+        "price_text": "3.399.000",
+        "fetched_at": "2026-08-27T15:36:35.258851+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd-ryzen-5-5500gt-4.4-ghz-upto-3.6-ghz-19mb-6-cores-12-threads-65w-socket-am4",
+        "final_url": "https://hacom.vn/cpu-amd-ryzen-5-5500gt-4.4-ghz-upto-3.6-ghz-19mb-6-cores-12-threads-65w-socket-am4",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:35.258851+00:00",
+        "content_sha256": "9e9ca37f387e6b7312869639c5004ccaf4a72ace64a26c268ee067c62cc1cfd1",
+        "bytes": 1196814,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    },
+    {
+      "component_type": "CPU",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 5500GT",
+      "price_source": {
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-5500gt-cpua0322",
+        "retailer_name": "HACOM",
+        "price_text": "3.299.000",
+        "fetched_at": "2026-08-27T15:36:37.196734+00:00"
+      },
+      "source_evidence": {
+        "requested_url": "https://hacom.vn/cpu-amd-ryzen-5-5500gt-cpua0322",
+        "final_url": "https://hacom.vn/cpu-amd-ryzen-5-5500gt-cpua0322",
+        "status": 200,
+        "fetched_at": "2026-08-27T15:36:37.196734+00:00",
+        "content_sha256": "a8d629bbcd70193397c31be772204540f15bae6b914639ee5a2ba4d378074e1f",
+        "bytes": 1096224,
+        "content_type": "text/html; charset=utf-8"
+      },
+      "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+    }
+  ],
+  "price_review_policy": "Use the verified retail CPU-only price, generally the higher standalone price. Ignore full-build bundle prices, original/reference prices, and stale recommendation prices.",
+  "price_resolutions": [
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Athlon 3000G",
+      "listing_url": "https://hacom.vn/cpu-amd-athlon-3300g",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 1299000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "1.299.000",
+        "999.000"
+      ],
+      "selected_price_found_in_crawler_observations": true,
+      "raw_observation_count": 2,
+      "rationale": "Both observed URLs are the same product. 1.299.000 VND is the standalone retail CPU price; 999.000 VND is the cheaper full-build bundle price (motherboard, CPU, RAM, storage, case, PSU). Select the retail CPU price.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 4600G",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-4600g-3.7-ghz-turbo-upto-4.2ghz-11mb-6-cores-12-threads-65w-socket-am4",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 2799000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "2.399.000",
+        "3.099.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 2,
+      "rationale": "The live product page retail price is 2.799.000 VND. 3.099.000 VND is the original/reference price. 2.399.000 VND appeared only as a stale or unclickable recommendation and is not used.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 5500",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-5500-3.6-ghz-upto-4.2ghz-19mb-6-cores-12-threads-65w-socket-am4",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 2599000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "1.899.000",
+        "2.299.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 2,
+      "rationale": "The page shows multiple prices. 1.899.000 and 2.299.000 VND were crawler observations, but the standalone retail CPU price is 2.599.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 5500GT",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-5500gt-4.4-ghz-upto-3.6-ghz-19mb-6-cores-12-threads-65w-socket-am4",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 3799000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "3.799.000",
+        "3.399.000"
+      ],
+      "selected_price_found_in_crawler_observations": true,
+      "raw_observation_count": 2,
+      "rationale": "Select the 3.799.000 VND retail CPU price on this listing. The other observed prices are full-build bundle prices or belong to a different/wrong component listing, including https://hacom.vn/cpu-amd-ryzen-5-5500gt-cpua0322.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 5600X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-5600x",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 4299000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "3.699.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 4.299.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7500F",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-7500f-cpua0313",
+      "retailer_name": "HACOM",
+      "variant": "TRAY_NO_BOX",
+      "selected_price_vnd": 4199000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "3.699.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "This listing is a separate genuine no-box/tray product. The crawler captured a full-build bundle price; the standalone retail tray price is 4.199.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7500F",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-ryzen-5-7500f-3.7-ghz-upto-5.0ghz-38mb-6-cores-12-threads-65w-socket-am5",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 5199000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "5.199.000"
+      ],
+      "selected_price_found_in_crawler_observations": true,
+      "raw_observation_count": 1,
+      "rationale": "This is a separate listing from the no-box/tray product and is treated as genuine boxed retail. Keep 5.199.000 VND as the boxed retail CPU price.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7500X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7500x3d-cpua0321",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 6599999,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "5.599.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 6.599.999 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7600X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-7600x-4.7-ghz-upto-5.3ghz-38mb-6-cores-12-threads-105w-socket-am5",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 6199000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "5.299.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 6.199.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 7700X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7700x-4.5-ghz-upto-5.4ghz-40mb-8-cores-16-threads-105w-socket-am5",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 9599000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "8.199.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 9.599.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 7800X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7800x3d-4.2ghz-up-to-5.0ghz-105mb-8-cores-16-threads-120w-socket-am5-tray-chinh-hang",
+      "retailer_name": "HACOM",
+      "variant": "TRAY_NO_BOX",
+      "selected_price_vnd": 8999000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "7.799.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "This listing is a separate genuine no-box/tray product. The crawler captured a full-build bundle price; the standalone retail tray price is 8.999.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 7800X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7800x3d",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 9999000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "9.999.000"
+      ],
+      "selected_price_found_in_crawler_observations": true,
+      "raw_observation_count": 1,
+      "rationale": "This is a separate genuine boxed listing from the no-box/tray product. Keep 9.999.000 VND as the boxed retail CPU price.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 9700X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-9700x-3.8-ghz-upto-5.8ghz-40mb-8-cores-16-threads-65w-socket-am5",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 9999000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "7.899.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 9.999.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 9800X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-9800x3d",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 13499000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "11.999.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 13.499.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 9850X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-9850x3d-cpua0320",
+      "retailer_name": "HACOM",
+      "variant": "TRAY_NO_BOX",
+      "selected_price_vnd": 13999000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "12.599.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "This listing is a separate genuine no-box/tray product. The crawler captured a full-build bundle price; the standalone retail tray price is 13.999.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 9850X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-9850x3d-cpua0319",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 14699000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "12.999.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "This is a separate genuine boxed listing. The crawler captured a full-build bundle price; the standalone boxed retail CPU price is 14.699.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 9 7900X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-7900x-4.7-ghz-upto-5.6ghz-76mb-12-cores-24-threads-170w-socket-am5",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 10899000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "8.599.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 10.899.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 9 9900X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9900x-4.4-ghz-upto-5.6ghz-78mb-12-cores-24-threads-120w-socket-am5",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 11999000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "10.899.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 11.999.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "RYZEN 9 9900X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9900x3d-4.4ghz-up-to-5.5ghz-128mb-12-cores-24-threads-socket-am5",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 17499000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "15.799.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 17.499.000 VND. Keep the observed model capitalization from the listing evidence.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 9 9950X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9950x-tray-chinh-hang",
+      "retailer_name": "HACOM",
+      "variant": "TRAY_NO_BOX",
+      "selected_price_vnd": 13799000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "12.499.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "This listing is a separate genuine no-box/tray product. The crawler captured a full-build bundle price; the standalone retail tray price is 13.799.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 9 9950X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9950x-4.3-ghz-upto-5.7ghz-80mb-16-cores-32-threads-170w-socket-am5",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 16999000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "15.399.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "This is a separate genuine boxed listing. The crawler captured a full-build bundle price; the standalone boxed retail CPU price is 16.999.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "RYZEN 9 9950X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9950x3d-cpua0314",
+      "retailer_name": "HACOM",
+      "variant": "TRAY_NO_BOX",
+      "selected_price_vnd": 18899000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "16.599.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "This listing is a separate genuine no-box/tray product. The crawler captured a full-build bundle price; the standalone retail tray price is 18.899.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "RYZEN 9 9950X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9950x3d-4.3ghz-up-to-5.7ghz-128mb-16-cores-32-threads-socket-am5",
+      "retailer_name": "HACOM",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 20899000,
+      "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+      "observed_price_texts": [
+        "17.499.000"
+      ],
+      "selected_price_found_in_crawler_observations": false,
+      "raw_observation_count": 1,
+      "rationale": "This is a separate genuine boxed listing. The crawler captured a full-build bundle price; the standalone boxed retail CPU price is 20.899.000 VND.",
+      "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+    }
+  ]
+}

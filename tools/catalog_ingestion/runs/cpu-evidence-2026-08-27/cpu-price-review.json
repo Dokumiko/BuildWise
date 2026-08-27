@@ -1,0 +1,191 @@
+{
+  "review_schema_version": "0.1",
+  "policy": "Use the verified retail CPU-only price, generally the higher standalone price. Ignore full-build bundle prices, original/reference prices, and stale recommendation prices.",
+  "reviewed_at": "2026-08-28",
+  "records": [
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Athlon 3000G",
+      "listing_url": "https://hacom.vn/cpu-amd-athlon-3300g",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 1299000,
+      "rationale": "Both observed URLs are the same product. 1.299.000 VND is the standalone retail CPU price; 999.000 VND is the cheaper full-build bundle price (motherboard, CPU, RAM, storage, case, PSU). Select the retail CPU price."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 4600G",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-4600g-3.7-ghz-turbo-upto-4.2ghz-11mb-6-cores-12-threads-65w-socket-am4",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 2799000,
+      "rationale": "The live product page retail price is 2.799.000 VND. 3.099.000 VND is the original/reference price. 2.399.000 VND appeared only as a stale or unclickable recommendation and is not used."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 5500",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-5500-3.6-ghz-upto-4.2ghz-19mb-6-cores-12-threads-65w-socket-am4",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 2599000,
+      "rationale": "The page shows multiple prices. 1.899.000 and 2.299.000 VND were crawler observations, but the standalone retail CPU price is 2.599.000 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 5500GT",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-5500gt-4.4-ghz-upto-3.6-ghz-19mb-6-cores-12-threads-65w-socket-am4",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 3799000,
+      "rationale": "Select the 3.799.000 VND retail CPU price on this listing. The other observed prices are full-build bundle prices or belong to a different/wrong component listing, including https://hacom.vn/cpu-amd-ryzen-5-5500gt-cpua0322."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 5600X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-5600x",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 4299000,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 4.299.000 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7500F",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-7500f-cpua0313",
+      "variant": "TRAY_NO_BOX",
+      "selected_price_vnd": 4199000,
+      "rationale": "This listing is a separate genuine no-box/tray product. The crawler captured a full-build bundle price; the standalone retail tray price is 4.199.000 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7500F",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-ryzen-5-7500f-3.7-ghz-upto-5.0ghz-38mb-6-cores-12-threads-65w-socket-am5",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 5199000,
+      "rationale": "This is a separate listing from the no-box/tray product and is treated as genuine boxed retail. Keep 5.199.000 VND as the boxed retail CPU price."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7500X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7500x3d-cpua0321",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 6599999,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 6.599.999 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7600X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-5-7600x-4.7-ghz-upto-5.3ghz-38mb-6-cores-12-threads-105w-socket-am5",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 6199000,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 6.199.000 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 7700X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7700x-4.5-ghz-upto-5.4ghz-40mb-8-cores-16-threads-105w-socket-am5",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 9599000,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 9.599.000 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 7800X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7800x3d-4.2ghz-up-to-5.0ghz-105mb-8-cores-16-threads-120w-socket-am5-tray-chinh-hang",
+      "variant": "TRAY_NO_BOX",
+      "selected_price_vnd": 8999000,
+      "rationale": "This listing is a separate genuine no-box/tray product. The crawler captured a full-build bundle price; the standalone retail tray price is 8.999.000 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 7800X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7800x3d",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 9999000,
+      "rationale": "This is a separate genuine boxed listing from the no-box/tray product. Keep 9.999.000 VND as the boxed retail CPU price."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 9700X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-9700x-3.8-ghz-upto-5.8ghz-40mb-8-cores-16-threads-65w-socket-am5",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 9999000,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 9.999.000 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 9800X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-9800x3d",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 13499000,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 13.499.000 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 9850X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-9850x3d-cpua0320",
+      "variant": "TRAY_NO_BOX",
+      "selected_price_vnd": 13999000,
+      "rationale": "This listing is a separate genuine no-box/tray product. The crawler captured a full-build bundle price; the standalone retail tray price is 13.999.000 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 9850X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-9850x3d-cpua0319",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 14699000,
+      "rationale": "This is a separate genuine boxed listing. The crawler captured a full-build bundle price; the standalone boxed retail CPU price is 14.699.000 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 9 7900X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-7900x-4.7-ghz-upto-5.6ghz-76mb-12-cores-24-threads-170w-socket-am5",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 10899000,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 10.899.000 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 9 9900X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9900x-4.4-ghz-upto-5.6ghz-78mb-12-cores-24-threads-120w-socket-am5",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 11999000,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 11.999.000 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "RYZEN 9 9900X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9900x3d-4.4ghz-up-to-5.5ghz-128mb-12-cores-24-threads-socket-am5",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 17499000,
+      "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 17.499.000 VND. Keep the observed model capitalization from the listing evidence."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 9 9950X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9950x-tray-chinh-hang",
+      "variant": "TRAY_NO_BOX",
+      "selected_price_vnd": 13799000,
+      "rationale": "This listing is a separate genuine no-box/tray product. The crawler captured a full-build bundle price; the standalone retail tray price is 13.799.000 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 9 9950X",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9950x-4.3-ghz-upto-5.7ghz-80mb-16-cores-32-threads-170w-socket-am5",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 16999000,
+      "rationale": "This is a separate genuine boxed listing. The crawler captured a full-build bundle price; the standalone boxed retail CPU price is 16.999.000 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "RYZEN 9 9950X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9950x3d-cpua0314",
+      "variant": "TRAY_NO_BOX",
+      "selected_price_vnd": 18899000,
+      "rationale": "This listing is a separate genuine no-box/tray product. The crawler captured a full-build bundle price; the standalone retail tray price is 18.899.000 VND."
+    },
+    {
+      "manufacturer": "AMD",
+      "exact_model": "RYZEN 9 9950X3D",
+      "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9950x3d-4.3ghz-up-to-5.7ghz-128mb-16-cores-32-threads-socket-am5",
+      "variant": "RETAIL_BOXED",
+      "selected_price_vnd": 20899000,
+      "rationale": "This is a separate genuine boxed listing. The crawler captured a full-build bundle price; the standalone boxed retail CPU price is 20.899.000 VND."
+    }
+  ]
+}

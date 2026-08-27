@@ -56,3 +56,9 @@ Thumbs.db
 .claude/
 skills-lock.json
 .codex/
+# One-time catalog crawler outputs are local research artifacts. Commit only
+# curated candidate/review artifacts; raw pages and run logs are reproducible.
+/tools/catalog_ingestion/runs/*/artifacts/
+/tools/catalog_ingestion/runs/cpu-smoke-*/
+/tools/catalog_ingestion/runs/*/fetch-manifest.json
+/tools/catalog_ingestion/runs/*/crawl-errors.json
