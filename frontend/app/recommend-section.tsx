@@ -3,13 +3,13 @@
 import { FormEvent, useState } from "react";
 import {
   ApiError,
-  CatalogDataset,
   CaseFormFactor,
   RecommendationResponse,
   ScoredBuild,
   WorkloadProfile,
   requestRecommendation,
 } from "../lib/recommendation-api";
+import { useCatalogDatasets } from "../lib/use-catalog-datasets";
 import { formatScore, formatVnd } from "../lib/format";
 import { FindingList, PriceEvidence, ScoreEvidence } from "./evidence";
 import styles from "./page.module.css";
@@ -27,17 +27,8 @@ const caseFormFactorLabels: Record<CaseFormFactor, string> = {
   SFF: "Small form factor",
 };
 
-export function RecommendSection({
-  datasets,
-  selectedDataset,
-  onDatasetChange,
-  catalogState,
-}: {
-  datasets: CatalogDataset[];
-  selectedDataset: string;
-  onDatasetChange: (value: string) => void;
-  catalogState: "loading" | "ready" | "error";
-}) {
+export function RecommendSection() {
+  const { datasets, selectedDataset, setSelectedDataset, catalogState, catalogError } = useCatalogDatasets();
   const [budget, setBudget] = useState("35000000");
   const [budgetMode, setBudgetMode] = useState<"strict" | "approximate">("strict");
   const [workload, setWorkload] = useState<WorkloadProfile>("gaming");
@@ -81,22 +72,19 @@ export function RecommendSection({
   const topBuild = result?.ranked_builds[0] ?? null;
 
   return (
-    <section className={styles.section} aria-labelledby="recommend-heading">
-      <div className={styles.sectionHeading}>
-        <div>
-          <h2 id="recommend-heading">Get a recommended build</h2>
-          <p className={styles.lede}>
-            If you would rather start from a VND budget and workload, the same catalog can search for feasible builds. This does not replace the parts table above.
-          </p>
-        </div>
-      </div>
-
+    <section className={styles.section} aria-label="Recommendation requirements">
+      {catalogState === "loading" && <p className={styles.muted}>Loading persisted catalog datasets…</p>}
+      {catalogState === "error" && (
+        <p className={styles.alert} role="alert">
+          {catalogError}
+        </p>
+      )}
       <form onSubmit={submitRecommendation} className={styles.form}>
         <label className={styles.field}>
           <span>Catalog dataset</span>
           <select
             value={selectedDataset}
-            onChange={(event) => onDatasetChange(event.target.value)}
+            onChange={(event) => setSelectedDataset(event.target.value)}
             disabled={catalogState !== "ready" || readyDatasets.length === 0}
             required
           >
@@ -164,7 +152,7 @@ export function RecommendSection({
         <div className={styles.results}>
           {topBuild ? <BuildCard build={topBuild} /> : (
             <div className={styles.emptyState}>
-              <h3>No feasible build returned</h3>
+              <h2>No feasible build returned</h2>
               <p>The deterministic search found no build that satisfies the submitted constraints.</p>
             </div>
           )}
@@ -182,7 +170,7 @@ function BuildCard({ build }: { build: ScoredBuild }) {
     <article className={styles.buildCard}>
       <div className={styles.buildHeader}>
         <div>
-          <h3>{formatVnd(build.total_price_vnd)}</h3>
+          <h2>{formatVnd(build.total_price_vnd)}</h2>
           <p className={styles.muted}>
             {build.analysis_status} · {warningCount} warning{warningCount === 1 ? "" : "s"}
           </p>
@@ -205,15 +193,15 @@ function BuildCard({ build }: { build: ScoredBuild }) {
       <div className={styles.evidenceGrid}>
         <div>
           <span>Estimated system draw</span>
-          <strong>{summary.estimated_system_draw_w ?? "—"} W</strong>
+          <strong>{summary.estimated_system_draw_w ?? "\u2014"} W</strong>
         </div>
         <div>
           <span>Recommended PSU capacity</span>
-          <strong>{summary.recommended_psu_capacity_w ?? "—"} W</strong>
+          <strong>{summary.recommended_psu_capacity_w ?? "\u2014"} W</strong>
         </div>
         <div>
           <span>Selected PSU capacity</span>
-          <strong>{summary.selected_psu_capacity_w ?? "—"} W</strong>
+          <strong>{summary.selected_psu_capacity_w ?? "\u2014"} W</strong>
         </div>
       </div>
       <FindingList findings={build.analysis.findings} />

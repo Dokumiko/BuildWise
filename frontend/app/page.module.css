@@ -37,6 +37,10 @@
   color: var(--accent);
 }
 
+.header nav a[aria-current="page"] {
+  color: var(--text);
+}
+
 .shell {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
@@ -55,6 +59,60 @@
   font-weight: 650;
   letter-spacing: -0.035em;
   line-height: 1.08;
+}
+
+.feature {
+  max-width: 42rem;
+  padding: 28px 0 8px;
+  border-top: 1px solid var(--border);
+}
+
+.feature + .feature {
+  margin-top: 8px;
+}
+
+.feature h2 {
+  margin: 20px 0 0;
+  color: var(--text);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+.featureActions {
+  margin: 18px 0 12px;
+}
+
+.cta,
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.cta {
+  color: #09201d;
+  background: var(--accent);
+}
+
+.cta:hover {
+  background: var(--accent-hover);
+}
+
+.ctaSecondary {
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+}
+
+.ctaSecondary:hover {
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 .intro p,
@@ -84,9 +142,13 @@
 }
 
 .sectionHeading h2,
+.buildHeader h2,
 .buildHeader h3,
+.emptyState h2,
 .emptyState h3,
+.analysisRail h2,
 .analysisRail h3,
+.chooser h2,
 .chooser h3,
 .subsection h3 {
   margin: 0;
@@ -151,6 +213,8 @@
 .secondaryButton:focus-visible,
 .textButton:focus-visible,
 .optionButton:focus-visible,
+.cta:focus-visible,
+.ctaSecondary:focus-visible,
 .header nav a:focus-visible,
 .logo:focus-visible {
   outline: 2px solid var(--accent);
@@ -260,6 +324,7 @@
   background: var(--input);
 }
 
+.analysisRail h2,
 .analysisRail h3 {
   margin-bottom: 10px;
   font-size: 1.05rem;
@@ -393,6 +458,7 @@
   background: linear-gradient(130deg, rgb(84 238 195 / 0.15), transparent 58%);
 }
 
+.buildHeader h2,
 .buildHeader h3 {
   font-size: clamp(2rem, 5vw, 3rem);
 }

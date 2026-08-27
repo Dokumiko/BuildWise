@@ -1,9 +1,10 @@
 # BuildWise frontend
 
-The homepage is a thin presentation layer over the deterministic backend.
+The UI is a thin presentation layer over the deterministic backend.
 
-1. **Start your build** (primary): load catalog parts from `GET /api/v1/catalog-datasets/{dataset}/components`, choose one part per category, and inspect `POST /api/v1/builds/analyze`.
-2. **Get a recommended build** (secondary): submit supported requirement fields to `POST /api/v1/recommendations`.
+- `/`: short homepage that points to the two product workflows.
+- `/build` (primary): load catalog parts from `GET /api/v1/catalog-datasets/{dataset}/components`, choose one part per category, and inspect `POST /api/v1/builds/analyze`.
+- `/recommend` (secondary): submit supported requirement fields to `POST /api/v1/recommendations`.
 
 The UI does **not** calculate compatibility, PSU suitability, price selection, scoring, or ranking in the browser.
 

@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ApiError,
-  CatalogDataset,
   CatalogPickerComponent,
   ManualAnalysisResponse,
   analyzeManualBuild,
   listCatalogPickerComponents,
 } from "../lib/recommendation-api";
+import { useCatalogDatasets } from "../lib/use-catalog-datasets";
 import { formatVnd } from "../lib/format";
 import { FindingList } from "./evidence";
 import styles from "./page.module.css";
@@ -26,19 +26,8 @@ const CATEGORIES = [
 
 type CategoryType = (typeof CATEGORIES)[number]["type"];
 
-export function BuilderSection({
-  datasets,
-  selectedDataset,
-  onDatasetChange,
-  catalogState,
-  catalogError,
-}: {
-  datasets: CatalogDataset[];
-  selectedDataset: string;
-  onDatasetChange: (value: string) => void;
-  catalogState: "loading" | "ready" | "error";
-  catalogError: string;
-}) {
+export function BuilderSection() {
+  const { datasets, selectedDataset, setSelectedDataset, catalogState, catalogError } = useCatalogDatasets();
   const [components, setComponents] = useState<CatalogPickerComponent[]>([]);
   const [pickerState, setPickerState] = useState<"idle" | "loading" | "error">("idle");
   const [pickerError, setPickerError] = useState("");
@@ -100,7 +89,7 @@ export function BuilderSection({
       setAnalysisError("");
       analyzeManualBuild(
         {
-          name: "Manual homepage build",
+          name: "Manual build",
           component_ids: selectedParts.map((part) => part.id),
         },
         controller.signal,
@@ -145,17 +134,7 @@ export function BuilderSection({
   const warningCount = analysis?.findings.filter((finding) => finding.severity === "WARNING").length ?? 0;
 
   return (
-    <section className={styles.section} aria-labelledby="builder-heading">
-      <div className={styles.sectionHeading}>
-        <div>
-          <h2 id="builder-heading">Start your build</h2>
-          <p className={styles.lede}>
-            Choose one part per category. The backend checks compatibility and PSU headroom against the persisted catalog.
-          </p>
-        </div>
-        <span className={styles.badge}>Primary</span>
-      </div>
-
+    <section className={styles.section} aria-label="Parts table and compatibility">
       {catalogState === "loading" && <p className={styles.muted}>Loading persisted catalog datasets…</p>}
       {catalogState === "error" && (
         <p className={styles.alert} role="alert">
@@ -167,7 +146,7 @@ export function BuilderSection({
         <span>Catalog</span>
         <select
           value={selectedDataset}
-          onChange={(event) => onDatasetChange(event.target.value)}
+          onChange={(event) => setSelectedDataset(event.target.value)}
           disabled={catalogState !== "ready" || readyDatasets.length === 0}
         >
           <option value="">Select a READY dataset</option>
@@ -204,7 +183,7 @@ export function BuilderSection({
                   <tr key={category.type}>
                     <th scope="row">{category.label}</th>
                     <td>{part ? `${part.manufacturer} ${part.model}` : <span className={styles.placeholder}>No part selected</span>}</td>
-                    <td className={styles.priceCell}>{part ? formatVnd(part.price_vnd) : "—"}</td>
+                    <td className={styles.priceCell}>{part ? formatVnd(part.price_vnd) : "\u2014"}</td>
                     <td className={styles.actionsCell}>
                       <button type="button" className={styles.chooseButton} onClick={() => setChoosing(category.type)} disabled={!selectedDataset || pickerState === "loading"}>
                         {part ? "Change" : "Choose"}
@@ -222,8 +201,10 @@ export function BuilderSection({
             <tfoot>
               <tr>
                 <th scope="row">Selected total</th>
-                <td>{selectedParts.length} / {CATEGORIES.length} parts</td>
-                <td className={styles.priceCell}>{selectedParts.length ? formatVnd(totalPrice) : "—"}</td>
+                <td>
+                  {selectedParts.length} / {CATEGORIES.length} parts
+                </td>
+                <td className={styles.priceCell}>{selectedParts.length ? formatVnd(totalPrice) : "\u2014"}</td>
                 <td />
               </tr>
             </tfoot>
@@ -231,7 +212,7 @@ export function BuilderSection({
         </div>
 
         <aside className={styles.analysisRail} aria-live="polite">
-          <h3>Compatibility</h3>
+          <h2>Compatibility</h2>
           {selectedParts.length === 0 && <p className={styles.muted}>Select a part to see backend compatibility and power findings.</p>}
           {analysisState === "loading" && <p className={styles.muted}>Checking selected parts…</p>}
           {analysisState === "error" && (
@@ -250,19 +231,19 @@ export function BuilderSection({
               <dl className={styles.powerList}>
                 <div>
                   <dt>Estimated draw</dt>
-                  <dd>{summary?.estimated_system_draw_w ?? "—"} W</dd>
+                  <dd>{summary?.estimated_system_draw_w ?? "\u2014"} W</dd>
                 </div>
                 <div>
                   <dt>Recommended PSU</dt>
-                  <dd>{summary?.recommended_psu_capacity_w ?? "—"} W</dd>
+                  <dd>{summary?.recommended_psu_capacity_w ?? "\u2014"} W</dd>
                 </div>
                 <div>
                   <dt>Selected PSU</dt>
-                  <dd>{summary?.selected_psu_capacity_w ?? "—"} W</dd>
+                  <dd>{summary?.selected_psu_capacity_w ?? "\u2014"} W</dd>
                 </div>
                 <div>
                   <dt>Headroom</dt>
-                  <dd>{summary?.headroom_w ?? "—"} W</dd>
+                  <dd>{summary?.headroom_w ?? "\u2014"} W</dd>
                 </div>
               </dl>
               <FindingList findings={analysis.findings} />
@@ -273,7 +254,7 @@ export function BuilderSection({
 
       <dialog ref={dialogRef} className={styles.chooser} onClose={() => setChoosing(null)}>
         <form method="dialog" className={styles.chooserHeader}>
-          <h3>Choose {CATEGORIES.find((category) => category.type === choosing)?.label ?? "part"}</h3>
+          <h2>Choose {CATEGORIES.find((category) => category.type === choosing)?.label ?? "part"}</h2>
           <button type="submit" className={styles.textButton} onClick={() => setChoosing(null)}>
             Close
           </button>
