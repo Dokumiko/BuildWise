@@ -1,0 +1,546 @@
+{
+  "review_schema_version": "0.1",
+  "dataset_version": "vn-pc-am5-ddr5-sandbox",
+  "approved_cpu_records": [
+    {
+      "review_status": "APPROVED",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 5 7500F",
+      "specifications": {
+        "socket": "AM5",
+        "canonical_cpu_family": "RYZEN_7000",
+        "cores": 6,
+        "threads": 12,
+        "default_tdp_w": 65,
+        "memory_type": "DDR5",
+        "integrated_graphics": false,
+        "pcie_version": "PCIe 5.0"
+      },
+      "technical_candidate": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 5 7500F",
+        "technical_source": {
+          "url": "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-5-7500f.html",
+          "source_type": "MANUFACTURER_OFFICIAL",
+          "fetched_at": "2026-08-28T16:11:48.393849+00:00"
+        },
+        "source_evidence": {
+          "requested_url": "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-5-7500f.html",
+          "final_url": "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-5-7500f.html",
+          "status": 200,
+          "fetched_at": "2026-08-28T16:11:48.393849+00:00",
+          "content_sha256": "40ce3704fb6d1dbf749e2b409deb0368f7e7bdc05bccf3ecee035eea3f95a205",
+          "bytes": 192042,
+          "content_type": "text/html"
+        },
+        "observed": {
+          "socket": "AM5",
+          "canonical_cpu_family": "RYZEN_7000",
+          "cores": 6,
+          "threads": 12,
+          "default_tdp_w": 65,
+          "memory_type": "DDR5",
+          "integrated_graphics": false,
+          "pcie_version": "PCIe 5.0"
+        },
+        "review_status": "PENDING_PRICE_AND_BENCHMARK_REVIEW"
+      },
+      "price_candidate": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 5 7500F",
+        "price_source": {
+          "listing_url": "https://hacom.vn/cpu-amd-ryzen-ryzen-5-7500f-3.7-ghz-upto-5.0ghz-38mb-6-cores-12-threads-65w-socket-am5",
+          "retailer_name": "HACOM",
+          "price_text": "5.199.000",
+          "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+        },
+        "source_evidence": {
+          "requested_url": "https://hacom.vn/cpu-amd",
+          "final_url": "https://hacom.vn/cpu-amd",
+          "status": 200,
+          "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+          "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+          "bytes": 1748805,
+          "content_type": "text/html; charset=utf-8"
+        },
+        "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+      },
+      "price_resolution": {
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 5 7500F",
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-ryzen-5-7500f-3.7-ghz-upto-5.0ghz-38mb-6-cores-12-threads-65w-socket-am5",
+        "retailer_name": "HACOM",
+        "variant": "RETAIL_BOXED",
+        "selected_price_vnd": 5199000,
+        "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+        "observed_price_texts": [
+          "5.199.000"
+        ],
+        "selected_price_found_in_crawler_observations": true,
+        "raw_observation_count": 1,
+        "rationale": "This is a separate listing from the no-box/tray product and is treated as genuine boxed retail. Keep 5.199.000 VND as the boxed retail CPU price.",
+        "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+      },
+      "benchmark_candidate": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 5 7500F",
+        "benchmark_source": {
+          "url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+5+7500F&id=5648",
+          "source_type": "PASSMARK_DIRECT",
+          "cpu_id": "5648"
+        },
+        "source_evidence": {
+          "requested_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+5+7500F&id=5648",
+          "final_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+5+7500F&id=5648",
+          "status": 200,
+          "fetched_at": "2026-08-29T05:07:39.169099+00:00",
+          "content_sha256": "c761044223c1e4611ee1dc6371748450c9b3a80352c150d588d7cdc2cd521948",
+          "bytes": 113783,
+          "content_type": "text/html; charset=UTF-8"
+        },
+        "benchmark": {
+          "benchmark_name": "PassMark CPU Mark",
+          "metric_name": "CPU Mark",
+          "raw_metric_value": 26525.0,
+          "metric_unit": "points",
+          "benchmark_version": "PerformanceTest V10",
+          "test_context": {
+            "rating_type": "Multithread Rating",
+            "samples": 5470,
+            "source_as_of": "28th of August 2026."
+          }
+        }
+      },
+      "benchmark": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 5 7500F",
+        "sku": null,
+        "benchmark_name": "PassMark CPU Mark",
+        "metric_name": "CPU Mark",
+        "raw_metric_value": 26525.0,
+        "metric_unit": "points",
+        "direct_source_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+5+7500F&id=5648",
+        "benchmark_version": "PerformanceTest V10",
+        "test_context": {
+          "rating_type": "Multithread Rating",
+          "samples": 5470,
+          "source_as_of": "28th of August 2026."
+        },
+        "match_scope": "CPU_MODEL",
+        "collected_at": "2026-08-29T05:07:39.169099+00:00",
+        "dataset_version": "vn-pc-am5-ddr5-sandbox",
+        "source_type": "PASSMARK_DIRECT"
+      },
+      "reviewer_note": "Approved only after exact AMD technical evidence, reviewed HACOM retail-price resolution, and retained exact PassMark CPU Mark evidence were joined by exact manufacturer/model."
+    },
+    {
+      "review_status": "APPROVED",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 7800X3D",
+      "specifications": {
+        "socket": "AM5",
+        "canonical_cpu_family": "RYZEN_7000",
+        "cores": 8,
+        "threads": 16,
+        "default_tdp_w": 120,
+        "memory_type": "DDR5",
+        "integrated_graphics": true,
+        "pcie_version": "PCIe 5.0"
+      },
+      "technical_candidate": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 7 7800X3D",
+        "technical_source": {
+          "url": "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-7-7800x3d.html",
+          "source_type": "MANUFACTURER_OFFICIAL",
+          "fetched_at": "2026-08-28T16:12:01.545773+00:00"
+        },
+        "source_evidence": {
+          "requested_url": "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-7-7800x3d.html",
+          "final_url": "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-7-7800x3d.html",
+          "status": 200,
+          "fetched_at": "2026-08-28T16:12:01.545773+00:00",
+          "content_sha256": "ec24022963fdccff4debed24adca17d04b805a577058869ed9f183422f646ade",
+          "bytes": 207923,
+          "content_type": "text/html"
+        },
+        "observed": {
+          "socket": "AM5",
+          "canonical_cpu_family": "RYZEN_7000",
+          "cores": 8,
+          "threads": 16,
+          "default_tdp_w": 120,
+          "memory_type": "DDR5",
+          "integrated_graphics": true,
+          "pcie_version": "PCIe 5.0"
+        },
+        "review_status": "PENDING_PRICE_AND_BENCHMARK_REVIEW"
+      },
+      "price_candidate": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 7 7800X3D",
+        "price_source": {
+          "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7800x3d",
+          "retailer_name": "HACOM",
+          "price_text": "9.999.000",
+          "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+        },
+        "source_evidence": {
+          "requested_url": "https://hacom.vn/cpu-amd",
+          "final_url": "https://hacom.vn/cpu-amd",
+          "status": 200,
+          "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+          "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+          "bytes": 1748805,
+          "content_type": "text/html; charset=utf-8"
+        },
+        "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+      },
+      "price_resolution": {
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 7 7800X3D",
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7800x3d",
+        "retailer_name": "HACOM",
+        "variant": "RETAIL_BOXED",
+        "selected_price_vnd": 9999000,
+        "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+        "observed_price_texts": [
+          "9.999.000"
+        ],
+        "selected_price_found_in_crawler_observations": true,
+        "raw_observation_count": 1,
+        "rationale": "This is a separate genuine boxed listing from the no-box/tray product. Keep 9.999.000 VND as the boxed retail CPU price.",
+        "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+      },
+      "benchmark_candidate": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 7 7800X3D",
+        "benchmark_source": {
+          "url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+7+7800X3D&id=5299",
+          "source_type": "PASSMARK_DIRECT",
+          "cpu_id": "5299"
+        },
+        "source_evidence": {
+          "requested_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+7+7800X3D&id=5299",
+          "final_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+7+7800X3D&id=5299",
+          "status": 200,
+          "fetched_at": "2026-08-29T05:07:39.304647+00:00",
+          "content_sha256": "a6070277048f91c43c931f95421523836cd5511207b56764b806a9154800cce0",
+          "bytes": 112276,
+          "content_type": "text/html; charset=UTF-8"
+        },
+        "benchmark": {
+          "benchmark_name": "PassMark CPU Mark",
+          "metric_name": "CPU Mark",
+          "raw_metric_value": 34277.0,
+          "metric_unit": "points",
+          "benchmark_version": "PerformanceTest V10",
+          "test_context": {
+            "rating_type": "Multithread Rating",
+            "samples": 27022,
+            "source_as_of": "28th of August 2026."
+          }
+        }
+      },
+      "benchmark": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 7 7800X3D",
+        "sku": null,
+        "benchmark_name": "PassMark CPU Mark",
+        "metric_name": "CPU Mark",
+        "raw_metric_value": 34277.0,
+        "metric_unit": "points",
+        "direct_source_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+7+7800X3D&id=5299",
+        "benchmark_version": "PerformanceTest V10",
+        "test_context": {
+          "rating_type": "Multithread Rating",
+          "samples": 27022,
+          "source_as_of": "28th of August 2026."
+        },
+        "match_scope": "CPU_MODEL",
+        "collected_at": "2026-08-29T05:07:39.304647+00:00",
+        "dataset_version": "vn-pc-am5-ddr5-sandbox",
+        "source_type": "PASSMARK_DIRECT"
+      },
+      "reviewer_note": "Approved only after exact AMD technical evidence, reviewed HACOM retail-price resolution, and retained exact PassMark CPU Mark evidence were joined by exact manufacturer/model."
+    },
+    {
+      "review_status": "APPROVED",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 9700X",
+      "specifications": {
+        "socket": "AM5",
+        "canonical_cpu_family": "RYZEN_9000",
+        "cores": 8,
+        "threads": 16,
+        "default_tdp_w": 65,
+        "memory_type": "DDR5",
+        "integrated_graphics": true,
+        "pcie_version": "PCIe 5.0"
+      },
+      "technical_candidate": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 7 9700X",
+        "technical_source": {
+          "url": "https://www.amd.com/en/products/processors/desktops/ryzen/9000-series/amd-ryzen-7-9700x.html",
+          "source_type": "MANUFACTURER_OFFICIAL",
+          "fetched_at": "2026-08-28T16:12:43.673205+00:00"
+        },
+        "source_evidence": {
+          "requested_url": "https://www.amd.com/en/products/processors/desktops/ryzen/9000-series/amd-ryzen-7-9700x.html",
+          "final_url": "https://www.amd.com/en/products/processors/desktops/ryzen/9000-series/amd-ryzen-7-9700x.html",
+          "status": 200,
+          "fetched_at": "2026-08-28T16:12:43.673205+00:00",
+          "content_sha256": "277b5766b3b520788c80725d10413ee1f79b0d0078a5cb6e15173409c61312af",
+          "bytes": 202628,
+          "content_type": "text/html"
+        },
+        "observed": {
+          "socket": "AM5",
+          "canonical_cpu_family": "RYZEN_9000",
+          "cores": 8,
+          "threads": 16,
+          "default_tdp_w": 65,
+          "memory_type": "DDR5",
+          "integrated_graphics": true,
+          "pcie_version": "PCIe 5.0"
+        },
+        "review_status": "PENDING_PRICE_AND_BENCHMARK_REVIEW"
+      },
+      "price_candidate": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 7 9700X",
+        "price_source": {
+          "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-9700x-3.8-ghz-upto-5.8ghz-40mb-8-cores-16-threads-65w-socket-am5",
+          "retailer_name": "HACOM",
+          "price_text": "7.899.000",
+          "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+        },
+        "source_evidence": {
+          "requested_url": "https://hacom.vn/cpu-amd",
+          "final_url": "https://hacom.vn/cpu-amd",
+          "status": 200,
+          "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+          "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+          "bytes": 1748805,
+          "content_type": "text/html; charset=utf-8"
+        },
+        "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+      },
+      "price_resolution": {
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 7 9700X",
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-9700x-3.8-ghz-upto-5.8ghz-40mb-8-cores-16-threads-65w-socket-am5",
+        "retailer_name": "HACOM",
+        "variant": "RETAIL_BOXED",
+        "selected_price_vnd": 9999000,
+        "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+        "observed_price_texts": [
+          "7.899.000"
+        ],
+        "selected_price_found_in_crawler_observations": false,
+        "raw_observation_count": 1,
+        "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 9.999.000 VND.",
+        "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+      },
+      "benchmark_candidate": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 7 9700X",
+        "benchmark_source": {
+          "url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+7+9700X&id=6205",
+          "source_type": "PASSMARK_DIRECT",
+          "cpu_id": "6205"
+        },
+        "source_evidence": {
+          "requested_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+7+9700X&id=6205",
+          "final_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+7+9700X&id=6205",
+          "status": 200,
+          "fetched_at": "2026-08-29T05:07:39.416590+00:00",
+          "content_sha256": "50ccd01f48998226bbca98b5baef931eb3fc0c5c774b87b3e0fc3205d6b07790",
+          "bytes": 114844,
+          "content_type": "text/html; charset=UTF-8"
+        },
+        "benchmark": {
+          "benchmark_name": "PassMark CPU Mark",
+          "metric_name": "CPU Mark",
+          "raw_metric_value": 36953.0,
+          "metric_unit": "points",
+          "benchmark_version": "PerformanceTest V10",
+          "test_context": {
+            "rating_type": "Multithread Rating",
+            "samples": 9519,
+            "source_as_of": "28th of August 2026."
+          }
+        }
+      },
+      "benchmark": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 7 9700X",
+        "sku": null,
+        "benchmark_name": "PassMark CPU Mark",
+        "metric_name": "CPU Mark",
+        "raw_metric_value": 36953.0,
+        "metric_unit": "points",
+        "direct_source_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+7+9700X&id=6205",
+        "benchmark_version": "PerformanceTest V10",
+        "test_context": {
+          "rating_type": "Multithread Rating",
+          "samples": 9519,
+          "source_as_of": "28th of August 2026."
+        },
+        "match_scope": "CPU_MODEL",
+        "collected_at": "2026-08-29T05:07:39.416590+00:00",
+        "dataset_version": "vn-pc-am5-ddr5-sandbox",
+        "source_type": "PASSMARK_DIRECT"
+      },
+      "reviewer_note": "Approved only after exact AMD technical evidence, reviewed HACOM retail-price resolution, and retained exact PassMark CPU Mark evidence were joined by exact manufacturer/model."
+    },
+    {
+      "review_status": "APPROVED",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 9 9900X",
+      "specifications": {
+        "socket": "AM5",
+        "canonical_cpu_family": "RYZEN_9000",
+        "cores": 12,
+        "threads": 24,
+        "default_tdp_w": 120,
+        "memory_type": "DDR5",
+        "integrated_graphics": true,
+        "pcie_version": "PCIe 5.0"
+      },
+      "technical_candidate": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 9 9900X",
+        "technical_source": {
+          "url": "https://www.amd.com/en/products/processors/desktops/ryzen/9000-series/amd-ryzen-9-9900x.html",
+          "source_type": "MANUFACTURER_OFFICIAL",
+          "fetched_at": "2026-08-28T16:12:48.465955+00:00"
+        },
+        "source_evidence": {
+          "requested_url": "https://www.amd.com/en/products/processors/desktops/ryzen/9000-series/amd-ryzen-9-9900x.html",
+          "final_url": "https://www.amd.com/en/products/processors/desktops/ryzen/9000-series/amd-ryzen-9-9900x.html",
+          "status": 200,
+          "fetched_at": "2026-08-28T16:12:48.465955+00:00",
+          "content_sha256": "21bda5139e2797a575ddafe2c06339a8c47e7941ab5889e0b6fcde93540c91cd",
+          "bytes": 202683,
+          "content_type": "text/html"
+        },
+        "observed": {
+          "socket": "AM5",
+          "canonical_cpu_family": "RYZEN_9000",
+          "cores": 12,
+          "threads": 24,
+          "default_tdp_w": 120,
+          "memory_type": "DDR5",
+          "integrated_graphics": true,
+          "pcie_version": "PCIe 5.0"
+        },
+        "review_status": "PENDING_PRICE_AND_BENCHMARK_REVIEW"
+      },
+      "price_candidate": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 9 9900X",
+        "price_source": {
+          "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9900x-4.4-ghz-upto-5.6ghz-78mb-12-cores-24-threads-120w-socket-am5",
+          "retailer_name": "HACOM",
+          "price_text": "10.899.000",
+          "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+        },
+        "source_evidence": {
+          "requested_url": "https://hacom.vn/cpu-amd",
+          "final_url": "https://hacom.vn/cpu-amd",
+          "status": 200,
+          "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+          "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+          "bytes": 1748805,
+          "content_type": "text/html; charset=utf-8"
+        },
+        "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+      },
+      "price_resolution": {
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 9 9900X",
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-9-9900x-4.4-ghz-upto-5.6ghz-78mb-12-cores-24-threads-120w-socket-am5",
+        "retailer_name": "HACOM",
+        "variant": "RETAIL_BOXED",
+        "selected_price_vnd": 11999000,
+        "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+        "observed_price_texts": [
+          "10.899.000"
+        ],
+        "selected_price_found_in_crawler_observations": false,
+        "raw_observation_count": 1,
+        "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 11.999.000 VND.",
+        "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+      },
+      "benchmark_candidate": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 9 9900X",
+        "benchmark_source": {
+          "url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+9+9900X&id=6171",
+          "source_type": "PASSMARK_DIRECT",
+          "cpu_id": "6171"
+        },
+        "source_evidence": {
+          "requested_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+9+9900X&id=6171",
+          "final_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+9+9900X&id=6171",
+          "status": 200,
+          "fetched_at": "2026-08-29T05:07:39.531746+00:00",
+          "content_sha256": "3b9d357e7feccb7463d84b16a7e5b5932c4d2c911625414187fb81cb92c2d88f",
+          "bytes": 114650,
+          "content_type": "text/html; charset=UTF-8"
+        },
+        "benchmark": {
+          "benchmark_name": "PassMark CPU Mark",
+          "metric_name": "CPU Mark",
+          "raw_metric_value": 54327.0,
+          "metric_unit": "points",
+          "benchmark_version": "PerformanceTest V10",
+          "test_context": {
+            "rating_type": "Multithread Rating",
+            "samples": 6522,
+            "source_as_of": "28th of August 2026."
+          }
+        }
+      },
+      "benchmark": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 9 9900X",
+        "sku": null,
+        "benchmark_name": "PassMark CPU Mark",
+        "metric_name": "CPU Mark",
+        "raw_metric_value": 54327.0,
+        "metric_unit": "points",
+        "direct_source_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+9+9900X&id=6171",
+        "benchmark_version": "PerformanceTest V10",
+        "test_context": {
+          "rating_type": "Multithread Rating",
+          "samples": 6522,
+          "source_as_of": "28th of August 2026."
+        },
+        "match_scope": "CPU_MODEL",
+        "collected_at": "2026-08-29T05:07:39.531746+00:00",
+        "dataset_version": "vn-pc-am5-ddr5-sandbox",
+        "source_type": "PASSMARK_DIRECT"
+      },
+      "reviewer_note": "Approved only after exact AMD technical evidence, reviewed HACOM retail-price resolution, and retained exact PassMark CPU Mark evidence were joined by exact manufacturer/model."
+    }
+  ]
+}

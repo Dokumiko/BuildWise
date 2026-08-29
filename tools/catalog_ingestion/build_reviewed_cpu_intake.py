@@ -49,6 +49,8 @@ class ReviewedCpuRecord(BaseModel):
     specifications: dict[str, Any]
     technical_candidate: dict[str, Any]
     price_candidate: dict[str, Any]
+    price_resolution: dict[str, Any]
+    benchmark_candidate: dict[str, Any]
     benchmark: BenchmarkRecord
     reviewer_note: str = Field(min_length=1)
 
@@ -73,16 +75,47 @@ class ReviewedCpuRecord(BaseModel):
             raise ValueError("approved CPU needs crawler price_source evidence")
         if not isinstance(price_source.get("price_text"), str):
             raise ValueError("approved CPU needs a crawler-observed price_text")
+        resolution = self.price_resolution
+        if (
+            resolution.get("manufacturer") != self.manufacturer
+            or resolution.get("exact_model") != self.exact_model
+            or resolution.get("listing_url") != price_source.get("listing_url")
+            or not isinstance(resolution.get("selected_price_vnd"), int)
+            or resolution.get("selected_price_vnd") <= 0
+        ):
+            raise ValueError("approved CPU needs a matching reviewed price resolution")
         observed = technical.get("observed")
         if not isinstance(observed, dict):
             raise ValueError("approved CPU needs crawler-observed technical fields")
         for key, value in observed.items():
             if value is not None and self.specifications.get(key) != value:
                 raise ValueError(f"approved CPU specification {key!r} conflicts with crawler evidence")
+        benchmark_candidate = self.benchmark_candidate
+        if (
+            benchmark_candidate.get("component_type") != "CPU"
+            or benchmark_candidate.get("manufacturer") != self.manufacturer
+            or benchmark_candidate.get("exact_model") != self.exact_model
+            or not isinstance(benchmark_candidate.get("benchmark_source"), dict)
+            or not isinstance(benchmark_candidate.get("source_evidence"), dict)
+            or not isinstance(benchmark_candidate.get("benchmark"), dict)
+        ):
+            raise ValueError("approved CPU needs retained benchmark candidate evidence")
         if self.benchmark.component_type.value != "CPU":
             raise ValueError("approved CPU benchmark must be CPU evidence")
         if self.benchmark.manufacturer != self.manufacturer or self.benchmark.exact_model != self.exact_model:
             raise ValueError("approved CPU benchmark identity must match approval")
+        observed_benchmark = benchmark_candidate["benchmark"]
+        if (
+            self.benchmark.benchmark_name != observed_benchmark.get("benchmark_name")
+            or self.benchmark.metric_name != observed_benchmark.get("metric_name")
+            or self.benchmark.raw_metric_value != observed_benchmark.get("raw_metric_value")
+            or self.benchmark.metric_unit != observed_benchmark.get("metric_unit")
+            or self.benchmark.benchmark_version != observed_benchmark.get("benchmark_version")
+            or self.benchmark.test_context != observed_benchmark.get("test_context")
+            or self.benchmark.direct_source_url != benchmark_candidate["benchmark_source"].get("url")
+            or self.benchmark.dataset_version == ""
+        ):
+            raise ValueError("approved CPU benchmark does not match retained benchmark candidate")
         return self
 
 
@@ -160,16 +193,35 @@ def _candidate_matches_reviewed_record(
             "approved CPU price evidence does not match retained crawler candidates: "
             f"{reviewed.manufacturer} {reviewed.exact_model}"
         )
+    resolutions = candidates_payload.get("price_resolutions")
+    if not isinstance(resolutions, list) or reviewed.price_resolution not in resolutions:
+        raise ValueError(
+            "approved CPU price resolution does not match retained crawler candidates: "
+            f"{reviewed.manufacturer} {reviewed.exact_model}"
+        )
 
 
 def validate_reviewed_candidates(
     *, review: ReviewedCpuEvidenceFile, candidates_payload: dict[str, Any]
 ) -> None:
     """Validate the explicit review-to-crawler-evidence join before promotion."""
-    if not isinstance(candidates_payload.get("technical"), list) or not isinstance(candidates_payload.get("prices"), list):
-        raise ValueError("crawler candidates payload must contain technical and prices lists")
+    if (
+        not isinstance(candidates_payload.get("technical"), list)
+        or not isinstance(candidates_payload.get("prices"), list)
+        or not isinstance(candidates_payload.get("benchmarks"), list)
+    ):
+        raise ValueError("crawler candidates payload must contain technical, prices, and benchmarks lists")
     for reviewed in review.approved_cpu_records:
         _candidate_matches_reviewed_record(reviewed=reviewed, candidates_payload=candidates_payload)
+        benchmark_matches = [
+            candidate for candidate in candidates_payload["benchmarks"]
+            if candidate == reviewed.benchmark_candidate
+        ]
+        if not benchmark_matches:
+            raise ValueError(
+                "approved CPU benchmark evidence does not match retained crawler candidates: "
+                f"{reviewed.manufacturer} {reviewed.exact_model}"
+            )
 
 
 def build_reviewed_intake(
@@ -229,6 +281,7 @@ def build_reviewed_intake(
             "verified_at": technical_source.verified_at.isoformat(),
         })
         price_source = approved.price_candidate["price_source"]
+        price_resolution = approved.price_resolution
         output["price_snapshots"].append(
             PriceSnapshot(
                 component_type="CPU",
@@ -237,13 +290,13 @@ def build_reviewed_intake(
                 sku=None,
                 retailer_name=price_source["retailer_name"],
                 listing_url=price_source["listing_url"],
-                price_vnd=_price_vnd(price_source["price_text"]),
+                price_vnd=price_resolution["selected_price_vnd"],
                 availability=None,
-                price_type="CRAWLER_REVIEW_PENDING",
+                price_type=price_resolution.get("price_basis", "MANUAL_RETAIL_CPU_PRICE"),
                 vat_included=None,
                 verified_at=price_source["fetched_at"],
                 notes=(
-                    "Manually approved from retained crawler evidence; review note: "
+                    "Manually approved from retained crawler evidence and reviewed retail price resolution; "
                     + approved.reviewer_note
                 ),
             ).model_dump(mode="json")

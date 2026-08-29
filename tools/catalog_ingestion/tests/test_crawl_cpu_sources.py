@@ -49,7 +49,25 @@ def test_hacom_detail_extracts_model_canonical_url_and_price() -> None:
 def test_amd_detail_extracts_only_documented_fields() -> None:
     candidate = amd("https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-7-7800x3d.html", AMD_FIXTURE.read_bytes(), fetch_record("https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-7-7800x3d.html"))
     assert candidate["exact_model"] == "Ryzen 7 7800X3D"
-    assert candidate["observed"] == {"socket": "AM5", "canonical_cpu_family": "RYZEN_7000", "cores": 8, "threads": 16, "default_tdp_w": 120, "memory_type": "DDR5", "pcie_version": "PCIe 5.0"}
+    assert candidate["observed"] == {
+        "socket": "AM5",
+        "canonical_cpu_family": "RYZEN_7000",
+        "cores": 8,
+        "threads": 16,
+        "default_tdp_w": 120,
+        "pcie_version": "PCIe 5.0",
+    }
+
+
+def test_amd_detail_extracts_memory_and_graphics_when_present() -> None:
+    body = b"""<html><head><meta property=\"og:title\" content=\"AMD Ryzen 7 7800X3D Desktop Processor\"></head>
+    <dl><dt># of CPU Cores</dt><dd>8</dd><dt># of Threads</dt><dd>16</dd>
+    <dt>Default TDP</dt><dd>120W</dd><dt>CPU Socket</dt><dd>AM5</dd>
+    <dt>PCI Express Version</dt><dd>PCIe 5.0</dd><dt>System Memory Type</dt><dd>DDR5</dd>
+    <dt>Graphics Model</dt><dd>AMD Radeon Graphics</dd></dl></html>"""
+    candidate = amd("https://www.amd.com/cpu.html", body, fetch_record("https://www.amd.com/cpu.html"))
+    assert candidate["observed"]["memory_type"] == "DDR5"
+    assert candidate["observed"]["integrated_graphics"] is True
 
 
 def test_document_parser_retains_og_metadata() -> None:
@@ -102,6 +120,16 @@ def test_review_file_rejects_duplicate_cpu_identities() -> None:
             "component_type": "CPU", "manufacturer": "AMD", "exact_model": "Ryzen 7 7800X3D",
             "price_source": {"listing_url": "https://retailer.example/cpu", "retailer_name": "Example", "price_text": "1.000.000", "fetched_at": "2026-08-27T00:00:00Z"},
         },
+        "price_resolution": {
+            "manufacturer": "AMD", "exact_model": "Ryzen 7 7800X3D",
+            "listing_url": "https://retailer.example/cpu", "selected_price_vnd": 1000000,
+        },
+        "benchmark_candidate": {
+            "component_type": "CPU", "manufacturer": "AMD", "exact_model": "Ryzen 7 7800X3D",
+            "benchmark_source": {"url": "https://benchmark.example/cpu", "source_type": "PASSMARK_DIRECT", "cpu_id": "1"},
+            "source_evidence": {"requested_url": "https://benchmark.example/cpu", "final_url": "https://benchmark.example/cpu", "status": 200},
+            "benchmark": {"benchmark_name": "PassMark CPU Mark", "metric_name": "CPU Mark", "raw_metric_value": 1.0, "metric_unit": "points", "benchmark_version": "test", "test_context": "test"},
+        },
         "benchmark": {
             "component_type": "CPU", "manufacturer": "AMD", "exact_model": "Ryzen 7 7800X3D", "sku": None,
             "benchmark_name": "PassMark CPU Mark", "metric_name": "CPU Mark", "raw_metric_value": 1.0,
@@ -140,6 +168,16 @@ def _approved_record() -> dict:
             "price_source": {"listing_url": "https://retailer.example/cpu", "retailer_name": "Example", "price_text": "1.000.000", "fetched_at": "2026-08-27T00:00:00Z"},
             "source_evidence": {"requested_url": "https://retailer.example/cpu", "final_url": "https://retailer.example/cpu", "status": 200},
         },
+        "price_resolution": {
+            "manufacturer": "AMD", "exact_model": "Ryzen 7 7800X3D",
+            "listing_url": "https://retailer.example/cpu", "selected_price_vnd": 1000000,
+        },
+        "benchmark_candidate": {
+            "component_type": "CPU", "manufacturer": "AMD", "exact_model": "Ryzen 7 7800X3D",
+            "benchmark_source": {"url": "https://benchmark.example/cpu", "source_type": "PASSMARK_DIRECT", "cpu_id": "1"},
+            "source_evidence": {"requested_url": "https://benchmark.example/cpu", "final_url": "https://benchmark.example/cpu", "status": 200},
+            "benchmark": {"benchmark_name": "PassMark CPU Mark", "metric_name": "CPU Mark", "raw_metric_value": 1.0, "metric_unit": "points", "benchmark_version": "test", "test_context": "test"},
+        },
         "benchmark": {
             "component_type": "CPU", "manufacturer": "AMD", "exact_model": "Ryzen 7 7800X3D", "sku": None,
             "benchmark_name": "PassMark CPU Mark", "metric_name": "CPU Mark", "raw_metric_value": 1.0,
@@ -161,7 +199,7 @@ def test_reviewed_intake_rejects_evidence_not_present_in_candidates() -> None:
                 "review_schema_version": "0.1", "dataset_version": "test",
                 "approved_cpu_records": [record],
             }),
-            candidates_payload={"technical": [], "prices": []},
+            candidates_payload={"technical": [], "prices": [], "benchmarks": []},
         )
 
 
@@ -179,5 +217,5 @@ def test_reviewed_intake_rejects_dataset_version_mismatch_before_merge() -> None
                 "dataset_version": "not-the-base-version",
                 "approved_cpu_records": [_approved_record()],
             },
-            candidates_payload={"technical": [], "prices": []},
+            candidates_payload={"technical": [], "prices": [], "benchmarks": []},
         )

@@ -5,6 +5,9 @@ import argparse
 import hashlib
 import json
 import re
+import shutil
+import subprocess
+import tempfile
 import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -18,9 +21,12 @@ from urllib.robotparser import RobotFileParser
 
 UA = "BuildWiseCatalogEvidenceCrawler/0.1 (one-time research dataset)"
 AMD_INDEX = "https://www.amd.com/en/products/processors/desktops/ryzen.html"
+AMD_SITEMAP = "https://www.amd.com/en.sitemap.xml"
 HACOM_INDEX = "https://hacom.vn/cpu-amd"
+TRANSPORT_UA = "Mozilla/5.0"
+CRAWLER_HEADER = "BuildWiseCatalogEvidenceCrawler/0.1"
 MODEL_RE = re.compile(
-    r"\b(?:(?:CPU\s+)?AMD\s+)?(Ryzen\s+[3579]\s+\d{3,4}[A-Z0-9-]*|Athlon\s+\d{4}[A-Z0-9-]*)\b",
+    r"\b(?:(?:CPU\s+)?AMD\s+)?(Ryzen(?:[^\w\s])?\s+[3579]\s+\d{3,4}[A-Z0-9-]*|Athlon\s+\d{4}[A-Z0-9-]*)\b",
     re.I,
 )
 
@@ -170,35 +176,88 @@ def _open_with_retries(opener, request, *, timeout: float, attempts: int = 3):
     raise last_error
 
 
-def fetch(url, opener, out, delay, robots_cache):
+def _robots_from_text(robot_url: str, robot_text: str) -> RobotFileParser:
+    robots = RobotFileParser(robot_url)
+    robots.parse(robot_text.splitlines())
+    return robots
+
+
+def _write_fetch_artifact(body: bytes, rec: Fetch, out: Path) -> None:
+    out.mkdir(parents=True, exist_ok=True)
+    (out / f"{rec.content_sha256}.html").write_bytes(body)
+    (out / f"{rec.content_sha256}.metadata.json").write_text(
+        json.dumps(asdict(rec), indent=2), encoding="utf-8"
+    )
+
+
+def _fetch_with_curl(url: str, *, timeout: float) -> tuple[bytes, Fetch]:
+    """Fetch through curl's Schannel/TLS path while retaining raw evidence."""
+    curl = shutil.which("curl.exe") or shutil.which("curl")
+    if not curl:
+        raise RuntimeError("curl executable is required for the curl transport")
+    with tempfile.TemporaryDirectory(prefix="buildwise-curl-") as temp_dir:
+        body_path = Path(temp_dir) / "body.bin"
+        command = [
+            curl, "-4", "--http1.1", "--tlsv1.3", "--connect-timeout", "10",
+            "--max-time", str(max(10, int(timeout))), "-L", "-sS", "-A", TRANSPORT_UA,
+            "-H", "Connection: close", "-H", f"X-BuildWise-Crawler: {CRAWLER_HEADER}",
+            "--retry", "2", "--retry-delay", "2", "--retry-all-errors",
+            "-w", "%{http_code}\n%{url_effective}\n%{content_type}\n",
+            "-o", str(body_path), url,
+        ]
+        result = subprocess.run(command, capture_output=True, text=True, check=False)
+        if not body_path.exists():
+            raise RuntimeError(result.stderr.strip() or f"curl exited with status {result.returncode}")
+        lines = result.stdout.splitlines()
+        if len(lines) < 3 or not lines[-3].isdigit():
+            raise RuntimeError("curl did not return usable response metadata")
+        body = body_path.read_bytes()
+        if not body:
+            raise RuntimeError(result.stderr.strip() or "curl returned an empty response")
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.strip() or f"curl exited with status {result.returncode}")
+        status = int(lines[-3])
+        rec = Fetch(
+            url, lines[-2], status, datetime.now(timezone.utc).isoformat(),
+            hashlib.sha256(body).hexdigest(), len(body), lines[-1] or None,
+        )
+    return body, rec
+
+
+def fetch(url, opener, out, delay, robots_cache, *, transport: str = "urllib"):
     host = urlparse(url)
     origin = f"{host.scheme}://{host.netloc}"
     if origin not in robots_cache:
         robot_url = f"{origin}/robots.txt"
         try:
-            robot_request = Request(robot_url, headers={"User-Agent": UA})
-            with _open_with_retries(opener, robot_request, timeout=10) as robot_response:
-                robot_text = robot_response.read().decode("utf-8", errors="replace")
-            robots = RobotFileParser(robot_url)
-            robots.parse(robot_text.splitlines())
-            robots_cache[origin] = robots
+            if transport == "curl":
+                robot_body, robot_rec = _fetch_with_curl(robot_url, timeout=60)
+                if not 200 <= robot_rec.status < 400:
+                    raise RuntimeError(f"robots.txt returned HTTP {robot_rec.status}")
+                robot_text = robot_body.decode("utf-8", errors="replace")
+            else:
+                robot_request = Request(robot_url, headers={"User-Agent": UA})
+                with _open_with_retries(opener, robot_request, timeout=10) as robot_response:
+                    robot_text = robot_response.read().decode("utf-8", errors="replace")
+            robots_cache[origin] = _robots_from_text(robot_url, robot_text)
         except Exception as exc:
             raise RuntimeError(f"robots.txt could not be fetched for {host.netloc}: {exc}") from exc
     robots = robots_cache[origin]
     if not robots.can_fetch(UA, url):
         raise RuntimeError(f"robots.txt disallows URL: {url}")
     time.sleep(delay)
-    req = Request(url, headers={"User-Agent": UA, "Accept": "text/html,application/xhtml+xml"})
-    with _open_with_retries(opener, req, timeout=30) as response:
-        body = response.read()
-        final = response.geturl()
-        status = getattr(response, "status", 200)
-        ctype = response.headers.get("Content-Type")
-    digest = hashlib.sha256(body).hexdigest()
-    out.mkdir(parents=True, exist_ok=True)
-    (out / f"{digest}.html").write_bytes(body)
-    rec = Fetch(url, final, status, datetime.now(timezone.utc).isoformat(), digest, len(body), ctype)
-    (out / f"{digest}.metadata.json").write_text(json.dumps(asdict(rec), indent=2), encoding="utf-8")
+    if transport == "curl":
+        body, rec = _fetch_with_curl(url, timeout=60)
+    else:
+        req = Request(url, headers={"User-Agent": UA, "Accept": "text/html,application/xhtml+xml"})
+        with _open_with_retries(opener, req, timeout=30) as response:
+            body = response.read()
+            rec = Fetch(
+                url, response.geturl(), getattr(response, "status", 200),
+                datetime.now(timezone.utc).isoformat(), hashlib.sha256(body).hexdigest(),
+                len(body), response.headers.get("Content-Type"),
+            )
+    _write_fetch_artifact(body, rec, out)
     return body, rec
 
 
@@ -208,6 +267,7 @@ def links(body, base, pattern):
     text = body.decode("utf-8", errors="replace")
     raw_values = [attrs["href"] for _, attrs in parser.links if attrs.get("href")]
     raw_values.extend(re.findall(r"(?:href|canonical)\s*=\s*[\"']([^\"']+)", text, re.I))
+    raw_values.extend(re.findall(r"<loc>\s*(https?://[^<\s]+)\s*</loc>", text, re.I))
     # AMD's category data can expose fully-qualified product URLs inside
     # escaped JSON rather than anchor attributes. Decode only URL escaping;
     # identity/specifications still come from a fetched detail page.
@@ -233,9 +293,36 @@ def number(value, pattern):
     return int(match.group(1)) if match else None
 
 
+def definition_value(body: bytes, label_pattern: str) -> str | None:
+    """Extract the value paired with one definition-list label.
+
+    AMD product pages contain repeated and occasionally misaligned definition
+    lists in the rendered markup. Pairing each requested ``dt`` directly with
+    its following ``dd`` avoids borrowing a value from a neighbouring section.
+    """
+    text = body.decode("utf-8", errors="replace")
+    match = re.search(
+        rf"<dt[^>]*>\s*{label_pattern}.*?</dt>\s*<dd[^>]*>(.*?)</dd>",
+        text,
+        re.I | re.S,
+    )
+    if not match:
+        return None
+    return clean_text(re.sub(r"<[^>]+>", " ", match.group(1))) or None
+
+
 def model_from_text(value: str) -> str | None:
     match = MODEL_RE.search(clean_text(value))
-    return clean_text(match.group(1)) if match else None
+    if not match:
+        return None
+    return clean_text(re.sub(r"(Ryzen)[^\w\s]", r"\1", match.group(1)))
+
+
+def normalize_pcie_version(value: str | None) -> str | None:
+    if not value:
+        return None
+    match = re.search(r"PCIe[^0-9]*([0-9]+(?:\.[0-9]+)?)", value, re.I)
+    return f"PCIe {match.group(1)}" if match else clean_text(value)
 
 
 def price_from_text(value: str | None) -> str | None:
@@ -251,7 +338,21 @@ def amd(url, body, rec):
     title = document.meta.get("og:title") or title
     model = model_from_text(title)
     family = re.search(r"Ryzen\s+\d\s+(\d)", model or "", re.I)
-    socket = pairs.get("cpu socket")
+    socket = definition_value(body, r"CPU\s+Socket") or pairs.get("cpu socket")
+    pcie_raw = definition_value(body, r"PCI\s+Express[^<]*Version")
+    if not pcie_raw:
+        pcie_raw = next(
+            (value for key, value in pairs.items() if key.startswith("pci express") and "version" in key),
+            None,
+        )
+    memory_type = definition_value(body, r"System\s+Memory\s+Type")
+    graphics_model = definition_value(body, r"Graphics\s+Model")
+    integrated_graphics = None
+    if graphics_model:
+        if re.search(r"discrete graphics card required", graphics_model, re.I):
+            integrated_graphics = False
+        elif re.search(r"radeon|graphics", graphics_model, re.I):
+            integrated_graphics = True
     return {
         "component_type": "CPU",
         "manufacturer": "AMD",
@@ -259,13 +360,18 @@ def amd(url, body, rec):
         "technical_source": {"url": rec.final_url, "source_type": "MANUFACTURER_OFFICIAL", "fetched_at": rec.fetched_at},
         "source_evidence": asdict(rec),
         "observed": {
-            "socket": socket,
-            "canonical_cpu_family": f"RYZEN_{family.group(1)}000" if family else None,
-            "cores": number(pairs.get("# of cpu cores"), r"(\d+)"),
-            "threads": number(pairs.get("# of threads"), r"(\d+)"),
-            "default_tdp_w": number(pairs.get("default tdp"), r"(\d+)\s*w"),
-            "memory_type": "DDR5" if (socket or "").strip().upper() == "AM5" else None,
-            "pcie_version": pairs.get("pci express® version") or pairs.get("pci express version"),
+            key: value
+            for key, value in {
+                "socket": socket,
+                "canonical_cpu_family": f"RYZEN_{family.group(1)}000" if family else None,
+                "cores": number(definition_value(body, r"#\s*of\s+CPU\s+Cores") or pairs.get("# of cpu cores"), r"(\d+)"),
+                "threads": number(definition_value(body, r"#\s+of\s+Threads") or pairs.get("# of threads"), r"(\d+)"),
+                "default_tdp_w": number(definition_value(body, r"Default\s+TDP") or pairs.get("default tdp"), r"(\d+)\s*w"),
+                "memory_type": memory_type,
+                "integrated_graphics": integrated_graphics,
+                "pcie_version": normalize_pcie_version(pcie_raw),
+            }.items()
+            if value is not None
         },
         "review_status": "PENDING_PRICE_AND_BENCHMARK_REVIEW",
     }
@@ -333,6 +439,7 @@ def main():
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--limit", type=int, default=40)
     ap.add_argument("--delay", type=float, default=1.0)
+    ap.add_argument("--transport", choices=("urllib", "curl"), default="curl")
     a = ap.parse_args()
     a.output.mkdir(parents=True, exist_ok=True)
     opener = build_opener()
@@ -346,15 +453,36 @@ def main():
         (HACOM_INDEX, "hacom", r"/cpu-(?:amd|amdryzen).*", hacom),
     ]:
         try:
-            body, rec = fetch(index, opener, a.output / "artifacts" / kind, a.delay, robots_cache)
+            body, rec = fetch(index, opener, a.output / "artifacts" / kind, a.delay, robots_cache, transport=a.transport)
             fetches.append(asdict(rec))
+            if rec.status >= 400:
+                raise RuntimeError(f"HTTP {rec.status} for {index}")
             if kind == "hacom":
                 prices.extend(hacom_listing(index, body, rec))
-            urls = [u for u in links(body, index, pattern) if u.rstrip("/") not in {index.rstrip("/")} and "?" not in u][:a.limit]
+            discovery_bodies = [(body, index)]
+            if kind == "amd":
+                sitemap_body, sitemap_rec = fetch(
+                    AMD_SITEMAP, opener, a.output / "artifacts" / kind, a.delay,
+                    robots_cache, transport=a.transport,
+                )
+                fetches.append(asdict(sitemap_rec))
+                if sitemap_rec.status >= 400:
+                    raise RuntimeError(f"HTTP {sitemap_rec.status} for {AMD_SITEMAP}")
+                discovery_bodies.append((sitemap_body, AMD_SITEMAP))
+            discovered = set()
+            for discovery_body, discovery_base in discovery_bodies:
+                discovered.update(links(discovery_body, discovery_base, pattern))
+            urls = [
+                u for u in sorted(discovered)
+                if u.rstrip("/") not in {index.rstrip("/"), AMD_SITEMAP.rstrip("/")}
+                and "?" not in u
+            ][:a.limit]
             for url in urls:
                 try:
-                    b, r = fetch(url, opener, a.output / "artifacts" / kind, a.delay, robots_cache)
+                    b, r = fetch(url, opener, a.output / "artifacts" / kind, a.delay, robots_cache, transport=a.transport)
                     fetches.append(asdict(r))
+                    if r.status >= 400:
+                        raise RuntimeError(f"HTTP {r.status} for {url}")
                     item = parser(url, b, r)
                     if item:
                         (technical if kind == "amd" else prices).append(item)
@@ -370,8 +498,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
 

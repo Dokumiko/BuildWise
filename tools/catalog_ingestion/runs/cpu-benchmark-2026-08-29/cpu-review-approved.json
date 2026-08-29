@@ -1,0 +1,141 @@
+{
+  "review_schema_version": "0.1",
+  "dataset_version": "vn-pc-am5-ddr5-sandbox",
+  "approved_cpu_records": [
+    {
+      "review_status": "APPROVED",
+      "manufacturer": "AMD",
+      "exact_model": "Ryzen 7 7700X",
+      "specifications": {
+        "socket": "AM5",
+        "canonical_cpu_family": "RYZEN_7000",
+        "cores": 8,
+        "threads": 16,
+        "default_tdp_w": 105,
+        "memory_type": "DDR5",
+        "integrated_graphics": true,
+        "pcie_version": "PCIe 5.0"
+      },
+      "technical_candidate": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 7 7700X",
+        "technical_source": {
+          "url": "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-7-7700x.html",
+          "source_type": "MANUFACTURER_OFFICIAL",
+          "fetched_at": "2026-08-28T16:11:58.511177+00:00"
+        },
+        "source_evidence": {
+          "requested_url": "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-7-7700x.html",
+          "final_url": "https://www.amd.com/en/products/processors/desktops/ryzen/7000-series/amd-ryzen-7-7700x.html",
+          "status": 200,
+          "fetched_at": "2026-08-28T16:11:58.511177+00:00",
+          "content_sha256": "b544f6f24c608184c1301200f13357949d30ee91d6b9c544af2bf63e422c1c14",
+          "bytes": 199113,
+          "content_type": "text/html"
+        },
+        "observed": {
+          "socket": "AM5",
+          "canonical_cpu_family": "RYZEN_7000",
+          "cores": 8,
+          "threads": 16,
+          "default_tdp_w": 105,
+          "memory_type": "DDR5",
+          "integrated_graphics": true,
+          "pcie_version": "PCIe 5.0"
+        },
+        "review_status": "PENDING_PRICE_AND_BENCHMARK_REVIEW"
+      },
+      "price_candidate": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 7 7700X",
+        "price_source": {
+          "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7700x-4.5-ghz-upto-5.4ghz-40mb-8-cores-16-threads-105w-socket-am5",
+          "retailer_name": "HACOM",
+          "price_text": "8.199.000",
+          "fetched_at": "2026-08-27T15:36:20.804033+00:00"
+        },
+        "source_evidence": {
+          "requested_url": "https://hacom.vn/cpu-amd",
+          "final_url": "https://hacom.vn/cpu-amd",
+          "status": 200,
+          "fetched_at": "2026-08-27T15:36:20.804033+00:00",
+          "content_sha256": "774582c537005a8206f72301ba44e89af54f672f457a497307e1a1eef10d741a",
+          "bytes": 1748805,
+          "content_type": "text/html; charset=utf-8"
+        },
+        "review_status": "PENDING_TECHNICAL_AND_BENCHMARK_JOIN"
+      },
+      "price_resolution": {
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 7 7700X",
+        "listing_url": "https://hacom.vn/cpu-amd-ryzen-7-7700x-4.5-ghz-upto-5.4ghz-40mb-8-cores-16-threads-105w-socket-am5",
+        "retailer_name": "HACOM",
+        "variant": "RETAIL_BOXED",
+        "selected_price_vnd": 9599000,
+        "price_basis": "MANUAL_RETAIL_CPU_PRICE",
+        "observed_price_texts": [
+          "8.199.000"
+        ],
+        "selected_price_found_in_crawler_observations": false,
+        "raw_observation_count": 1,
+        "rationale": "The crawler captured a full-build bundle price. The standalone retail CPU price is 9.599.000 VND.",
+        "review_status": "PRICE_REVIEWED_PENDING_TECHNICAL_AND_BENCHMARK"
+      },
+      "benchmark": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 7 7700X",
+        "sku": null,
+        "benchmark_name": "PassMark CPU Mark",
+        "metric_name": "CPU Mark",
+        "raw_metric_value": 35488.0,
+        "metric_unit": "points",
+        "direct_source_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+7+7700X&id=5036",
+        "benchmark_version": "PerformanceTest V10",
+        "test_context": {
+          "rating_type": "Multithread Rating",
+          "samples": 9578,
+          "source_as_of": "28th of August 2026."
+        },
+        "match_scope": "CPU_MODEL",
+        "collected_at": "2026-08-29T02:11:10.5604497Z",
+        "dataset_version": "vn-pc-am5-ddr5-sandbox",
+        "source_type": "PASSMARK_DIRECT"
+      },
+      "reviewer_note": "Approved only after exact AMD technical evidence, reviewed HACOM retail-price resolution, and retained PassMark CPU Mark evidence were joined by exact manufacturer/model. Ryzen 9 7900X remains excluded because PCIe version is unresolved.",
+      "benchmark_candidate": {
+        "component_type": "CPU",
+        "manufacturer": "AMD",
+        "exact_model": "Ryzen 7 7700X",
+        "benchmark_source": {
+          "url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+7+7700X&id=5036",
+          "source_type": "PASSMARK_DIRECT",
+          "cpu_id": "5036"
+        },
+        "source_evidence": {
+          "requested_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD%20Ryzen%207%207700X&id=5036",
+          "final_url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD%20Ryzen%207%207700X&id=5036",
+          "status": 200,
+          "fetched_at": "2026-08-29T02:11:10.5604497Z",
+          "content_sha256": "d996e945b5293c3a571ff667694f17b8dfe57cb5de971ee2dc7024c53c8e3384",
+          "bytes": 115421,
+          "content_type": "text/html; charset=UTF-8"
+        },
+        "benchmark": {
+          "benchmark_name": "PassMark CPU Mark",
+          "metric_name": "CPU Mark",
+          "raw_metric_value": 35488.0,
+          "metric_unit": "points",
+          "benchmark_version": "PerformanceTest V10",
+          "test_context": {
+            "rating_type": "Multithread Rating",
+            "samples": 9578,
+            "source_as_of": "28th of August 2026."
+          }
+        }
+      }
+    }
+  ]
+}

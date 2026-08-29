@@ -62,3 +62,4 @@ skills-lock.json
 /tools/catalog_ingestion/runs/cpu-smoke-*/
 /tools/catalog_ingestion/runs/*/fetch-manifest.json
 /tools/catalog_ingestion/runs/*/crawl-errors.json
+/tools/catalog_ingestion/runs/*/*candidates*.json
