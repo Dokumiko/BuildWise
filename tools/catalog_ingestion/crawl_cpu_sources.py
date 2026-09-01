@@ -201,7 +201,9 @@ def _fetch_with_curl(url: str, *, timeout: float) -> tuple[bytes, Fetch]:
             curl, "-4", "--http1.1", "--tlsv1.3", "--connect-timeout", "10",
             "--max-time", str(max(10, int(timeout))), "-L", "-sS", "-A", TRANSPORT_UA,
             "-H", "Connection: close", "-H", f"X-BuildWise-Crawler: {CRAWLER_HEADER}",
-            "--retry", "2", "--retry-delay", "2", "--retry-all-errors",
+            # Curl retries transient transport failures only by default. Do not
+            # enable --retry-all-errors: policy responses such as 403 must stop.
+            "--retry", "2", "--retry-delay", "2",
             "-w", "%{http_code}\n%{url_effective}\n%{content_type}\n",
             "-o", str(body_path), url,
         ]

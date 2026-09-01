@@ -39,3 +39,74 @@ python tools/catalog_ingestion/review_cpu_prices.py --candidates tools/catalog_i
 The final intake bridge must be invoked with `--candidates` as well as
 `--base-intake`, `--review`, and `--output`.
 
+## PassMark benchmark crawl
+
+`crawl_cpu_benchmarks.py` crawls only operator-supplied, exact PassMark CPU
+URLs. It does not search, guess CPU IDs, follow nearest-name redirects, or use
+search snippets. The target file must contain directly verified URLs and the
+expected model identity:
+
+```json
+[
+  {
+    "expected_model": "Ryzen 7 9800X3D",
+    "url": "https://www.cpubenchmark.net/cpu.php?cpu=AMD+Ryzen+7+9800X3D&id=6344"
+  }
+]
+```
+
+Run it with a conservative delay:
+
+```powershell
+python tools/catalog_ingestion/crawl_cpu_benchmarks.py \
+  --targets tools/catalog_ingestion/passmark-targets.json \
+  --output tools/catalog_ingestion/runs/cpu-benchmark-YYYY-MM-DD \
+  --delay 3
+```
+
+The command first fetches and interprets `cpubenchmark.net/robots.txt`, then
+retains raw HTML, response headers, fetch metadata, parser output, and an error
+artifact. The parser fails closed unless the title, canonical URL,
+`myCmp.addCPU` identity, CPU ID, and expected model agree. HTTP policy failures
+remain blocked and are not bypassed.
+
+
+## Deterministic promotion reporting
+
+`promotion_report.py` joins technical, retail-price, benchmark, and contract-validation artifacts by exact component identity. It emits a coverage matrix and marks a row promotable only when all category gates pass. Missing contract validation is a blocker; the report never creates an intake or imports PostgreSQL.
+
+```powershell
+python tools/catalog_ingestion/promotion_report.py `
+  --candidates tools/catalog_ingestion/runs/<run>/cpu-candidates-merged.json `
+  --base-intake backend/data/vn-pc-am5-ddr5-v0.2-catalog-evaluation-intake.json `
+  --contract-validations tools/catalog_ingestion/runs/<run>/contract-validations.json `
+  --output tools/catalog_ingestion/runs/<run>/coverage-matrix.json
+```
+
+For CPU, promotion requires a `RETAIL_BOXED` price resolution and one exact
+PassMark record. For GPU, use the intake's explicit model-association and
+limitation fields. Other categories do not require a benchmark, but still need
+technical, one VND retail price, exact identity, and contract validation.
+
+## Automatic CPU promotion (no approval record)
+
+`promote_cpu_candidates.py` is the CPU-first promotion bridge. It validates
+candidate raw CPU fields against the existing canonical contract, writes a
+contract-validation artifact, coverage matrix, and unresolved/blocker report.
+It only writes a **new** versioned intake when every eligible CPU passes all
+independent gates and the resulting intake passes readiness; it never imports
+a database.
+
+```powershell
+python tools/catalog_ingestion/promote_cpu_candidates.py `
+  --candidates tools/catalog_ingestion/runs/<run>/cpu-candidates-merged.json `
+  --base-intake backend/data/vn-pc-am5-ddr5-v0.2-catalog-evaluation-intake.json `
+  --validation-output tools/catalog_ingestion/runs/<run>/contract-validations.json `
+  --coverage-output tools/catalog_ingestion/runs/<run>/coverage-matrix.json `
+  --unresolved-output tools/catalog_ingestion/runs/<run>/unresolved-blockers.json
+```
+
+Add `--intake-output`, `--dataset-version`, and `--collected-at` only after the
+report has promotable rows. The bridge rejects a historical dataset version,
+base identity duplicates, wrong/final URL ownership, unresolved canonical CPU
+families, tray-only prices, and non-exact benchmark evidence.

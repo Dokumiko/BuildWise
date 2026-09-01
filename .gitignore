@@ -63,3 +63,13 @@ skills-lock.json
 /tools/catalog_ingestion/runs/*/fetch-manifest.json
 /tools/catalog_ingestion/runs/*/crawl-errors.json
 /tools/catalog_ingestion/runs/*/*candidates*.json
+# Keep the explicitly requested execution runbook tracked while other docs remain local.
+!/docs/
+/docs/*
+!/docs/CATALOG_EXPANSION_EXECUTION_PLAN.md
+# Generated promotion/robots reports remain local; keep only versioned intake and source/tests.
+/tools/catalog_ingestion/runs/*/*automatic*.json
+/tools/catalog_ingestion/runs/*/coverage-matrix.json
+/tools/catalog_ingestion/runs/*/robots-fetch.json
+/tools/catalog_ingestion/runs/*/robots.headers.txt
+/tools/catalog_ingestion/runs/*/robots.txt

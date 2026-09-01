@@ -24,6 +24,9 @@ INTAKE = Path(__file__).parents[1] / "data" / "catalog-evaluation-intake-v0.1.js
 V02_INTAKE = (
     Path(__file__).parents[1] / "data" / "vn-pc-am5-ddr5-v0.2-catalog-evaluation-intake.json"
 )
+V03_CPU_EVIDENCE_INTAKE = (
+    Path(__file__).parents[1] / "data" / "vn-pc-am5-ddr5-v0.3-cpu-evidence-intake.json"
+)
 
 
 def intake_payload() -> dict:
@@ -249,3 +252,21 @@ def test_invalid_json_is_rejected_before_intake_validation(tmp_path: Path) -> No
 
     with pytest.raises(json.JSONDecodeError):
         load_intake_payload(invalid_json)
+
+
+def test_v03_cpu_evidence_intake_is_versioned_and_preserves_only_promoted_cpu_records() -> None:
+    intake = load_validated_intake(V03_CPU_EVIDENCE_INTAKE)
+    assert intake.dataset_version == "vn-pc-am5-ddr5-v0.3-cpu-evidence"
+    cpu_models = {
+        component.exact_model
+        for component in intake.components
+        if component.component_type.value == "CPU"
+    }
+    assert cpu_models == {
+        "Ryzen 5 7600", "Ryzen 5 7600X", "Ryzen 5 7500F",
+        "Ryzen 7 7700X", "Ryzen 7 7800X3D", "Ryzen 7 9700X", "Ryzen 9 9900X",
+    }
+    cpu_benchmarks = [record for record in intake.benchmark_records if record.component_type.value == "CPU"]
+    assert {record.exact_model for record in cpu_benchmarks} == cpu_models
+    assert intake.dataset_bounds.cpu.min == 26525
+    assert intake.dataset_bounds.cpu.max == 54327
