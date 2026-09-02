@@ -21,8 +21,8 @@ if (!existsSync(pythonPath)) {
 }
 
 if (!existsSync(nextPackagePath)) {
-  console.log("Installing frontend dependencies for the first local run…");
-  const install = spawnSync(npmCommand, ["install", "--package-lock=false"], {
+  console.log("Installing frontend dependencies for the first local run...");
+  const install = spawnSync(npmCommand, ["ci"], {
     cwd: frontendDirectory,
     stdio: "inherit",
     shell: process.platform === "win32",
