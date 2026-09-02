@@ -1,18 +1,26 @@
-# Project-local documentation and agent scratch space
+# Only product runtime source, setup files, and the bootstrap dataset belong in Git.
+# Local documentation, research, quality checks, and collection tooling remain on
+# the operator machine and must not be staged accidentally.
 /docs/
+/backend/docs/
+/backend/tests/
+
+# Offline thesis/search-evaluation utilities are not part of the shipped app.
+/backend/src/app/scripts/run_search_evaluation.py
+/backend/src/app/services/evaluation.py
+/backend/src/app/services/persisted_evaluation.py
+/tools/
 /outputs/
 /work/
 /AGENTS.md
 /PRODUCT.md
 
-# Local research artifacts; validated versioned catalog intake files remain tracked.
-/backend/data/test-data.txt
-/backend/data/report/
-/backend/data/media_source/
-/backend/data/*-targeted-verification-report.json
+# Retain exactly the DDL baseline and the catalog imported by backend/README.md.
+/backend/data/*
+!/backend/data/database-schema-v0.1.sql
+!/backend/data/vn-pc-am5-ddr5-v0.2-catalog-evaluation-intake.json
 
-
-# Python
+# Python environments, caches, and coverage output.
 .venv/
 venv/
 __pycache__/
@@ -25,16 +33,14 @@ __pycache__/
 coverage.xml
 htmlcov/
 
-# Windows reserved / accidental empty files
-nul
-NUL
-
-# Environment and secrets
+# Environment-specific configuration and Windows accidental files.
 .env
 .env.*
 !.env.example
+nul
+NUL
 
-# Node / Next.js
+# Node / Next.js build and package-manager output.
 node_modules/
 .next/
 out/
@@ -45,31 +51,13 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# IDE and operating-system files
+# Editor, OS, and local agent state.
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
-
-# AI Agent Skills
 .agents/
 .claude/
-skills-lock.json
 .codex/
-# One-time catalog crawler outputs are local research artifacts. Commit only
-# curated candidate/review artifacts; raw pages and run logs are reproducible.
-/tools/catalog_ingestion/runs/*/artifacts/
-/tools/catalog_ingestion/runs/cpu-smoke-*/
-/tools/catalog_ingestion/runs/*/fetch-manifest.json
-/tools/catalog_ingestion/runs/*/crawl-errors.json
-/tools/catalog_ingestion/runs/*/*candidates*.json
-# Keep the explicitly requested execution runbook tracked while other docs remain local.
-!/docs/
-/docs/*
-!/docs/CATALOG_EXPANSION_EXECUTION_PLAN.md
-# Generated promotion/robots reports remain local; keep only versioned intake and source/tests.
-/tools/catalog_ingestion/runs/*/*automatic*.json
-/tools/catalog_ingestion/runs/*/coverage-matrix.json
-/tools/catalog_ingestion/runs/*/robots-fetch.json
-/tools/catalog_ingestion/runs/*/robots.headers.txt
-/tools/catalog_ingestion/runs/*/robots.txt
+.impeccable/
+skills-lock.json
