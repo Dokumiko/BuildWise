@@ -1,4 +1,4 @@
-"""Deterministic compatibility analysis for canonical component contracts.
+﻿"""Deterministic compatibility analysis for canonical component contracts.
 
 The engine is pure: it consumes already-validated catalog contracts and explicit
 CPU/motherboard support evidence. It does not query the database, make network
@@ -158,6 +158,15 @@ def _cpu_motherboard_socket(build: CompatibilityBuild) -> CompatibilityFinding:
     rule_id = "CPU_MOTHERBOARD_SOCKET"
     if build.cpu is None or build.motherboard is None:
         return _missing(rule_id, "CPU", "MOTHERBOARD")
+    if build.cpu.socket is None or build.motherboard.socket is None:
+        return _finding(
+            rule_id,
+            FindingSeverity.WARNING,
+            FindingStatus.INSUFFICIENT_DATA,
+            "CPU/motherboard socket compatibility cannot be confirmed because a socket fact is missing.",
+            cpu_socket=build.cpu.socket,
+            motherboard_socket=build.motherboard.socket,
+        )
     if build.cpu.socket != build.motherboard.socket:
         return _finding(
             rule_id,
@@ -213,6 +222,15 @@ def _cpu_motherboard_bios_support(build: CompatibilityBuild) -> CompatibilityFin
                 min_bios_version=support.min_bios_version,
             )
 
+    if not build.motherboard.supported_cpu_families:
+        return _finding(
+            rule_id,
+            FindingSeverity.WARNING,
+            FindingStatus.INSUFFICIENT_DATA,
+            "Motherboard CPU-family support data is not documented for this pair.",
+            cpu_family=build.cpu.family.value,
+            supported_cpu_families=[],
+        )
     if build.cpu.family not in build.motherboard.supported_cpu_families:
         return _finding(
             rule_id,
@@ -236,6 +254,15 @@ def _ram_memory_type(build: CompatibilityBuild) -> CompatibilityFinding:
     rule_id = "RAM_MOTHERBOARD_MEMORY_TYPE"
     if build.ram is None or build.motherboard is None:
         return _missing(rule_id, "RAM", "MOTHERBOARD")
+    if build.ram.memory_type is None or build.motherboard.memory.type is None:
+        return _finding(
+            rule_id,
+            FindingSeverity.WARNING,
+            FindingStatus.INSUFFICIENT_DATA,
+            "RAM/motherboard memory-generation compatibility cannot be confirmed because a memory type is missing.",
+            ram_memory_type=build.ram.memory_type,
+            motherboard_memory_type=build.motherboard.memory.type,
+        )
     if build.ram.memory_type != build.motherboard.memory.type:
         return _finding(
             rule_id,
@@ -260,6 +287,15 @@ def _ram_capacity(build: CompatibilityBuild) -> CompatibilityFinding:
     if build.ram is None or build.motherboard is None:
         return _missing(rule_id, "RAM", "MOTHERBOARD")
     maximum = build.motherboard.memory.max_capacity_gb
+    if build.ram.capacity_gb is None or maximum is None:
+        return _finding(
+            rule_id,
+            FindingSeverity.WARNING,
+            FindingStatus.INSUFFICIENT_DATA,
+            "RAM capacity compatibility cannot be confirmed because a capacity limit is missing.",
+            ram_capacity_gb=build.ram.capacity_gb,
+            motherboard_max_capacity_gb=maximum,
+        )
     if build.ram.capacity_gb > maximum:
         return _finding(
             rule_id,
@@ -284,6 +320,15 @@ def _ram_module_count(build: CompatibilityBuild) -> CompatibilityFinding:
     if build.ram is None or build.motherboard is None:
         return _missing(rule_id, "RAM", "MOTHERBOARD")
     maximum = build.motherboard.memory.slot_count
+    if build.ram.module_count is None or maximum is None:
+        return _finding(
+            rule_id,
+            FindingSeverity.WARNING,
+            FindingStatus.INSUFFICIENT_DATA,
+            "RAM module-count compatibility cannot be confirmed because a module or slot count is missing.",
+            ram_module_count=build.ram.module_count,
+            motherboard_slot_count=maximum,
+        )
     if build.ram.module_count > maximum:
         return _finding(
             rule_id,
@@ -307,6 +352,15 @@ def _motherboard_case_form_factor(build: CompatibilityBuild) -> CompatibilityFin
     rule_id = "MOTHERBOARD_CASE_FORM_FACTOR"
     if build.motherboard is None or build.case is None:
         return _missing(rule_id, "MOTHERBOARD", "CASE")
+    if build.motherboard.form_factor is None or not build.case.supported_motherboard_form_factors:
+        return _finding(
+            rule_id,
+            FindingSeverity.WARNING,
+            FindingStatus.INSUFFICIENT_DATA,
+            "Motherboard/case form-factor compatibility cannot be confirmed because support data is missing.",
+            motherboard_form_factor=(build.motherboard.form_factor.value if build.motherboard.form_factor else None),
+            supported_motherboard_form_factors=[item.value for item in build.case.supported_motherboard_form_factors],
+        )
     if build.motherboard.form_factor not in build.case.supported_motherboard_form_factors:
         return _finding(
             rule_id,
@@ -332,6 +386,16 @@ def _gpu_case_length(build: CompatibilityBuild) -> CompatibilityFinding:
     if build.gpu is None or build.case is None:
         return _missing(rule_id, "GPU", "CASE")
     clearance = build.case.max_gpu_length
+    if build.gpu.length_mm is None or clearance.value_mm is None:
+        return _finding(
+            rule_id,
+            FindingSeverity.WARNING,
+            FindingStatus.INSUFFICIENT_DATA,
+            "GPU/case length compatibility cannot be confirmed because a documented length or clearance is missing.",
+            gpu_length_mm=build.gpu.length_mm,
+            case_max_gpu_length_mm=clearance.value_mm,
+            clearance_context=clearance.context.value,
+        )
     if build.gpu.length_mm > clearance.value_mm:
         return _finding(
             rule_id,
@@ -368,14 +432,14 @@ def _gpu_case_slot_width(build: CompatibilityBuild) -> CompatibilityFinding:
     if build.gpu is None or build.case is None:
         return _missing(rule_id, "GPU", "CASE")
     maximum = build.case.max_gpu_slot_width
-    if maximum is None:
+    if maximum is None or build.gpu.slot_width is None:
         return _finding(
             rule_id,
             FindingSeverity.WARNING,
             FindingStatus.INSUFFICIENT_DATA,
-            "Case GPU slot-width clearance is not documented.",
+            "GPU/case slot-width compatibility cannot be confirmed because a documented width or clearance is missing.",
             gpu_slot_width=build.gpu.slot_width,
-            case_max_gpu_slot_width=None,
+            case_max_gpu_slot_width=maximum,
         )
     if build.gpu.slot_width > maximum:
         return _finding(
@@ -400,6 +464,15 @@ def _cooler_cpu_socket(build: CompatibilityBuild) -> CompatibilityFinding:
     rule_id = "COOLER_CPU_SOCKET"
     if build.cooler is None or build.cpu is None:
         return _missing(rule_id, "COOLER", "CPU")
+    if build.cpu.socket is None or not build.cooler.supported_sockets:
+        return _finding(
+            rule_id,
+            FindingSeverity.WARNING,
+            FindingStatus.INSUFFICIENT_DATA,
+            "Cooler/CPU socket compatibility cannot be confirmed because socket support data is missing.",
+            cpu_socket=build.cpu.socket,
+            cooler_supported_sockets=build.cooler.supported_sockets,
+        )
     if build.cpu.socket not in build.cooler.supported_sockets:
         return _finding(
             rule_id,
@@ -422,6 +495,23 @@ def _cooler_case_height(build: CompatibilityBuild) -> CompatibilityFinding:
     rule_id = "COOLER_CASE_HEIGHT"
     if build.cooler is None or build.case is None:
         return _missing(rule_id, "COOLER", "CASE")
+    if build.cooler.cooler_type in {"AIO", "LIQUID"}:
+        return _finding(
+            rule_id,
+            FindingSeverity.INFO,
+            FindingStatus.PASS,
+            "Tower-cooler height compatibility is not applicable to a liquid cooler.",
+            cooler_type=build.cooler.cooler_type,
+        )
+    if build.cooler.height_mm is None or build.case.max_cpu_cooler_height_mm is None:
+        return _finding(
+            rule_id,
+            FindingSeverity.WARNING,
+            FindingStatus.INSUFFICIENT_DATA,
+            "Cooler/case height compatibility cannot be confirmed because a documented height or clearance is missing.",
+            cooler_height_mm=build.cooler.height_mm,
+            case_max_cpu_cooler_height_mm=build.case.max_cpu_cooler_height_mm,
+        )
     if build.cooler.height_mm > build.case.max_cpu_cooler_height_mm:
         return _finding(
             rule_id,
@@ -445,7 +535,16 @@ def _cooler_case_aio_radiator(build: CompatibilityBuild) -> CompatibilityFinding
     rule_id = "COOLER_CASE_AIO_RADIATOR"
     if build.cooler is None or build.case is None:
         return _missing(rule_id, "COOLER", "CASE")
-    if build.cooler.cooler_type != "AIO":
+    if build.cooler.cooler_type is None:
+        return _finding(
+            rule_id,
+            FindingSeverity.WARNING,
+            FindingStatus.INSUFFICIENT_DATA,
+            "AIO radiator compatibility cannot be assessed because the cooler type is missing.",
+            cooler_type=None,
+            case_radiator_support=build.case.radiator_support,
+        )
+    if build.cooler.cooler_type not in {"AIO", "LIQUID"}:
         return _finding(
             rule_id,
             FindingSeverity.INFO,
@@ -467,59 +566,45 @@ def _storage_motherboard_interface(build: CompatibilityBuild) -> CompatibilityFi
     rule_id = "STORAGE_MOTHERBOARD_INTERFACE"
     if build.storage is None or build.motherboard is None:
         return _missing(rule_id, "STORAGE", "MOTHERBOARD")
-    matching_slots = [
-        slot.slot_id
-        for slot in build.motherboard.m2_slots
-        if build.storage.interface in slot.interfaces
-    ]
+    interface = build.storage.interface
+    if interface is None:
+        return _finding(rule_id, FindingSeverity.WARNING, FindingStatus.INSUFFICIENT_DATA,
+            "Storage/motherboard interface compatibility cannot be confirmed because the storage interface is missing.", storage_interface=None)
+    if interface == "SATA":
+        if build.motherboard.sata_ports is None:
+            return _finding(rule_id, FindingSeverity.WARNING, FindingStatus.INSUFFICIENT_DATA,
+                "SATA storage compatibility cannot be confirmed because the motherboard SATA-port count is missing.", storage_interface=interface, motherboard_sata_ports=None)
+        if build.motherboard.sata_ports < 1:
+            return _finding(rule_id, FindingSeverity.ERROR, FindingStatus.FAIL,
+                "Motherboard has no documented SATA port for the selected SATA storage.", storage_interface=interface, motherboard_sata_ports=build.motherboard.sata_ports)
+        return _finding(rule_id, FindingSeverity.INFO, FindingStatus.PASS,
+            "Motherboard has a documented SATA port for the selected SATA storage.", storage_interface=interface, motherboard_sata_ports=build.motherboard.sata_ports)
+    matching_slots = [slot.slot_id for slot in build.motherboard.m2_slots if interface in slot.interfaces]
     if not matching_slots:
-        return _finding(
-            rule_id,
-            FindingSeverity.ERROR,
-            FindingStatus.FAIL,
-            "Motherboard has no documented compatible storage interface slot.",
-            storage_interface=build.storage.interface,
-            motherboard_m2_interfaces=[
-                interface for slot in build.motherboard.m2_slots for interface in slot.interfaces
-            ],
-        )
-    return _finding(
-        rule_id,
-        FindingSeverity.INFO,
-        FindingStatus.PASS,
-        "Motherboard has a documented compatible storage interface slot.",
-        storage_interface=build.storage.interface,
-        matching_slot_ids=matching_slots,
-    )
+        return _finding(rule_id, FindingSeverity.ERROR, FindingStatus.FAIL,
+            "Motherboard has no documented compatible storage interface slot.", storage_interface=interface,
+            motherboard_m2_interfaces=[interface for slot in build.motherboard.m2_slots for interface in slot.interfaces])
+    return _finding(rule_id, FindingSeverity.INFO, FindingStatus.PASS,
+        "Motherboard has a documented compatible storage interface slot.", storage_interface=interface, matching_slot_ids=matching_slots)
 
 
 def _storage_motherboard_form_factor(build: CompatibilityBuild) -> CompatibilityFinding:
     rule_id = "STORAGE_MOTHERBOARD_FORM_FACTOR"
     if build.storage is None or build.motherboard is None:
         return _missing(rule_id, "STORAGE", "MOTHERBOARD")
-    matching_slots = [
-        slot.slot_id
-        for slot in build.motherboard.m2_slots
-        if build.storage.interface in slot.interfaces and build.storage.form_factor in slot.sizes
-    ]
+    if build.storage.interface == "SATA":
+        return _finding(rule_id, FindingSeverity.INFO, FindingStatus.PASS,
+            "M.2 form-factor compatibility is not applicable to SATA storage.", storage_interface="SATA", storage_form_factor=build.storage.form_factor)
+    if build.storage.interface is None or build.storage.form_factor is None:
+        return _finding(rule_id, FindingSeverity.WARNING, FindingStatus.INSUFFICIENT_DATA,
+            "Storage/motherboard form-factor compatibility cannot be confirmed because storage dimensions are missing.",
+            storage_interface=build.storage.interface, storage_form_factor=build.storage.form_factor)
+    matching_slots = [slot.slot_id for slot in build.motherboard.m2_slots if build.storage.interface in slot.interfaces and build.storage.form_factor in slot.sizes]
     if not matching_slots:
-        return _finding(
-            rule_id,
-            FindingSeverity.ERROR,
-            FindingStatus.FAIL,
-            "Motherboard has no documented compatible storage form-factor slot.",
-            storage_interface=build.storage.interface,
-            storage_form_factor=build.storage.form_factor,
-        )
-    return _finding(
-        rule_id,
-        FindingSeverity.INFO,
-        FindingStatus.PASS,
-        "Motherboard has a documented compatible storage form-factor slot.",
-        storage_interface=build.storage.interface,
-        storage_form_factor=build.storage.form_factor,
-        matching_slot_ids=matching_slots,
-    )
+        return _finding(rule_id, FindingSeverity.ERROR, FindingStatus.FAIL,
+            "Motherboard has no documented compatible storage form-factor slot.", storage_interface=build.storage.interface, storage_form_factor=build.storage.form_factor)
+    return _finding(rule_id, FindingSeverity.INFO, FindingStatus.PASS,
+        "Motherboard has a documented compatible storage form-factor slot.", storage_interface=build.storage.interface, storage_form_factor=build.storage.form_factor, matching_slot_ids=matching_slots)
 
 
 # Registration order is the serialized findings order.

@@ -49,6 +49,7 @@ from app.services.catalog_dataset_metadata import (
     component_role_memberships,
     dataset_versions,
     is_canonical_component_for_dataset,
+    is_dataset_component_for_dataset,
 )
 from app.services.catalog_errors import classify_catalog_load_error
 from app.services.catalog_intake import (
@@ -56,6 +57,13 @@ from app.services.catalog_intake import (
     IntakeCanonicalizationResult,
 )
 from app.services.catalog_policies import price_availability_disclaimer, select_price_snapshot
+
+SNAPSHOT_DATASET_VERSION = "vn-pc-buildwise-snapshot-2026-09-02-updated"
+from app.services.compatibility import (
+    CompatibilityBuild,
+    CompatibilityStatus,
+    analyze_compatibility,
+)
 from app.services.scoring import ScoringCatalog
 
 
@@ -138,6 +146,12 @@ def _selected_components(
     session: Session,
     dataset_version: str,
 ) -> dict[object, Component]:
+    """Select one dataset's active records.
+
+    The owner-verified workbook snapshot deliberately retains RAW_ONLY rows for
+    manual analysis. Older evaluation datasets keep their established strict
+    CANONICAL-only reconstruction behavior.
+    """
     rows = session.execute(
         select(Component, ComponentSource.notes)
         .join(ComponentSource, ComponentSource.component_id == Component.id)
@@ -146,7 +160,12 @@ def _selected_components(
     ).all()
     selected: dict[object, Component] = {}
     for component, notes in rows:
-        if is_canonical_component_for_dataset(notes, dataset_version):
+        included = (
+            is_dataset_component_for_dataset(notes, dataset_version)
+            if dataset_version == SNAPSHOT_DATASET_VERSION
+            else is_canonical_component_for_dataset(notes, dataset_version)
+        )
+        if included:
             selected[component.id] = component
     if not selected:
         raise ValueError(
@@ -154,6 +173,19 @@ def _selected_components(
         )
     return selected
 
+
+def _canonical_component_ids(session: Session, dataset_version: str) -> set[object]:
+    """Return the recommendation-eligible population explicitly marked canonical."""
+    rows = session.execute(
+        select(ComponentSource.component_id, ComponentSource.notes)
+        .join(Component, ComponentSource.component_id == Component.id)
+        .where(Component.active.is_(True))
+    ).all()
+    return {
+        component_id
+        for component_id, notes in rows
+        if is_canonical_component_for_dataset(notes, dataset_version)
+    }
 
 def _price_snapshots(
     session: Session,
@@ -171,6 +203,11 @@ def _price_snapshots(
     for price, source in rows:
         memberships = dataset_versions(source.description)
         if not memberships:
+            if dataset_version == SNAPSHOT_DATASET_VERSION:
+                # A prior import may have reused a retailer URL before the
+                # snapshot-local source identity was introduced. Ignore that
+                # unmarked evidence rather than making the new dataset unusable.
+                continue
             raise ValueError(
                 "persisted price source lacks explicit catalog dataset metadata: "
                 f"{source.url}"
@@ -203,29 +240,30 @@ def _price_snapshots(
                 notes=None,
             )
         )
-    missing_components = [
-        component
-        for component in components.values()
-        if select_price_snapshot(
-            snapshots,
-            manufacturer=component.manufacturer,
-            model=component.model,
-            component_type=ComponentType(component.component_type.value),
-        )
-        is None
-    ]
-    if missing_components:
-        identities = ", ".join(
-            f"{component.manufacturer} {component.model}"
-            for component in sorted(
-                missing_components,
-                key=lambda item: (item.component_type.value, item.manufacturer, item.model),
+    if dataset_version != SNAPSHOT_DATASET_VERSION:
+        missing_components = [
+            component
+            for component in components.values()
+            if select_price_snapshot(
+                snapshots,
+                manufacturer=component.manufacturer,
+                model=component.model,
+                component_type=ComponentType(component.component_type.value),
             )
-        )
-        raise ValueError(
-            "persisted catalog is missing eligible price evidence for canonical components: "
-            + identities
-        )
+            is None
+        ]
+        if missing_components:
+            identities = ", ".join(
+                f"{component.manufacturer} {component.model}"
+                for component in sorted(
+                    missing_components,
+                    key=lambda item: (item.component_type.value, item.manufacturer, item.model),
+                )
+            )
+            raise ValueError(
+                "persisted catalog is missing eligible price evidence for canonical components: "
+                + identities
+            )
     return tuple(snapshots)
 
 
@@ -234,7 +272,14 @@ def _normalized_benchmarks(
     *,
     components: dict[object, Component],
     dataset_version: str,
+    recommendation_component_ids: set[object],
 ) -> tuple[tuple[NormalizedBenchmark, ...], tuple[CanonicalizedIntakeComponent, ...]]:
+    """Rebuild only explicitly stored benchmark evidence.
+
+    The workbook can retain CPU/GPU rows whose score is absent. Those rows are
+    still manual-analysis candidates but are not required to carry score
+    evidence. Every CANONICAL CPU/GPU, however, must still be benchmarked.
+    """
     rows = session.execute(
         select(DbBenchmarkRecord, DataSource)
         .join(DataSource, DataSource.id == DbBenchmarkRecord.source_id)
@@ -252,8 +297,14 @@ def _normalized_benchmarks(
     for benchmark, source in rows:
         context = benchmark.test_context
         if not isinstance(context, dict):
+            if dataset_version == SNAPSHOT_DATASET_VERSION:
+                continue
             raise ValueError("persisted benchmark context must be an object")
-        persisted_dataset = _require_nonempty_string(context, "dataset_version")
+        persisted_dataset = context.get("dataset_version")
+        if not isinstance(persisted_dataset, str) or not persisted_dataset:
+            if dataset_version == SNAPSHOT_DATASET_VERSION:
+                continue
+            raise ValueError("persisted benchmark context is missing non-empty 'dataset_version'")
         if persisted_dataset != dataset_version:
             continue
         manufacturer, model, component_type = _identity_from_context(
@@ -276,37 +327,39 @@ def _normalized_benchmarks(
         source_test_context = context.get("source_test_context")
         if not isinstance(source_test_context, (str, dict)):
             raise ValueError("persisted benchmark context lacks source_test_context")
-        normalized = NormalizedBenchmark(
-            component_type=component_type,
-            manufacturer=manufacturer,
-            exact_model=model,
-            sku=None,
-            benchmark_name=benchmark.benchmark_name,
-            metric_name=benchmark.metric_name,
-            raw_metric_value=float(benchmark.metric_value),
-            normalized_score=float(normalized_score),
-            metric_unit=benchmark.metric_unit,
-            source_url=source.url,
-            benchmark_version=_require_nonempty_string(context, "benchmark_version"),
-            collected_at=_parse_collected_at(context),
-            dataset_version=persisted_dataset,
-            normalization_method=method,
-            normalization_min=float(normalization_min),
-            normalization_max=float(normalization_max),
-            match_scope=context.get("match_scope"),
-            exact_board_sku_verified=context.get("exact_board_sku_verified"),
-            limitation=context.get("limitation"),
-            test_context=source_test_context,
+        benchmarks.append(
+            NormalizedBenchmark(
+                component_type=component_type,
+                manufacturer=manufacturer,
+                exact_model=model,
+                sku=None,
+                benchmark_name=benchmark.benchmark_name,
+                metric_name=benchmark.metric_name,
+                raw_metric_value=float(benchmark.metric_value),
+                normalized_score=float(normalized_score),
+                metric_unit=benchmark.metric_unit,
+                source_url=source.url,
+                benchmark_version=_require_nonempty_string(context, "benchmark_version"),
+                collected_at=_parse_collected_at(context),
+                dataset_version=dataset_version,
+                normalization_method=method,
+                normalization_min=float(normalization_min),
+                normalization_max=float(normalization_max),
+                match_scope=context.get("match_scope"),
+                exact_board_sku_verified=context.get("exact_board_sku_verified"),
+                limitation=context.get("limitation"),
+                test_context=source_test_context,
+            )
         )
-        benchmarks.append(normalized)
 
-        target = components[benchmark.component_id]
+        # Existing intake datasets retain their stricter, explicit retail-board
+        # to GPU-model association. The workbook stores a direct model-level
+        # indicator on the GPU row instead, so it deliberately has no invented
+        # association object.
         if component_type is not ComponentType.GPU:
             continue
         if context.get("association_scope") != "GPU_MODEL_PROXY":
-            raise ValueError(
-                "persisted GPU benchmark lacks explicit GPU_MODEL_PROXY association scope"
-            )
+            continue
         association_manufacturer, association_model, association_type = _identity_from_context(
             context,
             key="gpu_model_association_identity",
@@ -318,6 +371,7 @@ def _normalized_benchmarks(
                 "persisted GPU model association does not match benchmark component identity"
             )
         association_url = _require_nonempty_string(context, "association_evidence_url")
+        target = components[benchmark.component_id]
         if target.component_type.value != ComponentType.GPU.value:
             raise ValueError("GPU model proxy benchmark is attached to a non-GPU component")
         if target.id in associated_gpu_components:
@@ -338,6 +392,7 @@ def _normalized_benchmarks(
                 ),
             )
         )
+
     component_types = {
         ComponentType(component.component_type.value)
         for component in components.values()
@@ -348,36 +403,39 @@ def _normalized_benchmarks(
             "persisted catalog is missing required component types: "
             + ", ".join(sorted(item.value for item in missing_types))
         )
-    benchmark_types = {benchmark.component_type for benchmark in benchmarks}
-    missing_benchmark_types = {ComponentType.CPU, ComponentType.GPU} - benchmark_types
-    if missing_benchmark_types:
-        raise ValueError(
-            "persisted catalog is missing normalized benchmark evidence for: "
-            + ", ".join(sorted(item.value for item in missing_benchmark_types))
-        )
+
     benchmark_identities = {
         (benchmark.component_type, benchmark.manufacturer, benchmark.exact_model)
         for benchmark in benchmarks
     }
-    # GPU model-proxy coverage is verified below through the explicit board to
-    # model association. CPU benchmark evidence must match each canonical CPU
-    # identity directly.
-    missing_benchmark_components = [
+    missing_recommendation_benchmarks = [
         component
-        for component in components.values()
-        if component.component_type.value == ComponentType.CPU.value
+        for component_id, component in components.items()
+        if component_id in recommendation_component_ids
+        and component.component_type.value == ComponentType.CPU.value
         and (
-            ComponentType(component.component_type.value),
+            ComponentType.CPU,
             component.manufacturer,
             component.model,
-        )
-        not in benchmark_identities
+        ) not in benchmark_identities
     ]
-    if missing_benchmark_components:
+    if dataset_version == SNAPSHOT_DATASET_VERSION:
+        missing_recommendation_benchmarks.extend(
+            component
+            for component_id, component in components.items()
+            if component_id in recommendation_component_ids
+            and component.component_type.value == ComponentType.GPU.value
+            and (
+                ComponentType.GPU,
+                component.manufacturer,
+                component.model,
+            ) not in benchmark_identities
+        )
+    if missing_recommendation_benchmarks:
         identities = ", ".join(
             f"{component.manufacturer} {component.model}"
             for component in sorted(
-                missing_benchmark_components,
+                missing_recommendation_benchmarks,
                 key=lambda item: (item.component_type.value, item.manufacturer, item.model),
             )
         )
@@ -385,17 +443,18 @@ def _normalized_benchmarks(
             "persisted catalog is missing normalized benchmark evidence for canonical components: "
             + identities
         )
-    gpu_components = {
-        component.id
-        for component in components.values()
-        if component.component_type.value == ComponentType.GPU.value
-    }
-    if gpu_components != associated_gpu_components:
-        raise ValueError(
-            "one or more canonical GPU components lacks explicit GPU_MODEL_PROXY metadata"
-        )
-    return tuple(benchmarks), tuple(canonical_entries)
 
+    if dataset_version != SNAPSHOT_DATASET_VERSION:
+        gpu_components = {
+            component_id
+            for component_id, component in components.items()
+            if component.component_type.value == ComponentType.GPU.value
+        }
+        if gpu_components != associated_gpu_components:
+            raise ValueError(
+                "one or more canonical GPU components lacks explicit GPU_MODEL_PROXY metadata"
+            )
+    return tuple(benchmarks), tuple(canonical_entries)
 
 def _support_records(
     session: Session,
@@ -452,6 +511,7 @@ def load_persisted_scoring_catalog(
         session,
         components=components_by_id,
         dataset_version=dataset_version,
+        recommendation_component_ids=_canonical_component_ids(session, dataset_version),
     )
     return PersistedScoringCatalog(
         catalog=ScoringCatalog(
@@ -546,23 +606,122 @@ class CatalogPickerComponent:
     component_type: ComponentType
     manufacturer: str
     model: str
-    price_vnd: int
+    price_vnd: int | None
     availability: AvailabilityStatus | None
-    listing_url: str
-    verified_at: datetime
+    listing_url: str | None
+    verified_at: datetime | None
     availability_disclaimer: str
 
+
+@dataclass(frozen=True)
+class CatalogPickerSelectionComponent:
+    """A picker row plus display-safe filter facts and engine compatibility."""
+
+    id: object
+    component_type: ComponentType
+    manufacturer: str
+    model: str
+    price_vnd: int | None
+    availability: AvailabilityStatus | None
+    listing_url: str | None
+    verified_at: datetime | None
+    availability_disclaimer: str
+    filter_values: dict[str, object]
+    compatibility_status: CompatibilityStatus
+
+
+def _picker_filter_values(component: Component) -> dict[str, object]:
+    """Expose a compact, display-safe subset of documented picker facts."""
+    specs = component.specifications
+    component_type = ComponentType(component.component_type.value)
+    if component_type is ComponentType.CPU:
+        return {
+            "cores": specs.get("cores"),
+            "threads": specs.get("threads"),
+            "socket": specs.get("socket"),
+            "integrated_graphics": specs.get("integrated_graphics"),
+        }
+    if component_type is ComponentType.MOTHERBOARD:
+        memory = specs.get("memory") if isinstance(specs.get("memory"), dict) else {}
+        return {
+            "socket": specs.get("socket"),
+            "form_factor": specs.get("form_factor"),
+            "memory_type": memory.get("type"),
+            "memory_max_capacity_gb": memory.get("max_capacity_gb"),
+        }
+    if component_type is ComponentType.RAM:
+        return {
+            "memory_type": specs.get("memory_type"),
+            "capacity_gb": specs.get("capacity_gb"),
+            "module_count": specs.get("module_count"),
+            "tested_speed_mt_s": specs.get("tested_speed_mt_s"),
+        }
+    if component_type is ComponentType.GPU:
+        return {
+            "vram_gb": specs.get("vram_gb"),
+            "length_mm": specs.get("length_mm"),
+            "slot_width": specs.get("slot_width"),
+        }
+    if component_type is ComponentType.STORAGE:
+        return {
+            "capacity_gb": specs.get("capacity_gb"),
+            "interface": specs.get("interface"),
+            "form_factor": specs.get("form_factor"),
+            "pcie_generation": specs.get("pcie_generation"),
+        }
+    if component_type is ComponentType.PSU:
+        return {
+            "capacity_w": specs.get("capacity_w"),
+            "form_factor": specs.get("form_factor"),
+            "atx_version": specs.get("atx_version"),
+        }
+    if component_type is ComponentType.CASE:
+        clearance = specs.get("max_gpu_length") if isinstance(specs.get("max_gpu_length"), dict) else {}
+        return {
+            "form_factor": specs.get("form_factor"),
+            "max_gpu_length_mm": clearance.get("value_mm"),
+            "max_cpu_cooler_height_mm": specs.get("max_cpu_cooler_height_mm"),
+        }
+    return {
+        "cooler_type": specs.get("cooler_type"),
+        "height_mm": specs.get("height_mm"),
+        "supported_sockets": specs.get("supported_sockets", []),
+    }
+
+
+def _picker_price(
+    component: Component,
+    catalog: ScoringCatalog,
+) -> tuple[int | None, AvailabilityStatus | None, str | None, datetime | None, str]:
+    snapshot = select_price_snapshot(
+        catalog.prices,
+        manufacturer=component.manufacturer,
+        model=component.model,
+        component_type=ComponentType(component.component_type.value),
+    )
+    if snapshot is None:
+        return (
+            None,
+            None,
+            None,
+            None,
+            "No VND price was recorded in this dataset; this component is excluded from recommendations.",
+        )
+    listing_url = snapshot.listing_url if snapshot.listing_url.startswith(("http://", "https://")) else None
+    return (
+        snapshot.price_vnd,
+        snapshot.availability,
+        listing_url,
+        snapshot.verified_at,
+        price_availability_disclaimer(snapshot),
+    )
 
 def list_persisted_catalog_picker_components(
     session: Session,
     *,
     dataset_version: str,
 ) -> tuple[CatalogPickerComponent, ...]:
-    """Return canonical picker rows for one reconstructed READY dataset.
-
-    The listing reuses the same strict reconstruction boundary as recommendation.
-    Component specifications are omitted so the UI cannot calculate compatibility.
-    """
+    """Return manual-picker rows, including snapshot compatibility-only items."""
     persisted = load_persisted_scoring_catalog(session, dataset_version=dataset_version)
     selected = _selected_components(session, dataset_version)
     order = {component_type: index for index, component_type in enumerate(PICKER_CATEGORY_ORDER)}
@@ -575,28 +734,132 @@ def list_persisted_catalog_picker_components(
             item.model,
         ),
     ):
-        snapshot = select_price_snapshot(
-            persisted.catalog.prices,
-            manufacturer=component.manufacturer,
-            model=component.model,
-            component_type=ComponentType(component.component_type.value),
+        price_vnd, availability, listing_url, verified_at, disclaimer = _picker_price(
+            component, persisted.catalog
         )
-        if snapshot is None or snapshot.price_vnd is None:
-            raise ValueError(
-                "persisted catalog is missing eligible price evidence for canonical components: "
-                f"{component.manufacturer} {component.model}"
-            )
         items.append(
             CatalogPickerComponent(
                 id=component.id,
                 component_type=ComponentType(component.component_type.value),
                 manufacturer=component.manufacturer,
                 model=component.model,
-                price_vnd=snapshot.price_vnd,
-                availability=snapshot.availability,
-                listing_url=snapshot.listing_url,
-                verified_at=snapshot.verified_at,
-                availability_disclaimer=price_availability_disclaimer(snapshot),
+                price_vnd=price_vnd,
+                availability=availability,
+                listing_url=listing_url,
+                verified_at=verified_at,
+                availability_disclaimer=disclaimer,
+            )
+        )
+    return tuple(items)
+
+def _selection_compatibility_status(
+    selected_components: list[Component],
+    candidate: Component,
+    *,
+    support_records: tuple[CpuMotherboardSupportRecord, ...],
+) -> CompatibilityStatus:
+    """Run the deterministic compatibility engine for a picker candidate.
+
+    A CPU alone also has a canonical memory-generation fact. Apply that
+    explicitly sourced constraint when RAM is the candidate, so a CPU-first
+    selection can remove a known mismatched memory generation before a board is
+    selected. All other rules remain the registered compatibility engine.
+    """
+    compatibility = analyze_compatibility(
+        CompatibilityBuild.from_records(
+            [_component_record(component) for component in [*selected_components, candidate]],
+            cpu_motherboard_support=support_records,
+        )
+    )
+    if ComponentType(candidate.component_type.value) is ComponentType.RAM:
+        cpu = next(
+            (
+                component
+                for component in selected_components
+                if ComponentType(component.component_type.value) is ComponentType.CPU
+            ),
+            None,
+        )
+        if cpu is not None:
+            cpu_specifications = _component_record(cpu)
+            from app.contracts.components import CpuSpec, RamSpec
+
+            cpu_spec = CpuSpec.model_validate(cpu_specifications.specifications)
+            ram_spec = RamSpec.model_validate(candidate.specifications)
+            if (
+                ram_spec.memory_type is not None
+                and cpu_spec.supported_memory_types
+                and ram_spec.memory_type not in cpu_spec.supported_memory_types
+            ):
+                return CompatibilityStatus.INCOMPATIBLE
+    return compatibility.status
+
+
+def list_persisted_catalog_picker_selection_components(
+    session: Session,
+    *,
+    dataset_version: str,
+    component_type: ComponentType,
+    selected_component_ids: tuple[object, ...],
+) -> tuple[CatalogPickerSelectionComponent, ...]:
+    """Return one selection category with backend-evaluated compatibility.
+
+    The client sends only previously selected catalog identifiers. For every
+    candidate, this service replaces any current component in the target slot,
+    then runs the deterministic compatibility engine against the resulting
+    build. The frontend may hide rows based on the returned status but never
+    derives compatibility from facts itself.
+    """
+    persisted = load_persisted_scoring_catalog(session, dataset_version=dataset_version)
+    selected = _selected_components(session, dataset_version)
+    requested_ids = set(selected_component_ids)
+    unknown_ids = requested_ids - set(selected)
+    if unknown_ids:
+        raise ValueError("selected component identifiers are not in this catalog dataset")
+
+    current = [selected[component_id] for component_id in selected_component_ids]
+    current_types = [ComponentType(component.component_type.value) for component in current]
+    if len(current_types) != len(set(current_types)):
+        raise ValueError("selected component identifiers include duplicate component types")
+
+    existing = [
+        component
+        for component in current
+        if ComponentType(component.component_type.value) is not component_type
+    ]
+    support_records = _support_records(session, selected)
+    candidates = sorted(
+        (
+            component
+            for component in selected.values()
+            if ComponentType(component.component_type.value) is component_type
+        ),
+        key=lambda item: (item.manufacturer, item.model),
+    )
+
+    items: list[CatalogPickerSelectionComponent] = []
+    for candidate in candidates:
+        price_vnd, availability, listing_url, verified_at, disclaimer = _picker_price(
+            candidate, persisted.catalog
+        )
+        compatibility_status = _selection_compatibility_status(
+            existing,
+            candidate,
+            support_records=support_records,
+        )
+        items.append(
+            CatalogPickerSelectionComponent(
+                id=candidate.id,
+                component_type=component_type,
+                manufacturer=candidate.manufacturer,
+                model=candidate.model,
+                price_vnd=price_vnd,
+                availability=availability,
+                listing_url=listing_url,
+                verified_at=verified_at,
+                availability_disclaimer=disclaimer,
+                filter_values=_picker_filter_values(candidate),
+                compatibility_status=compatibility_status,
             )
         )
     return tuple(items)

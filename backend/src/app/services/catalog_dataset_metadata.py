@@ -36,6 +36,15 @@ def append_dataset_marker(value: str | None, dataset_version: str) -> str:
     return f"{existing}\n{marker}".strip()
 
 
+def remove_dataset_marker(value: str | None, dataset_version: str) -> str | None:
+    """Remove one explicit dataset marker while preserving other provenance."""
+    if value is None:
+        return None
+    cleaned = value.replace(dataset_marker(dataset_version), "")
+    cleaned = re.sub(r"\n{2,}", "\n", cleaned).strip()
+    return cleaned or None
+
+
 def merge_dataset_markers(existing: str | None, incoming: str | None) -> str | None:
     """Preserve all explicit dataset markers when a source URL is reused."""
     if existing is None and incoming is None:
@@ -58,6 +67,28 @@ def append_component_metadata(
     if marker in existing:
         return existing
     return f"{existing}\n{marker}".strip()
+
+
+def replace_component_role_metadata(
+    value: str | None,
+    *,
+    dataset_version: str,
+    role: str,
+) -> str:
+    """Set one dataset role without retaining a stale role from a prior import.
+
+    A component can only be one of CANONICAL or RAW_ONLY within one dataset.
+    Other datasets' markers are deliberately preserved.
+    """
+    existing = append_dataset_marker(value, dataset_version)
+    marker_pattern = re.compile(
+        r"(?:^|\n)\[buildwise_catalog_component_role=[^;\]\r\n]+;dataset="
+        + re.escape(dataset_version)
+        + r"\]"
+    )
+    cleaned = marker_pattern.sub("", existing).strip()
+    marker = component_role_marker(dataset_version=dataset_version, role=role)
+    return f"{cleaned}\n{marker}".strip()
 
 
 def component_role_memberships(value: str | None) -> frozenset[tuple[str, str]]:
@@ -86,6 +117,14 @@ def dataset_versions(value: str | None) -> frozenset[str]:
     """Return explicit dataset memberships from a stored text field."""
     return frozenset(match.group(1) for match in _DATASET_PATTERN.finditer(value or ""))
 
+
+
+def is_dataset_component_for_dataset(value: str | None, dataset_version: str) -> bool:
+    """Return whether a component carries either explicit role for a dataset."""
+    return (
+        dataset_version in dataset_versions(value)
+        and any(version == dataset_version for version, _role in component_role_memberships(value))
+    )
 
 def is_canonical_component_for_dataset(value: str | None, dataset_version: str) -> bool:
     return (

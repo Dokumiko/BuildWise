@@ -144,16 +144,27 @@ export interface CatalogPickerComponent {
   component_type: string;
   manufacturer: string;
   model: string;
-  price_vnd: number;
+  price_vnd: number | null;
   availability: string | null;
-  listing_url: string;
-  verified_at: string;
+  listing_url: string | null;
+  verified_at: string | null;
   availability_disclaimer: string;
 }
 
 export interface CatalogPickerListResponse {
   dataset_version: string;
   components: CatalogPickerComponent[];
+}
+
+export interface CatalogPickerSelectionComponent extends CatalogPickerComponent {
+  filter_values: Record<string, unknown>;
+  compatibility_status: "COMPATIBLE" | "COMPATIBLE_WITH_WARNINGS" | "INCOMPATIBLE";
+}
+
+export interface CatalogPickerSelectionListResponse {
+  dataset_version: string;
+  component_type: string;
+  components: CatalogPickerSelectionComponent[];
 }
 
 export interface SourceEvidence {
@@ -248,4 +259,19 @@ export function analyzeManualBuild(
     body: JSON.stringify(request),
     signal,
   });
+}
+
+
+export function listCatalogPickerSelectionComponents(
+  datasetVersion: string,
+  componentType: string,
+  selectedComponentIds: string[],
+  signal?: AbortSignal,
+): Promise<CatalogPickerSelectionListResponse> {
+  const params = new URLSearchParams({ component_type: componentType });
+  selectedComponentIds.forEach((id) => params.append("selected_component_ids", id));
+  return requestJson<CatalogPickerSelectionListResponse>(
+    `/api/v1/catalog-datasets/${encodeURIComponent(datasetVersion)}/components/selection?${params.toString()}`,
+    { signal },
+  );
 }

@@ -61,3 +61,6 @@ Thumbs.db
 .codex/
 .impeccable/
 skills-lock.json
+
+# Local extracted Python dependencies; install from backend package metadata instead.
+.deps/

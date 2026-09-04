@@ -291,6 +291,12 @@ def _benchmark_indicator(
         used_proxy = benchmark is not None
     if benchmark is None:
         return None
+    if (
+        record.component_type is ComponentType.GPU
+        and benchmark.match_scope == "GPU_MODEL"
+        and benchmark.exact_board_sku_verified is False
+    ):
+        used_proxy = True
     evidence = {
         "benchmark_name": benchmark.benchmark_name,
         "metric_name": benchmark.metric_name,
@@ -302,14 +308,17 @@ def _benchmark_indicator(
         "match_scope": benchmark.match_scope,
         "exact_board_sku_verified": benchmark.exact_board_sku_verified,
     }
-    if used_proxy and association is not None:
-        evidence.update(
-            {
-                "association_scope": "GPU_MODEL_PROXY",
-                "association_evidence_url": association.evidence_url,
-                "limitation": benchmark.limitation,
-            }
-        )
+    if used_proxy:
+        evidence["limitation"] = benchmark.limitation
+        if association is not None:
+            evidence.update(
+                {
+                    "association_scope": "GPU_MODEL_PROXY",
+                    "association_evidence_url": association.evidence_url,
+                }
+            )
+        else:
+            evidence["association_scope"] = "DIRECT_GPU_MODEL_BENCHMARK"
         method = "normalized GPU model benchmark proxy"
     else:
         method = "normalized exact component-model benchmark"
@@ -389,11 +398,11 @@ def _power_quality_score(analysis: DeterministicAnalysis, config: ScoringConfig)
     selected = analysis.summary.get("selected_psu_capacity_w")
     recommended = analysis.summary.get("recommended_psu_capacity_w")
     if selected is None or recommended is None:
-        return None
+        return Decimal("50")
     selected_decimal = Decimal(str(selected))
     recommended_decimal = Decimal(str(recommended))
     if recommended_decimal <= 0:
-        return None
+        return Decimal("50")
     ratio = selected_decimal / recommended_decimal
     return min(Decimal("100"), ratio / config.power_quality_cap_ratio * Decimal("100"))
 

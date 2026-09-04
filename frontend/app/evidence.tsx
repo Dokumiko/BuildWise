@@ -60,9 +60,13 @@ export function PriceEvidence({ prices }: { prices: SelectedPriceEvidence[] }) {
               <small>
                 {price.retailer_name} · verified {new Date(price.verified_at).toLocaleDateString("vi-VN")}
               </small>
-              <a href={price.listing_url} target="_blank" rel="noreferrer">
-                View dated retailer listing
-              </a>
+              {price.listing_url.startsWith("http") ? (
+                <a href={price.listing_url} target="_blank" rel="noreferrer">
+                  View dated retailer listing
+                </a>
+              ) : (
+                <small>Evidence retained in the owner-verified workbook snapshot.</small>
+              )}
             </div>
             <strong>{formatVnd(price.price_vnd)}</strong>
             <small>{price.availability_disclaimer}</small>

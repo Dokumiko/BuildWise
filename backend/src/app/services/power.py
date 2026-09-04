@@ -1,4 +1,4 @@
-"""Deterministic PSU power and connector analysis.
+﻿"""Deterministic PSU power and connector analysis.
 
 This module consumes canonical component contracts only. Derived draw and PSU
 recommendations remain analysis outputs; no generic estimated-power field is
@@ -151,58 +151,55 @@ def _finding(
     )
 
 
-def _storage_contribution(storage: StorageSpec, policy: PowerPolicy) -> Decimal:
+def _storage_contribution(storage: StorageSpec, policy: PowerPolicy) -> Decimal | None:
+    if storage.average_read_power_w is None or storage.average_write_power_w is None:
+        return None
     if policy.storage_power_basis is StoragePowerBasis.MAX_READ_WRITE:
-        return max(
-            _decimal(storage.average_read_power_w),
-            _decimal(storage.average_write_power_w),
-        )
+        return max(_decimal(storage.average_read_power_w), _decimal(storage.average_write_power_w))
     raise ValueError(f"unsupported storage power basis: {policy.storage_power_basis}")
 
 
 def _estimate_draw(
     build: PowerBuild, policy: PowerPolicy
 ) -> tuple[Decimal | None, list[str], PowerFinding | None]:
-    missing = [
-        name
-        for name, component in (
-            ("CPU", build.cpu),
-            ("MOTHERBOARD", build.motherboard),
-            ("RAM", build.ram),
-            ("GPU", build.gpu),
-            ("COOLER", build.cooler),
-            ("STORAGE", build.storage),
-        )
-        if component is None
+    missing_components = [
+        name for name, component in (
+            ("CPU", build.cpu), ("MOTHERBOARD", build.motherboard), ("RAM", build.ram),
+            ("GPU", build.gpu), ("COOLER", build.cooler), ("STORAGE", build.storage),
+        ) if component is None
     ]
-    if missing:
-        return (
-            None,
-            [],
-            _finding(
-                "POWER_ESTIMATE_INPUTS",
-                FindingSeverity.WARNING,
-                FindingStatus.INSUFFICIENT_DATA,
-                "Estimated system draw cannot be calculated because required component data is missing.",
-                missing_components=missing,
-            ),
+    if missing_components:
+        return None, [], _finding(
+            "POWER_ESTIMATE_INPUTS", FindingSeverity.WARNING, FindingStatus.INSUFFICIENT_DATA,
+            "Estimated system draw cannot be calculated because required components are missing.",
+            missing_components=missing_components,
         )
-
-    assert build.cpu is not None
-    assert build.ram is not None
-    assert build.gpu is not None
-    assert build.cooler is not None
-    assert build.storage is not None
-
-    cpu_w = _decimal(build.cpu.default_tdp_w)
-    gpu_w = _decimal(build.gpu.total_graphics_power_w)
+    assert build.cpu is not None and build.ram is not None and build.gpu is not None
+    assert build.cooler is not None and build.storage is not None
+    missing_facts: list[str] = []
+    cpu_w = build.cpu.documented_power_w
+    if cpu_w is None: missing_facts.append("CPU.power_w")
+    gpu_w = build.gpu.total_graphics_power_w
+    if gpu_w is None: missing_facts.append("GPU.total_graphics_power_w")
+    if build.ram.module_count is None: missing_facts.append("RAM.module_count")
+    storage_w = _storage_contribution(build.storage, policy)
+    if storage_w is None: missing_facts.append("STORAGE.average_read_power_w/average_write_power_w")
+    cooler_w = build.cooler.fan_max_input_power_w
+    if cooler_w is None: missing_facts.append("COOLER.fan_max_input_power_w")
+    if missing_facts:
+        return None, [], _finding(
+            "POWER_ESTIMATE_INPUTS", FindingSeverity.WARNING, FindingStatus.INSUFFICIENT_DATA,
+            "Estimated system draw cannot be calculated because documented power facts are missing.",
+            missing_facts=missing_facts,
+        )
+    assert cpu_w is not None and gpu_w is not None and storage_w is not None and cooler_w is not None
+    assert build.ram.module_count is not None
     motherboard_w = policy.motherboard_allowance_w
     ram_w = policy.ram_module_allowance_w * build.ram.module_count
-    storage_w = _storage_contribution(build.storage, policy)
-    cooler_w = _decimal(build.cooler.fan_max_input_power_w)
-    draw = cpu_w + gpu_w + motherboard_w + ram_w + storage_w + cooler_w
+    draw = _decimal(cpu_w) + _decimal(gpu_w) + motherboard_w + ram_w + storage_w + _decimal(cooler_w)
+    metric = build.cpu.power_metric or "legacy default_tdp_w"
     assumptions = [
-        "CPU contribution uses documented default_tdp_w; it is not treated as an exact system-power measurement.",
+        f"CPU contribution uses documented {metric} ({cpu_w} W); it is not treated as an exact system-power measurement.",
         "GPU contribution uses documented total_graphics_power_w.",
         f"Motherboard allowance is {motherboard_w} W under policy {policy.version}.",
         f"RAM allowance is {policy.ram_module_allowance_w} W per installed module under policy {policy.version}.",
@@ -225,7 +222,7 @@ def _capacity_finding(
             rule_id,
             FindingSeverity.WARNING,
             FindingStatus.INSUFFICIENT_DATA,
-            "PSU capacity cannot be evaluated because no PSU is selected.",
+            "PSU capacity cannot be evaluated because no documented PSU capacity is available.",
             selected_psu_capacity_w=None,
         )
     if estimated_draw_w is None or recommended_capacity_w is None:
@@ -286,6 +283,14 @@ def _connector_finding(build: PowerBuild) -> PowerFinding:
     assert build.motherboard is not None
     assert build.gpu is not None
     assert build.psu is not None
+    if not build.motherboard.power_connectors or not build.psu.connectors:
+        return _finding(
+            rule_id, FindingSeverity.WARNING, FindingStatus.INSUFFICIENT_DATA,
+            "PSU connector availability cannot be confirmed because motherboard or PSU connector data is missing.",
+            motherboard_connectors={key.value: value for key, value in build.motherboard.power_connectors.items()},
+            gpu_connectors={key.value: value for key, value in build.gpu.power_connectors.items()},
+            psu_connectors={key.value: value for key, value in build.psu.connectors.items()},
+        )
     required: dict[str, int] = {}
     for connector_map in (
         build.motherboard.power_connectors,
@@ -333,7 +338,7 @@ def analyze_power(
     recommended = (
         estimated_draw * policy.safety_factor if estimated_draw is not None else None
     )
-    selected_capacity = _decimal(build.psu.capacity_w) if build.psu is not None else None
+    selected_capacity = _decimal(build.psu.capacity_w) if build.psu is not None and build.psu.capacity_w is not None else None
     headroom = (
         selected_capacity - estimated_draw
         if selected_capacity is not None and estimated_draw is not None

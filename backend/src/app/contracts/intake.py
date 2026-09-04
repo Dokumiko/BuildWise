@@ -88,6 +88,15 @@ def validate_raw_http_url(value: str) -> str:
     return value
 
 
+def validate_price_evidence_url(value: str) -> str:
+    """Validate a direct listing URL or a stable owner-workbook row locator."""
+    if value.startswith("workbook://"):
+        if value != value.strip() or any(character.isspace() for character in value):
+            raise ValueError("workbook evidence URL must not contain whitespace")
+        return value
+    return validate_raw_http_url(value)
+
+
 class RawSourceEvidence(IntakeContract):
     url: str
     source_type: RawSourceType
@@ -172,7 +181,7 @@ class PriceSnapshot(IntakeContract):
     verified_at: datetime
     notes: str | None
 
-    _validate_listing_url = field_validator("listing_url")(validate_raw_http_url)
+    _validate_listing_url = field_validator("listing_url")(validate_price_evidence_url)
 
 
 class BenchmarkRecord(IntakeContract):

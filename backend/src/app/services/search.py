@@ -1,4 +1,4 @@
-"""Candidate-pruned constrained search and deterministic ranking.
+﻿"""Candidate-pruned constrained search and deterministic ranking.
 
 This service owns candidate filtering, diversity-preserving pruning, early
 compatibility rejection, hard-budget rejection, scoring, and tie-breaking. It
@@ -55,7 +55,7 @@ class SearchConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     version: str = "search-0.1.0"
-    pruning_k: int = Field(default=10, ge=1)
+    pruning_k: int = Field(default=3, ge=1)
     top_n: int = Field(default=3, ge=1)
     tie_tolerance: Decimal = Field(default=Decimal("0.0001"), ge=0)
 
@@ -149,14 +149,17 @@ def _component_indicator_value(
 def _power_signal(record: ComponentRecord) -> Decimal | None:
     specs = SPEC[record.component_type].model_validate(record.specifications)
     if record.component_type is ComponentType.CPU:
-        return Decimal(str(specs.default_tdp_w))
+        value = specs.documented_power_w
+        return Decimal(str(value)) if value is not None else None
     if record.component_type is ComponentType.GPU:
-        return Decimal(str(specs.total_graphics_power_w))
+        return Decimal(str(specs.total_graphics_power_w)) if specs.total_graphics_power_w is not None else None
     if record.component_type is ComponentType.PSU:
-        return Decimal(str(specs.capacity_w))
+        return Decimal(str(specs.capacity_w)) if specs.capacity_w is not None else None
     if record.component_type is ComponentType.COOLER:
-        return Decimal(str(specs.fan_max_input_power_w))
+        return Decimal(str(specs.fan_max_input_power_w)) if specs.fan_max_input_power_w is not None else None
     if record.component_type is ComponentType.STORAGE:
+        if specs.average_read_power_w is None or specs.average_write_power_w is None:
+            return None
         return max(Decimal(str(specs.average_read_power_w)), Decimal(str(specs.average_write_power_w)))
     return None
 
@@ -186,13 +189,15 @@ def _filter_pool(
     for record in records:
         if _price(record, catalog) is None:
             continue
+        if record.component_type in {ComponentType.CPU, ComponentType.GPU} and _benchmark_indicator(record, catalog) is None:
+            continue
         if record.component_type is ComponentType.RAM and requirements.minimum_ram_capacity_gb is not None:
             spec = SPEC[ComponentType.RAM].model_validate(record.specifications)
-            if spec.capacity_gb < requirements.minimum_ram_capacity_gb:
+            if spec.capacity_gb is None or spec.capacity_gb < requirements.minimum_ram_capacity_gb:
                 continue
         if record.component_type is ComponentType.STORAGE and requirements.minimum_storage_capacity_gb is not None:
             spec = SPEC[ComponentType.STORAGE].model_validate(record.specifications)
-            if spec.capacity_gb < requirements.minimum_storage_capacity_gb:
+            if spec.capacity_gb is None or spec.capacity_gb < requirements.minimum_storage_capacity_gb:
                 continue
         if record.component_type is ComponentType.CASE and requirements.case_form_factor is not None:
             spec = SPEC[ComponentType.CASE].model_validate(record.specifications)
@@ -363,6 +368,10 @@ def _component_local_baseline_build(
             indicator = _component_indicator_value(record, catalog)
             if price is None:
                 return (True, Decimal("0"), 2**63, record.model)
+            if price <= 0:
+                # A recorded zero is retained because the snapshot owner did
+                # not mark it null, but it cannot support a price-ratio score.
+                return (True, Decimal("0"), price, record.model)
             if indicator is None:
                 # No supported local performance indicator exists for this
                 # category; choose the cheapest candidate transparently.

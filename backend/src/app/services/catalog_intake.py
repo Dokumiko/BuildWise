@@ -260,6 +260,19 @@ def _canonical_case_radiator_support(specs: dict[str, Any]) -> dict[str, list[in
     return candidate
 
 
+def _without_unknown_facts(value: Any) -> Any:
+    """Compare canonical references while treating explicit null as unknown/omitted."""
+    if isinstance(value, dict):
+        return {
+            key: _without_unknown_facts(item)
+            for key, item in value.items()
+            if item is not None
+        }
+    if isinstance(value, list):
+        return [_without_unknown_facts(item) for item in value]
+    return value
+
+
 def _exclusion_reason(component: IntakeComponent) -> str:
     if component.component_type.value == "CASE":
         return (
@@ -313,7 +326,11 @@ def canonicalize_intake(
                     raw_component.component_type.value,
                 )
             )
-            if reference is not None and reference.specifications != canonical_specs:
+            if (
+                reference is not None
+                and _without_unknown_facts(reference.specifications)
+                != _without_unknown_facts(canonical_specs)
+            ):
                 raise ValueError(
                     "raw specifications conflict with frozen canonical reference; "
                     f"raw={canonical_specs}, frozen={reference.specifications}"

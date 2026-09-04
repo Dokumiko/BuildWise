@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans } from "next/font/google";
 import { SiteShell } from "./site-shell";
+import { BuildStateProvider } from "./build-state";
 import "./globals.css";
 
 const sans = IBM_Plex_Sans({
@@ -21,7 +22,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="vi">
       <body className={sans.className}>
-        <SiteShell>{children}</SiteShell>
+        <BuildStateProvider><SiteShell>{children}</SiteShell></BuildStateProvider>
       </body>
     </html>
   );
