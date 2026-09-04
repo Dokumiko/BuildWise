@@ -11,7 +11,7 @@ import {
 } from "../lib/recommendation-api";
 import { useCatalogDatasets } from "../lib/use-catalog-datasets";
 import { formatScore, formatVnd } from "../lib/format";
-import { FindingList, PriceEvidence, ScoreEvidence } from "./evidence";
+import { CompatibilityDisclaimer, FindingList, PowerSummary, PriceEvidence, ScoreEvidence, visibleFindings } from "./evidence";
 import styles from "./page.module.css";
 
 const workloadLabels: Record<WorkloadProfile, string> = {
@@ -25,12 +25,6 @@ const caseFormFactorLabels: Record<CaseFormFactor, string> = {
   MINI_TOWER: "Tháp nhỏ",
   FULL_TOWER: "Tháp lớn",
   SFF: "Kích thước nhỏ gọn",
-};
-
-const analysisStatusLabels: Record<string, string> = {
-  COMPATIBLE: "Tương thích",
-  COMPATIBLE_WITH_WARNINGS: "Tương thích, có lưu ý",
-  INCOMPATIBLE: "Không tương thích",
 };
 
 export function RecommendSection() {
@@ -111,15 +105,17 @@ export function RecommendSection() {
 }
 
 function BuildCard({ build }: { build: ScoredBuild }) {
-  const summary = build.analysis.summary;
   const indicators = build.indicators;
-  const warningCount = build.analysis.findings.filter((finding) => finding.severity === "WARNING" && finding.status !== "INSUFFICIENT_DATA").length;
+  const findings = visibleFindings(build.analysis.findings, build.component_identity.map((component) => component.component_type));
+  const errorCount = findings.filter((finding) => finding.severity === "ERROR").length;
+  const warningCount = findings.filter((finding) => finding.severity === "WARNING").length;
   return (
     <article className={styles.buildCard}>
-      <div className={styles.buildHeader}><div><h2>{formatVnd(build.total_price_vnd)}</h2><p className={styles.muted}>{analysisStatusLabels[build.analysis_status] ?? build.analysis_status} · {warningCount} lưu ý</p></div><div className={styles.scoreBlock}><span>Điểm heuristic tổng thể</span><strong>{formatScore(indicators?.overall_score ?? null)}</strong></div></div>
+      <div className={styles.buildHeader}><div><h2>{formatVnd(build.total_price_vnd)}</h2>{findings.length > 0 && <p className={styles.muted}>{errorCount > 0 ? "Có lỗi hoặc linh kiện không tương thích" : "Có điểm cần lưu ý"} · {errorCount} lỗi · {warningCount} lưu ý</p>}</div><div className={styles.scoreBlock}><span>Điểm heuristic tổng thể</span><strong>{formatScore(indicators?.overall_score ?? null)}</strong></div></div>
       <div className={styles.componentList}>{build.component_identity.map((component) => <div className={styles.componentRow} key={component.component_type + "-" + component.manufacturer + "-" + component.model}><span>{component.component_type}</span><strong>{component.manufacturer} {component.model}</strong></div>)}</div>
-      <div className={styles.evidenceGrid}><div><span>Điện năng hệ thống ước tính</span><strong>{summary.estimated_system_draw_w ?? "—"} W</strong></div><div><span>Công suất PSU khuyến nghị</span><strong>{summary.recommended_psu_capacity_w ?? "—"} W</strong></div><div><span>Công suất PSU đã chọn</span><strong>{summary.selected_psu_capacity_w ?? "—"} W</strong></div></div>
-      <FindingList findings={build.analysis.findings.filter((finding) => finding.status !== "INSUFFICIENT_DATA")} />
+      <PowerSummary summary={build.analysis.summary} />
+      <FindingList findings={findings} />
+      <CompatibilityDisclaimer />
       <PriceEvidence prices={build.selected_price_evidence} />
       <ScoreEvidence indicators={indicators} />
     </article>
