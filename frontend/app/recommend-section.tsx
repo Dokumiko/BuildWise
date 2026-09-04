@@ -104,7 +104,7 @@ export function RecommendSection() {
           <span>Budget mode</span>
           <select value={budgetMode} onChange={(event) => setBudgetMode(event.target.value as "strict" | "approximate")}>
             <option value="strict">Strict — do not exceed budget</option>
-            <option value="approximate">Approximate — show feasible trade-offs</option>
+            <option value="approximate">Approximate - allow up to 10% over budget</option>
           </select>
         </label>
         <label className={styles.field}>
@@ -150,10 +150,27 @@ export function RecommendSection() {
 
       {result && (
         <div className={styles.results}>
-          {topBuild ? <BuildCard build={topBuild} /> : (
+          {topBuild ? (
+            <>
+              <p className={styles.notice}>
+                {budgetMode === "approximate"
+                  ? `Approximate mode allows up to ${formatVnd(result.effective_budget_limit_vnd)}.`
+                  : "Strict mode does not allow the submitted budget to be exceeded."}
+              </p>
+              <BuildCard build={topBuild} />
+            </>
+          ) : (
             <div className={styles.emptyState}>
-              <h2>No feasible build returned</h2>
-              <p>The deterministic search found no build that satisfies the submitted constraints.</p>
+              <h2>No build within the allowed budget</h2>
+              <p>
+                The deterministic search found no compatible build within {formatVnd(result.effective_budget_limit_vnd)}.
+              </p>
+              {result.over_budget_fallback && (
+                <p className={styles.notice}>
+                  The cheapest feasible catalog build found costs {formatVnd(result.over_budget_fallback.total_price_vnd)}.
+                  It is not shown as a recommendation because it exceeds the allowed budget.
+                </p>
+              )}
             </div>
           )}
         </div>

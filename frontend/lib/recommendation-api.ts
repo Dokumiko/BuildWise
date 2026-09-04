@@ -122,6 +122,8 @@ export interface SearchResult {
   scoring_config_version: string;
   requirements: RecommendationRequirements;
   ranked_builds: ScoredBuild[];
+  effective_budget_limit_vnd: number;
+  over_budget_fallback: ScoredBuild | null;
   cheapest_feasible_baseline: ScoredBuild | null;
   component_local_baseline: {
     status: string;

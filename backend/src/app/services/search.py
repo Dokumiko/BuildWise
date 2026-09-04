@@ -8,7 +8,7 @@ does not claim global optimality and does not use a metaheuristic.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import Decimal, ROUND_FLOOR
 from enum import Enum
 from typing import Iterable
 
@@ -54,8 +54,11 @@ SEARCH_CATEGORY_ORDER: tuple[ComponentType, ...] = (
 class SearchConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    version: str = "search-0.1.0"
+    version: str = "search-0.1.1"
     pruning_k: int = Field(default=3, ge=1)
+    approximate_budget_tolerance_ratio: Decimal = Field(
+        default=Decimal("0.10"), ge=0, le=Decimal("1")
+    )
     top_n: int = Field(default=3, ge=1)
     tie_tolerance: Decimal = Field(default=Decimal("0.0001"), ge=0)
 
@@ -112,6 +115,8 @@ class SearchResult(BaseModel):
     scoring_config_version: str
     requirements: RecommendationRequirements
     ranked_builds: list[ScoredBuild]
+    effective_budget_limit_vnd: int
+    over_budget_fallback: ScoredBuild | None
     cheapest_feasible_baseline: ScoredBuild | None
     component_local_baseline: ComponentLocalBaselineResult
     metrics: SearchMetrics
@@ -249,6 +254,42 @@ def _prune_pool(
     return tuple(sorted(choices, key=lambda item: _candidate_sort_key(item, catalog)))
 
 
+def _socket(record: ComponentRecord) -> str | None:
+    if record.component_type is ComponentType.CPU:
+        return SPEC[ComponentType.CPU].model_validate(record.specifications).socket
+    if record.component_type is ComponentType.MOTHERBOARD:
+        return SPEC[ComponentType.MOTHERBOARD].model_validate(record.specifications).socket
+    return None
+
+
+def _prune_cpu_motherboard_pool(
+    records: tuple[ComponentRecord, ...],
+    *,
+    compatible_sockets: tuple[str, ...],
+    k: int,
+    catalog: ScoringCatalog,
+) -> tuple[ComponentRecord, ...]:
+    """Preserve one affordable representative for each common socket.
+
+    CPU and motherboard pools are joined later by a hard socket constraint.
+    Independent pruning must therefore retain compatible platform paths before
+    spending its small K budget on performance or power diversity.
+    """
+    choices: list[ComponentRecord] = []
+    for socket in compatible_sockets:
+        candidates = tuple(record for record in records if _socket(record) == socket)
+        if candidates:
+            choices.append(min(candidates, key=lambda item: _candidate_sort_key(item, catalog)))
+        if len(choices) == k:
+            return tuple(sorted(choices, key=lambda item: _candidate_sort_key(item, catalog)))
+    for candidate in _prune_pool(records, k=k, catalog=catalog):
+        if candidate not in choices:
+            choices.append(candidate)
+        if len(choices) == k:
+            break
+    return tuple(sorted(choices, key=lambda item: _candidate_sort_key(item, catalog)))
+
+
 def _filtered_pools(
     catalog: ScoringCatalog,
     requirements: RecommendationRequirements,
@@ -271,10 +312,23 @@ def _build_pool_state(
     metrics: list[CandidatePoolMetric] = []
     pools: dict[ComponentType, tuple[ComponentRecord, ...]] = {}
     filtered_pools = _filtered_pools(catalog, requirements)
+    cpu_sockets = {_socket(record) for record in filtered_pools[ComponentType.CPU]}
+    motherboard_sockets = {_socket(record) for record in filtered_pools[ComponentType.MOTHERBOARD]}
+    compatible_sockets = tuple(sorted(
+        socket for socket in cpu_sockets & motherboard_sockets if socket is not None
+    ))
     for component_type in SEARCH_CATEGORY_ORDER:
         source = tuple(item for item in catalog.components if item.component_type is component_type)
         filtered = filtered_pools[component_type]
-        pruned = _prune_pool(filtered, k=config.pruning_k, catalog=catalog)
+        if component_type in {ComponentType.CPU, ComponentType.MOTHERBOARD}:
+            pruned = _prune_cpu_motherboard_pool(
+                filtered,
+                compatible_sockets=compatible_sockets,
+                k=config.pruning_k,
+                catalog=catalog,
+            )
+        else:
+            pruned = _prune_pool(filtered, k=config.pruning_k, catalog=catalog)
         pools[component_type] = pruned
         metrics.append(
             CandidatePoolMetric(
@@ -303,6 +357,24 @@ def _partial_price(records: Iterable[ComponentRecord], catalog: ScoringCatalog) 
     if any(price is None for price in prices):
         return None
     return sum(price for price in prices if price is not None)
+
+
+def _effective_budget_limit_vnd(
+    requirements: RecommendationRequirements,
+    config: SearchConfig,
+) -> int:
+    """Return the largest price eligible for a primary recommendation.
+
+    Approximate mode is a controlled relaxation, not an unlimited permission to
+    ignore the user's budget. The tolerance remains versioned in SearchConfig
+    so requests are reproducible without expanding the requirements contract.
+    """
+    if requirements.budget_mode is BudgetMode.STRICT:
+        return requirements.budget_vnd
+    limit = Decimal(requirements.budget_vnd) * (
+        Decimal("1") + config.approximate_budget_tolerance_ratio
+    )
+    return int(limit.to_integral_value(rounding=ROUND_FLOOR))
 
 
 def _generate_compatible_builds(
@@ -516,21 +588,35 @@ def recommend_builds(
         cpu_motherboard_support=support_rows,
         config=scoring_config,
     )
-    rejected_budget = 0
-    if requirements.budget_mode is BudgetMode.STRICT:
-        retained_candidates = [
-            candidate
-            for candidate in scored.candidates
-            if candidate.total_price_vnd is not None
-            and candidate.total_price_vnd <= requirements.budget_vnd
-        ]
-        rejected_budget = len(scored.candidates) - len(retained_candidates)
-        scored = scored.model_copy(update={"candidates": retained_candidates})
-    ranked = _rank_builds(scored.candidates, tie_tolerance=config.tie_tolerance)
+    effective_budget_limit_vnd = _effective_budget_limit_vnd(requirements, config)
+    retained_candidates = [
+        candidate
+        for candidate in scored.candidates
+        if candidate.total_price_vnd is not None
+        and candidate.total_price_vnd <= effective_budget_limit_vnd
+    ]
+    rejected_budget = len(scored.candidates) - len(retained_candidates)
+    ranked = _rank_builds(retained_candidates, tie_tolerance=config.tie_tolerance)
+    # Only expose an over-budget build when no primary recommendation survives
+    # the applicable budget policy. It is evidence of the nearest feasible
+    # alternative, never a candidate competing in the normal ranking.
+    over_budget_fallback = None
+    if not ranked:
+        over_budget_fallback = min(
+            (
+                candidate
+                for candidate in scored.candidates
+                if candidate.feasible
+                and candidate.total_price_vnd is not None
+                and candidate.total_price_vnd > effective_budget_limit_vnd
+            ),
+            key=lambda candidate: (candidate.total_price_vnd, _identity_key(candidate)),
+            default=None,
+        )
     cheapest_feasible = min(
         (
             candidate
-            for candidate in scored.candidates
+            for candidate in retained_candidates
             if candidate.feasible and candidate.total_price_vnd is not None
         ),
         key=lambda candidate: (candidate.total_price_vnd, _identity_key(candidate)),
@@ -565,6 +651,8 @@ def recommend_builds(
         scoring_config_version=scoring_config.version,
         requirements=requirements,
         ranked_builds=ranked[: config.top_n],
+        effective_budget_limit_vnd=effective_budget_limit_vnd,
+        over_budget_fallback=over_budget_fallback,
         cheapest_feasible_baseline=cheapest_feasible,
         component_local_baseline=component_local_baseline,
         metrics=metrics,
