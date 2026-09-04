@@ -37,101 +37,55 @@ const EMPTY_RANGE = { min: 0, max: 99999 };
 
 const FILTER_CONFIG: Record<ManualBuildCategory, FilterConfig> = {
   CPU: {
-    first: "cores",
-    firstLabel: "Core count",
-    firstSuffix: "",
-    second: "threads",
-    secondLabel: "Thread count",
-    secondSuffix: "",
-    choice: "socket",
-    choiceLabel: "Socket",
-    boolean: "integrated_graphics",
-    booleanLabel: "Integrated graphics (iGPU)",
+    first: "cores", firstLabel: "Số nhân", firstSuffix: "",
+    second: "threads", secondLabel: "Số luồng", secondSuffix: "",
+    choice: "socket", choiceLabel: "Socket",
+    boolean: "integrated_graphics", booleanLabel: "Đồ họa tích hợp (iGPU)",
   },
   RAM: {
-    first: "capacity_gb",
-    firstLabel: "Capacity",
-    firstSuffix: " GB",
-    second: "tested_speed_mt_s",
-    secondLabel: "Tested speed",
-    secondSuffix: " MT/s",
-    choice: "memory_type",
-    choiceLabel: "Memory type",
-    boolean: null,
-    booleanLabel: "",
+    first: "capacity_gb", firstLabel: "Dung lượng", firstSuffix: " GB",
+    second: "tested_speed_mt_s", secondLabel: "Tốc độ kiểm thử", secondSuffix: " MT/s",
+    choice: "memory_type", choiceLabel: "Loại RAM", boolean: null, booleanLabel: "",
   },
   MOTHERBOARD: {
-    first: "memory_max_capacity_gb",
-    firstLabel: "Max memory",
-    firstSuffix: " GB",
-    second: null,
-    secondLabel: "",
-    secondSuffix: "",
-    choice: "socket",
-    choiceLabel: "Socket",
-    boolean: null,
-    booleanLabel: "",
+    first: "memory_max_capacity_gb", firstLabel: "Dung lượng RAM tối đa", firstSuffix: " GB",
+    second: null, secondLabel: "", secondSuffix: "",
+    choice: "socket", choiceLabel: "Socket", boolean: null, booleanLabel: "",
   },
   GPU: {
-    first: "vram_gb",
-    firstLabel: "VRAM",
-    firstSuffix: " GB",
-    second: "length_mm",
-    secondLabel: "Length",
-    secondSuffix: " mm",
-    choice: null,
-    choiceLabel: "",
-    boolean: null,
-    booleanLabel: "",
+    first: "vram_gb", firstLabel: "VRAM", firstSuffix: " GB",
+    second: "length_mm", secondLabel: "Chiều dài", secondSuffix: " mm",
+    choice: null, choiceLabel: "", boolean: null, booleanLabel: "",
   },
   STORAGE: {
-    first: "capacity_gb",
-    firstLabel: "Capacity",
-    firstSuffix: " GB",
-    second: null,
-    secondLabel: "",
-    secondSuffix: "",
-    choice: "interface",
-    choiceLabel: "Interface",
-    boolean: null,
-    booleanLabel: "",
+    first: "capacity_gb", firstLabel: "Dung lượng", firstSuffix: " GB",
+    second: null, secondLabel: "", secondSuffix: "",
+    choice: "interface", choiceLabel: "Giao tiếp", boolean: null, booleanLabel: "",
   },
   PSU: {
-    first: "capacity_w",
-    firstLabel: "Capacity",
-    firstSuffix: " W",
-    second: null,
-    secondLabel: "",
-    secondSuffix: "",
-    choice: "form_factor",
-    choiceLabel: "Form factor",
-    boolean: null,
-    booleanLabel: "",
+    first: "capacity_w", firstLabel: "Công suất", firstSuffix: " W",
+    second: null, secondLabel: "", secondSuffix: "",
+    choice: "form_factor", choiceLabel: "Kích thước chuẩn", boolean: null, booleanLabel: "",
   },
   CASE: {
-    first: "max_gpu_length_mm",
-    firstLabel: "Max GPU length",
-    firstSuffix: " mm",
-    second: "max_cpu_cooler_height_mm",
-    secondLabel: "Max cooler height",
-    secondSuffix: " mm",
-    choice: "form_factor",
-    choiceLabel: "Case form factor",
-    boolean: null,
-    booleanLabel: "",
+    first: "max_gpu_length_mm", firstLabel: "Chiều dài GPU tối đa", firstSuffix: " mm",
+    second: "max_cpu_cooler_height_mm", secondLabel: "Chiều cao tản nhiệt tối đa", secondSuffix: " mm",
+    choice: "form_factor", choiceLabel: "Kích thước vỏ máy", boolean: null, booleanLabel: "",
   },
   COOLER: {
-    first: "height_mm",
-    firstLabel: "Height",
-    firstSuffix: " mm",
-    second: null,
-    secondLabel: "",
-    secondSuffix: "",
-    choice: "cooler_type",
-    choiceLabel: "Cooler type",
-    boolean: null,
-    booleanLabel: "",
+    first: "height_mm", firstLabel: "Chiều cao", firstSuffix: " mm",
+    second: null, secondLabel: "", secondSuffix: "",
+    choice: "cooler_type", choiceLabel: "Loại tản nhiệt", boolean: null, booleanLabel: "",
   },
+};
+
+const FACT_LABELS: Record<string, string> = {
+  cores: "Số nhân", threads: "Số luồng", socket: "Socket", integrated_graphics: "Đồ họa tích hợp",
+  capacity_gb: "Dung lượng", tested_speed_mt_s: "Tốc độ kiểm thử", memory_type: "Loại RAM",
+  memory_max_capacity_gb: "Dung lượng RAM tối đa", vram_gb: "VRAM", length_mm: "Chiều dài",
+  interface: "Giao tiếp", capacity_w: "Công suất", form_factor: "Kích thước chuẩn",
+  max_gpu_length_mm: "Chiều dài GPU tối đa", max_cpu_cooler_height_mm: "Chiều cao tản nhiệt tối đa",
+  height_mm: "Chiều cao", cooler_type: "Loại tản nhiệt",
 };
 
 function isCategoryType(value: string | null): value is ManualBuildCategory {
@@ -148,11 +102,7 @@ function valueAsString(values: Record<string, unknown>, key: string): string | n
   return typeof value === "string" ? value : null;
 }
 
-function rangeFor(
-  items: CatalogPickerSelectionComponent[],
-  key: string,
-  fallback: Range,
-): Range {
+function rangeFor(items: CatalogPickerSelectionComponent[], key: string, fallback: Range): Range {
   const values = items
     .map((item) => valueAsNumber(item.filter_values, key))
     .filter((value): value is number => value !== null);
@@ -160,41 +110,37 @@ function rangeFor(
 }
 
 function formatFactLabel(key: string): string {
-  return key.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return FACT_LABELS[key] ?? key.replaceAll("_", " ");
 }
 
 function formatFactValue(value: unknown): string {
-  if (value === null || value === undefined) return "Not recorded";
-  if (value === true) return "Yes";
-  if (value === false) return "No";
+  if (value === null || value === undefined) return "Chưa có dữ liệu";
+  if (value === true) return "Có";
+  if (value === false) return "Không";
   return Array.isArray(value) ? value.join(", ") : String(value);
 }
 
-function CheckboxGroup({
-  label,
-  values,
-  selected,
-  onChange,
-}: {
+function choiceLabel(value: string): string {
+  if (value === "Yes") return "Có";
+  if (value === "No") return "Không";
+  return value.replaceAll("_", " ");
+}
+
+function CheckboxGroup({ label, values, selected, onChange }: {
   label: string;
   values: string[];
   selected: string[];
   onChange: (value: string) => void;
 }) {
   if (!values.length) return null;
-
   return (
     <fieldset className={styles.filterGroup}>
       <legend>{label}</legend>
       <div className={styles.checkboxList}>
         {values.map((value) => (
           <label key={value} className={styles.checkLabel}>
-            <input
-              type="checkbox"
-              checked={selected.includes(value)}
-              onChange={() => onChange(value)}
-            />
-            <span>{value.replaceAll("_", " ")}</span>
+            <input type="checkbox" checked={selected.includes(value)} onChange={() => onChange(value)} />
+            <span>{choiceLabel(value)}</span>
           </label>
         ))}
       </div>
@@ -202,46 +148,52 @@ function CheckboxGroup({
   );
 }
 
-function RangeFilter({
-  label,
-  range,
-  value,
-  onChange,
-  suffix = "",
-}: {
+function RangeFilter({ label, range, value, onChange, suffix = "" }: {
   label: string;
   range: Range;
   value: Range;
   onChange: (value: Range) => void;
   suffix?: string;
 }) {
+  const span = Math.max(range.max - range.min, 1);
+  const minPercent = ((value.min - range.min) / span) * 100;
+  const maxPercent = ((value.max - range.min) / span) * 100;
   return (
     <fieldset className={styles.filterGroup}>
       <legend>{label}</legend>
       <div className={styles.rangeValues}>
-        <span>{value.min}{suffix}</span>
-        <span>{value.max}{suffix}</span>
+        <span>{value.min}{suffix}</span><span>{value.max}{suffix}</span>
       </div>
-      <label className={styles.rangeLabel}>
-        <span className={styles.srOnly}>Minimum {label}</span>
-        <input
-          type="range"
-          min={range.min}
-          max={value.max}
-          value={value.min}
-          onChange={(event) => onChange({ ...value, min: Number(event.target.value) })}
+      <div className={styles.dualRange}>
+        <span className={styles.dualRangeTrack} aria-hidden="true" />
+        <span
+          className={styles.dualRangeSelected}
+          aria-hidden="true"
+          style={{ left: String(minPercent) + "%", right: String(100 - maxPercent) + "%" }}
         />
-      </label>
-      <label className={styles.rangeLabel}>
-        <span className={styles.srOnly}>Maximum {label}</span>
-        <input
-          type="range"
-          min={value.min}
-          max={range.max}
-          value={value.max}
-          onChange={(event) => onChange({ ...value, max: Number(event.target.value) })}
-        />
-      </label>
+        <label className={styles.rangeLabel}>
+          <span className={styles.srOnly}>Giá trị nhỏ nhất: {label}</span>
+          <input
+            className={styles.rangeThumb}
+            type="range"
+            min={range.min}
+            max={range.max}
+            value={value.min}
+            onChange={(event) => onChange({ ...value, min: Math.min(Number(event.target.value), value.max) })}
+          />
+        </label>
+        <label className={styles.rangeLabel}>
+          <span className={styles.srOnly}>Giá trị lớn nhất: {label}</span>
+          <input
+            className={styles.rangeThumb}
+            type="range"
+            min={range.min}
+            max={range.max}
+            value={value.max}
+            onChange={(event) => onChange({ ...value, max: Math.max(Number(event.target.value), value.min) })}
+          />
+        </label>
+      </div>
     </fieldset>
   );
 }
@@ -249,7 +201,7 @@ function RangeFilter({
 function SelectionLoadingState() {
   return (
     <div className={styles.selectionLoading} aria-live="polite" aria-busy="true">
-      <p className={styles.srOnly}>Loading catalog components...</p>
+      <p className={styles.srOnly}>Đang tải danh sách linh kiện...</p>
       {[0, 1, 2, 3].map((row) => <span key={row} className={styles.selectionLoadingRow} />)}
     </div>
   );
@@ -284,12 +236,8 @@ export function ComponentSelection() {
   );
   const selectedIdsKey = selectedIds.join("|");
   const filterConfig = type ? FILTER_CONFIG[type] : null;
-  const firstAvailable = filterConfig
-    ? rangeFor(items, filterConfig.first, EMPTY_RANGE)
-    : EMPTY_RANGE;
-  const secondAvailable = filterConfig?.second
-    ? rangeFor(items, filterConfig.second, EMPTY_RANGE)
-    : EMPTY_RANGE;
+  const firstAvailable = filterConfig ? rangeFor(items, filterConfig.first, EMPTY_RANGE) : EMPTY_RANGE;
+  const secondAvailable = filterConfig?.second ? rangeFor(items, filterConfig.second, EMPTY_RANGE) : EMPTY_RANGE;
   const choiceOptions = filterConfig?.choice
     ? Array.from(new Set(items
       .map((item) => valueAsString(item.filter_values, filterConfig.choice!))
@@ -301,7 +249,6 @@ export function ComponentSelection() {
     const controller = new AbortController();
     setRequestState("loading");
     setRequestError("");
-
     listCatalogPickerSelectionComponents(datasetVersion, type, selectedIds, controller.signal)
       .then((payload) => {
         if (controller.signal.aborted) return;
@@ -312,9 +259,8 @@ export function ComponentSelection() {
         if (controller.signal.aborted) return;
         setItems([]);
         setRequestState("error");
-        setRequestError(error instanceof ApiError ? error.message : "Components could not be loaded.");
+        setRequestError(error instanceof ApiError ? error.message : "Không thể tải danh sách linh kiện.");
       });
-
     return () => controller.abort();
   }, [datasetVersion, hydrated, selectedIdsKey, type]);
 
@@ -322,9 +268,7 @@ export function ComponentSelection() {
     setCoreRange(CPU_RANGE);
     setThreadRange(CPU_THREAD_RANGE);
     setNumberRange(filterConfig ? rangeFor(items, filterConfig.first, EMPTY_RANGE) : EMPTY_RANGE);
-    setSecondNumberRange(
-      filterConfig?.second ? rangeFor(items, filterConfig.second, EMPTY_RANGE) : EMPTY_RANGE,
-    );
+    setSecondNumberRange(filterConfig?.second ? rangeFor(items, filterConfig.second, EMPTY_RANGE) : EMPTY_RANGE);
     setSelectedValues([]);
     setBooleanValues([]);
     setPage(1);
@@ -333,75 +277,39 @@ export function ComponentSelection() {
   const firstRange = type === "CPU" ? coreRange : numberRange;
   const secondRange = type === "CPU" ? threadRange : secondNumberRange;
   const filtered = useMemo(() => items.filter((item) => {
-    const name = `${item.manufacturer} ${item.model}`.toLocaleLowerCase();
+    const name = (item.manufacturer + " " + item.model).toLocaleLowerCase();
     if (!name.includes(query.trim().toLocaleLowerCase())) return false;
     if (compatibleOnly && item.compatibility_status === "INCOMPATIBLE") return false;
     if (!filterConfig) return true;
-
     const first = valueAsNumber(item.filter_values, filterConfig.first);
     if (first !== null && (first < firstRange.min || first > firstRange.max)) return false;
-
     if (filterConfig.second) {
       const second = valueAsNumber(item.filter_values, filterConfig.second);
       if (second !== null && (second < secondRange.min || second > secondRange.max)) return false;
     }
-
-    if (
-      filterConfig.choice
-      && selectedValues.length
-      && !selectedValues.includes(valueAsString(item.filter_values, filterConfig.choice) ?? "")
-    ) return false;
-
+    if (filterConfig.choice && selectedValues.length
+      && !selectedValues.includes(valueAsString(item.filter_values, filterConfig.choice) ?? "")) return false;
     if (filterConfig.boolean && booleanValues.length) {
       const value = item.filter_values[filterConfig.boolean] === true ? "Yes" : "No";
       if (!booleanValues.includes(value)) return false;
     }
-
     return true;
-  }), [
-    booleanValues,
-    compatibleOnly,
-    filterConfig,
-    firstRange,
-    items,
-    query,
-    secondRange,
-    selectedValues,
-  ]);
+  }), [booleanValues, compatibleOnly, filterConfig, firstRange, items, query, secondRange, selectedValues]);
 
-  useEffect(() => {
-    setPage(1);
-  }, [
-    booleanValues,
-    compatibleOnly,
-    firstRange.max,
-    firstRange.min,
-    perPage,
-    query,
-    secondRange.max,
-    secondRange.min,
-    selectedValues,
-  ]);
+  useEffect(() => { setPage(1); }, [booleanValues, compatibleOnly, firstRange.max, firstRange.min, perPage, query, secondRange.max, secondRange.min, selectedValues]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const currentPage = Math.min(page, totalPages);
   const visibleItems = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
 
   function clearFilters() {
-    setQuery("");
-    setCompatibleOnly(false);
-    setSelectedValues([]);
-    setBooleanValues([]);
-    setCoreRange(CPU_RANGE);
-    setThreadRange(CPU_THREAD_RANGE);
-    setNumberRange(firstAvailable);
-    setSecondNumberRange(secondAvailable);
+    setQuery(""); setCompatibleOnly(false); setSelectedValues([]); setBooleanValues([]);
+    setCoreRange(CPU_RANGE); setThreadRange(CPU_THREAD_RANGE);
+    setNumberRange(firstAvailable); setSecondNumberRange(secondAvailable);
   }
 
   function toggleValue(value: string, setter: React.Dispatch<React.SetStateAction<string[]>>) {
-    setter((current) => current.includes(value)
-      ? current.filter((item) => item !== value)
-      : [...current, value]);
+    setter((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
   }
 
   function choose(item: CatalogPickerSelectionComponent) {
@@ -410,200 +318,41 @@ export function ComponentSelection() {
   }
 
   if (!type) {
-    return (
-      <section className={styles.section}>
-        <div className={styles.emptyState}>
-          <h1>Select a component category</h1>
-          <p>Return to the build table and choose the part category you want to browse.</p>
-          <Link className={styles.ctaSecondary} href="/build">Back to /build</Link>
-        </div>
-      </section>
-    );
+    return <section className={styles.section}><div className={styles.emptyState}>
+      <h1>Chọn nhóm linh kiện</h1><p>Quay lại trang cấu hình và chọn nhóm linh kiện bạn muốn xem.</p>
+      <Link className={styles.ctaSecondary} href="/build">Quay lại cấu hình</Link>
+    </div></section>;
   }
 
   return (
     <section className={styles.selectionPage} aria-labelledby="selection-heading">
       <div className={styles.selectionTopbar}>
-        <div>
-          <h1 id="selection-heading">Choose a {categoryLabel(type)}</h1>
-          <p>Search the persisted catalog, then add one part to your current build.</p>
-        </div>
-        <Link className={styles.ctaSecondary} href="/build">Back to /build</Link>
+        <div><h1 id="selection-heading">Chọn {categoryLabel(type)}</h1><p>Tìm trong danh sách linh kiện của hệ thống, sau đó thêm một linh kiện vào cấu hình hiện tại.</p></div>
+        <Link className={styles.ctaSecondary} href="/build">Quay lại cấu hình</Link>
       </div>
-
       {!hydrated || !datasetVersion ? (
-        <div className={styles.emptyState}>
-          <h2>Choose a catalog first</h2>
-          <p>Return to the builder and select a READY catalog dataset before browsing parts.</p>
-          <Link className={styles.ctaSecondary} href="/build">Back to /build</Link>
-        </div>
+        <div className={styles.emptyState}><h2>Đang chuẩn bị dữ liệu linh kiện</h2><p>Hãy quay lại trang cấu hình nếu trạng thái này kéo dài.</p><Link className={styles.ctaSecondary} href="/build">Quay lại cấu hình</Link></div>
       ) : (
         <div className={styles.selectionLayout}>
-          <aside className={styles.filterSidebar} aria-label={`${categoryLabel(type)} filters`}>
-            <div className={styles.filterHeader}>
-              <h2>Filters</h2>
-              <button type="button" className={styles.textButton} onClick={clearFilters}>Clear</button>
-            </div>
-            <label className={styles.searchField}>
-              <span>Search by name</span>
-              <input
-                type="search"
-                value={query}
-                placeholder={`Search ${categoryLabel(type).toLowerCase()}s`}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            </label>
-            <label className={styles.compatibilityToggle}>
-              <input
-                type="checkbox"
-                checked={compatibleOnly}
-                onChange={(event) => setCompatibleOnly(event.target.checked)}
-              />
-              <span>
-                <strong>Filter by compatibility</strong>
-                <small>Uses the deterministic backend against the parts already in your build.</small>
-              </span>
-            </label>
-            {filterConfig && (
-              <>
-                {type === "CPU" ? (
-                  <>
-                    <RangeFilter label="Core count" range={CPU_RANGE} value={coreRange} onChange={setCoreRange} />
-                    <RangeFilter label="Thread count" range={CPU_THREAD_RANGE} value={threadRange} onChange={setThreadRange} />
-                  </>
-                ) : (
-                  <RangeFilter
-                    label={filterConfig.firstLabel}
-                    range={firstAvailable}
-                    value={numberRange}
-                    onChange={setNumberRange}
-                    suffix={filterConfig.firstSuffix}
-                  />
-                )}
-                {type !== "CPU" && filterConfig.second && (
-                  <RangeFilter
-                    label={filterConfig.secondLabel}
-                    range={secondAvailable}
-                    value={secondNumberRange}
-                    onChange={setSecondNumberRange}
-                    suffix={filterConfig.secondSuffix}
-                  />
-                )}
-                {filterConfig.choice && (
-                  <CheckboxGroup
-                    label={filterConfig.choiceLabel}
-                    values={choiceOptions}
-                    selected={selectedValues}
-                    onChange={(value) => toggleValue(value, setSelectedValues)}
-                  />
-                )}
-                {filterConfig.boolean && (
-                  <CheckboxGroup
-                    label={filterConfig.booleanLabel}
-                    values={["Yes", "No"]}
-                    selected={booleanValues}
-                    onChange={(value) => toggleValue(value, setBooleanValues)}
-                  />
-                )}
-              </>
-            )}
+          <aside className={styles.filterSidebar} aria-label={"Bộ lọc " + categoryLabel(type)}>
+            <div className={styles.filterHeader}><h2>Bộ lọc</h2><button type="button" className={styles.textButton} onClick={clearFilters}>Xóa lọc</button></div>
+            <label className={styles.searchField}><span>Tìm theo tên</span><input type="search" value={query} placeholder={"Tìm " + categoryLabel(type).toLowerCase()} onChange={(event) => setQuery(event.target.value)} /></label>
+            <label className={styles.compatibilityToggle}><input type="checkbox" checked={compatibleOnly} onChange={(event) => setCompatibleOnly(event.target.checked)} /><span><strong>Chỉ hiện linh kiện tương thích</strong><small>Dựa trên các linh kiện đang có trong cấu hình của bạn.</small></span></label>
+            {filterConfig && <>
+              {type === "CPU" ? <><RangeFilter label="Số nhân" range={CPU_RANGE} value={coreRange} onChange={setCoreRange} /><RangeFilter label="Số luồng" range={CPU_THREAD_RANGE} value={threadRange} onChange={setThreadRange} /></> : <RangeFilter label={filterConfig.firstLabel} range={firstAvailable} value={numberRange} onChange={setNumberRange} suffix={filterConfig.firstSuffix} />}
+              {type !== "CPU" && filterConfig.second && <RangeFilter label={filterConfig.secondLabel} range={secondAvailable} value={secondNumberRange} onChange={setSecondNumberRange} suffix={filterConfig.secondSuffix} />}
+              {filterConfig.choice && <CheckboxGroup label={filterConfig.choiceLabel} values={choiceOptions} selected={selectedValues} onChange={(value) => toggleValue(value, setSelectedValues)} />}
+              {filterConfig.boolean && <CheckboxGroup label={filterConfig.booleanLabel} values={["Yes", "No"]} selected={booleanValues} onChange={(value) => toggleValue(value, setBooleanValues)} />}
+            </>}
           </aside>
-
           <div className={styles.selectionResults} aria-live="polite">
             {requestState === "loading" && <SelectionLoadingState />}
             {requestState === "error" && <p className={styles.alert} role="alert">{requestError}</p>}
-            {requestState === "ready" && (
-              <>
-                <div className={styles.resultsToolbar}>
-                  <p><strong>{filtered.length}</strong> matching {filtered.length === 1 ? "part" : "parts"}</p>
-                  <label className={styles.perPageField}>
-                    Rows per page
-                    <select value={perPage} onChange={(event) => setPerPage(Number(event.target.value))}>
-                      <option value={10}>10</option>
-                      <option value={25}>25</option>
-                      <option value={50}>50</option>
-                    </select>
-                  </label>
-                </div>
-
-                {!visibleItems.length ? (
-                  <div className={styles.emptyState}>
-                    <h2>No parts match these filters</h2>
-                    <p>Try clearing a filter or turn off compatibility filtering to inspect every available catalog part.</p>
-                  </div>
-                ) : (
-                  <div className={styles.selectionTableWrap}>
-                    <table className={styles.selectionTable}>
-                      <thead>
-                        <tr>
-                          <th scope="col">Product</th>
-                          <th scope="col">Key facts</th>
-                          <th scope="col">Price</th>
-                          <th scope="col">Compatibility</th>
-                          <th scope="col"><span className={styles.srOnly}>Action</span></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {visibleItems.map((item) => (
-                          <tr key={item.id}>
-                            <td>
-                              <span className={styles.selectionProduct}>
-                                <strong>{item.manufacturer} {item.model}</strong>
-                                <small>{item.availability_disclaimer}</small>
-                              </span>
-                            </td>
-                            <td>
-                              <span className={styles.factList}>
-                                {Object.entries(item.filter_values).map(([key, value]) => (
-                                  <span key={key}>{formatFactLabel(key)}: {formatFactValue(value)}</span>
-                                ))}
-                              </span>
-                            </td>
-                            <td className={styles.priceCell}>{item.price_vnd == null ? "No VND price recorded" : formatVnd(item.price_vnd)}</td>
-                            <td>
-                              <span className={`${styles.compatibilityPill} ${styles[item.compatibility_status.toLowerCase()]}`}>
-                                {item.compatibility_status === "COMPATIBLE"
-                                  ? "Compatible"
-                                  : item.compatibility_status === "INCOMPATIBLE"
-                                    ? "Incompatible"
-                                    : "Review warnings"}
-                              </span>
-                            </td>
-                            <td>
-                              <button type="button" className={styles.chooseButton} onClick={() => choose(item)}>
-                                Choose
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-
-                {filtered.length > 0 && (
-                  <nav className={styles.pagination} aria-label="Pagination">
-                    <button
-                      type="button"
-                      className={styles.secondaryButtonSmall}
-                      disabled={currentPage === 1}
-                      onClick={() => setPage((current) => Math.max(1, current - 1))}
-                    >
-                      Previous
-                    </button>
-                    <span>Page {currentPage} of {totalPages}</span>
-                    <button
-                      type="button"
-                      className={styles.secondaryButtonSmall}
-                      disabled={currentPage === totalPages}
-                      onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-                    >
-                      Next
-                    </button>
-                  </nav>
-                )}
-              </>
-            )}
+            {requestState === "ready" && <>
+              <div className={styles.resultsToolbar}><p><strong>{filtered.length}</strong> linh kiện phù hợp</p><label className={styles.perPageField}>Số dòng mỗi trang<select value={perPage} onChange={(event) => setPerPage(Number(event.target.value))}><option value={10}>10</option><option value={25}>25</option><option value={50}>50</option></select></label></div>
+              {!visibleItems.length ? <div className={styles.emptyState}><h2>Không có linh kiện phù hợp với bộ lọc</h2><p>Hãy xóa bớt bộ lọc hoặc tắt lọc tương thích để xem tất cả linh kiện.</p></div> : <div className={styles.selectionTableWrap}><table className={styles.selectionTable}><thead><tr><th scope="col">Sản phẩm</th><th scope="col">Thông số chính</th><th scope="col">Giá</th><th scope="col">Tương thích</th><th scope="col"><span className={styles.srOnly}>Thao tác</span></th></tr></thead><tbody>{visibleItems.map((item) => <tr key={item.id}><td><span className={styles.selectionProduct}><strong>{item.manufacturer} {item.model}</strong><small>Giá và tình trạng hàng được ghi nhận theo lần xác minh gần nhất.</small></span></td><td><span className={styles.factList}>{Object.entries(item.filter_values).map(([key, value]) => <span key={key}>{formatFactLabel(key)}: {formatFactValue(value)}</span>)}</span></td><td className={styles.priceCell}>{item.price_vnd == null ? "Chưa có giá VND" : formatVnd(item.price_vnd)}</td><td><span className={styles.compatibilityPill + " " + styles[item.compatibility_status.toLowerCase()]}>{item.compatibility_status === "COMPATIBLE" ? "Tương thích" : item.compatibility_status === "INCOMPATIBLE" ? "Không tương thích" : "Cần xem lại"}</span></td><td><button type="button" className={styles.chooseButton} onClick={() => choose(item)}>Chọn</button></td></tr>)}</tbody></table></div>}
+              {filtered.length > 0 && <nav className={styles.pagination} aria-label="Phân trang"><button type="button" className={styles.secondaryButtonSmall} disabled={currentPage === 1} onClick={() => setPage((current) => Math.max(1, current - 1))}>Trước</button><span>Trang {currentPage} / {totalPages}</span><button type="button" className={styles.secondaryButtonSmall} disabled={currentPage === totalPages} onClick={() => setPage((current) => Math.min(totalPages, current + 1))}>Sau</button></nav>}
+            </>}
           </div>
         </div>
       )}

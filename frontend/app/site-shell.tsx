@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import styles from "./page.module.css";
 
 const NAV = [
-  { href: "/build", label: "Start your build" },
-  { href: "/recommend", label: "Recommended build" },
+  { href: "/build", label: "Tự chọn linh kiện" },
+  { href: "/recommend", label: "Gợi ý cấu hình" },
 ] as const;
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
@@ -18,7 +18,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         <Link className={styles.logo} href="/">
           BuildWise
         </Link>
-        <nav aria-label="Primary">
+        <nav aria-label="Điều hướng chính">
           {NAV.map((item) => (
             <Link key={item.href} href={item.href} aria-current={pathname === item.href ? "page" : undefined}>
               {item.label}
@@ -28,8 +28,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       </header>
       {children}
       <footer className={styles.footer}>
-        Prices are dated listing snapshots, not a current stock guarantee. Compatibility and power results come from the
-        deterministic backend. Scores are heuristic indicators, not FPS predictions.
+        Giá và tình trạng hàng là dữ liệu được ghi nhận theo thời điểm, không phải cam kết tồn kho hiện tại. Kết quả tương thích
+        và điện năng do hệ thống xác định; điểm số là chỉ báo heuristic, không phải dự đoán FPS.
       </footer>
     </div>
   );

@@ -771,6 +771,9 @@ def _selection_compatibility_status(
             cpu_motherboard_support=support_records,
         )
     )
+    if any(finding.severity.value == "ERROR" for finding in compatibility.findings):
+        return CompatibilityStatus.INCOMPATIBLE
+
     if ComponentType(candidate.component_type.value) is ComponentType.RAM:
         cpu = next(
             (
@@ -792,6 +795,14 @@ def _selection_compatibility_status(
                 and ram_spec.memory_type not in cpu_spec.supported_memory_types
             ):
                 return CompatibilityStatus.INCOMPATIBLE
+    if not any(
+        finding.severity.value == "WARNING"
+        and finding.status.value != "INSUFFICIENT_DATA"
+        for finding in compatibility.findings
+    ):
+        # Missing counterpart components are expected while a user is still
+        # building their PC; they must not turn every picker row into a warning.
+        return CompatibilityStatus.COMPATIBLE
     return compatibility.status
 
 

@@ -1,12 +1,12 @@
 export const MANUAL_BUILD_CATEGORIES = [
   { type: "CPU", label: "CPU" },
-  { type: "COOLER", label: "CPU cooler" },
-  { type: "MOTHERBOARD", label: "Motherboard" },
-  { type: "RAM", label: "Memory" },
-  { type: "STORAGE", label: "Storage" },
-  { type: "GPU", label: "Graphics card" },
-  { type: "CASE", label: "Case" },
-  { type: "PSU", label: "Power supply" },
+  { type: "COOLER", label: "Tản nhiệt CPU" },
+  { type: "MOTHERBOARD", label: "Bo mạch chủ" },
+  { type: "RAM", label: "RAM" },
+  { type: "STORAGE", label: "Ổ lưu trữ" },
+  { type: "GPU", label: "Card đồ họa" },
+  { type: "CASE", label: "Vỏ máy" },
+  { type: "PSU", label: "Nguồn (PSU)" },
 ] as const;
 
 export type ManualBuildCategory = (typeof MANUAL_BUILD_CATEGORIES)[number]["type"];

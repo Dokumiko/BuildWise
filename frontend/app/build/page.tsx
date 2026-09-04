@@ -3,16 +3,16 @@ import { BuilderSection } from "../builder-section";
 import styles from "../page.module.css";
 
 export const metadata: Metadata = {
-  title: "Start your build",
+  title: "Tự chọn cấu hình",
 };
 
 export default function BuildPage() {
   return (
     <main className={styles.shell}>
       <section className={styles.intro} aria-labelledby="builder-heading">
-        <h1 id="builder-heading">Start your build</h1>
+        <h1 id="builder-heading">Tự chọn cấu hình</h1>
         <p>
-          Choose one part per category. The backend checks compatibility and PSU headroom against the persisted catalog.
+          Chọn một linh kiện cho mỗi nhóm. Hệ thống kiểm tra tương thích và mức dự phòng công suất của PSU dựa trên catalog đã chọn.
         </p>
       </section>
       <BuilderSection />
